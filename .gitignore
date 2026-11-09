@@ -1,0 +1,42 @@
+# Dependencies and build output
+node_modules/
+dist/
+dist-*/
+.astro/
+
+# Cloudflare and local secrets (never commit these)
+.wrangler/
+.dev.vars
+.env
+.env.*
+!.env.example
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# Editor, tool and OS files that are not part of the project
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.log
+.scratch*
+
+# Keys and local config
+.npmrc
+*.pem
+*.key
+.eslintcache
+*.jsonl
+*.tsbuildinfo
+*.tmp
+*.swp
+*~
+*.p12
+*.pfx
+.vs/
+*.code-workspace
+.history/
+Desktop.ini

@@ -1,0 +1,13 @@
+/* About and corrections pages: plain text sections and the list of corrections. */
+.trust h2 { margin-top: 36px; padding-top: 24px; border-top: 1px solid var(--line); }
+.trust h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.trust p, .trust ul { margin-top: 12px; }
+.trust ul { padding-left: 22px; }
+.trust li { margin-top: 8px; }
+.trust ol.plain { list-style: none; margin: 0; padding: 0; }
+.trust .correction h2 { margin: 0; padding: 0; border: 0; font-size: 16px; }
+.correction { margin-top: 16px; border: 1px solid var(--line-strong); border-radius: 8px; padding: 18px 20px; }
+.correction dl { margin: 12px 0 0; }
+.correction dt { margin-top: 10px; font-size: 14px; font-weight: 600; color: var(--muted); }
+.correction dd { margin: 2px 0 0; }
+.correction h2 .mono { display: block; margin-top: 4px; font-weight: 400; }

@@ -1,0 +1,15 @@
+/* Verdict page: the two-column layout and styles shared by its parts. Each part has its own stylesheet in styles/verdict/. */
+.record code { font-family: var(--font-mono); font-size: 0.9em; background: #f2f4f7; padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.sec > .sub { max-width: 66ch; margin-top: 6px; font-size: 14px; color: var(--muted); }
+
+/* Main column on the left, a narrow sidebar on the right that stays in view on wide screens. */
+.verdict-layout { margin-top: 40px; }
+.verdict-main > :first-child { margin-top: 0; }
+.verdict-layout .sidebar { margin-bottom: 40px; }
+
+@media (min-width: 1000px) {
+  .verdict-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: stretch; }
+  .verdict-layout .sidebar { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; margin-bottom: 0; }
+  .verdict-layout .toc { position: sticky; top: 24px; width: 100%; }
+  .verdict-main { grid-column: 1; grid-row: 1; }
+}

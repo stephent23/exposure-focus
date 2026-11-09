@@ -1,0 +1,40 @@
+---
+// One verdict page, built from a record: summary, sidebar, placements, protection options and detail.
+import Base from '../../layouts/Base.astro';
+import '../../styles/verdict.css';
+import Summary from '../../components/verdict/Summary.astro';
+import Sidebar from '../../components/verdict/Sidebar.astro';
+import Placements from '../../components/verdict/Placements.astro';
+import Protect from '../../components/verdict/Protect.astro';
+import Detail from '../../components/verdict/Detail.astro';
+import { bossSummary } from '../../lib/boss-summary';
+import { buildDate } from '../../lib/today';
+import { getAllRecords } from '../../lib/records';
+import { isStale } from '../../schema/record';
+
+export async function getStaticPaths() {
+  const records = await getAllRecords();
+  return records.map((record) => ({ params: { slug: record.slug }, props: { record } }));
+}
+
+const { record } = Astro.props;
+const stale = isStale(record, buildDate());
+const bossText = bossSummary(record, new URL(`/verdicts/${record.slug}/`, Astro.site).href);
+---
+
+<Base title={record.name} description={record.summary}>
+  <div class="record">
+    <Summary record={record} stale={stale} />
+    <div class="verdict-layout">
+      <Sidebar record={record} bossText={bossText} />
+      <div class="verdict-main">
+        <Placements record={record} />
+        <Protect record={record} />
+        <Detail record={record} />
+      </div>
+    </div>
+  </div>
+  <script>
+    import '../../scripts/copy';
+  </script>
+</Base>

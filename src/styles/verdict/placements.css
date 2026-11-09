@@ -1,0 +1,34 @@
+/* Placement cards, and the checks for whether the flaw applies. */
+.places { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 12px; }
+.place { background: #fff; border: 1px solid var(--line-strong); border-left: 4px solid var(--edge); border-radius: 10px; padding: 18px 22px 4px; }
+.place-main { display: grid; grid-template-columns: 76px 1fr; gap: 18px; align-items: start; }
+.place-main .badge { text-align: center; font-size: 13px; padding: 4px 0; }
+.place-body h3 { font-size: 15px; line-height: 1.4; font-weight: 600; color: var(--ink); }
+.place-action { margin-top: 6px; font-size: 14.5px; line-height: 1.6; color: var(--ink-2); max-width: 62ch; }
+.reasoning { margin: 6px 0 0 94px; }
+.reasoning > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 13.5px; font-weight: 600; color: var(--link); list-style: none; }
+.reasoning > summary::-webkit-details-marker { display: none; }
+.reasoning > summary::before { content: ""; width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
+.reasoning[open] > summary::before { transform: rotate(45deg); }
+.reasoning > summary:hover { color: var(--link-hover); }
+.reasoning > summary:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
+.reasoning .list { margin-top: 2px; font-size: 14px; max-width: 62ch; }
+.reasoning .list li { margin-top: 6px; }
+.reasoning .meta-line { margin: 8px 0 14px; font-size: 13px; }
+
+.applies { margin-top: 48px; }
+.applies-box { margin-top: 16px; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 10px; padding: 8px 24px 20px; }
+.applies-item { padding-top: 16px; max-width: 64ch; }
+.applies-item + .applies-item { margin-top: 16px; border-top: 1px solid var(--line-strong); }
+.applies-item h3 { font-size: 15px; line-height: 1.45; font-weight: 600; }
+.applies-how { margin-top: 6px; font-size: 14px; color: var(--ink-2); }
+.how-label { display: block; margin-bottom: 2px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
+.applies-default { margin: 18px 0 0; padding: 10px 14px; background: #fff; border: 1px solid var(--line-strong); border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--ink); max-width: max-content; }
+
+@media (max-width: 640px) {
+  .place { padding: 16px 16px 2px; }
+  .place-main { grid-template-columns: 1fr; gap: 10px; }
+  .place-main .badge { justify-self: start; padding: 4px 12px; }
+  .reasoning { margin-left: 0; }
+  .applies-box { padding: 4px 16px 18px; }
+}

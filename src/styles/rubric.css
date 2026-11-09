@@ -1,0 +1,44 @@
+/* Rubric page: tier cards, the tier matrix and its keys. */
+.tiercards { list-style: none; margin: 14px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr)); gap: 10px; }
+.tiercard { background: var(--wash); border-left: 4px solid var(--edge); border-radius: 6px; padding: 12px 14px; display: flex; flex-direction: column; align-items: flex-start; gap: 4px; }
+.tiercard p { font-size: 14px; color: var(--ink-2); }
+.tiercards + .sub { margin-top: 14px; }
+
+.axis { display: flex; justify-content: space-between; gap: 12px; margin-top: 16px; font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); }
+.table-wrap { margin-top: 6px; overflow-x: auto; border: 1px solid var(--line-strong); border-radius: 8px; }
+table.grid { width: 100%; table-layout: fixed; border-collapse: collapse; font-size: 15px; }
+table.grid th, table.grid td { text-align: center; vertical-align: middle; padding: 14px 6px; border-left: 1px solid #fff; border-bottom: 1px solid #fff; }
+table.grid td { line-height: 1.45; }
+table.grid thead th { font-size: 13px; color: var(--ink-2); font-weight: 600; background: var(--panel); border-bottom: 1px solid var(--line-strong); }
+table.grid thead th:first-child, table.grid .rowhead { width: 22%; text-align: left; padding-left: 14px; border-left: 0; }
+table.grid .rowhead { font-size: 14px; font-weight: 600; color: var(--ink); background: var(--panel); }
+table.grid td.cell { background: var(--wash); }
+table.grid .cell .badge { font-size: 14px; padding: 3px 12px; }
+table.grid tbody tr:last-child :is(td, .rowhead) { border-bottom: 0; }
+.cellname { display: block; margin-top: 4px; font-size: 12.5px; color: var(--fg); font-weight: 500; }
+
+.keys h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+.keys { display: grid; grid-template-columns: 1fr; gap: 0 32px; margin-top: 24px; }
+.keys dl { margin: 0; }
+.keys > div + div { margin-top: 32px; }
+.keys dl > div { padding-top: 20px; }
+.keys dt { font-weight: 600; }
+.keys dd { margin: 4px 0 0; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+
+/* Two columns share row heights, so each impact level sits level with its matching evidence column. */
+@media (min-width: 760px) {
+  .keys { grid-template-columns: 1fr 1fr; grid-template-rows: auto repeat(3, auto); }
+  .keys > div + div { margin-top: 0; }
+  .keys > div { display: grid; grid-row: 1 / span 4; grid-template-rows: subgrid; }
+  .keys dl { display: grid; grid-row: 2 / span 3; grid-template-rows: subgrid; }
+}
+.keys + .note { margin-top: 36px; }
+
+@media (max-width: 640px) {
+  .axis { font-size: 11px; }
+  table.grid thead th { font-size: 12px; padding: 10px 4px; }
+  table.grid thead th:first-child, table.grid .rowhead { width: 25%; padding-left: 8px; }
+  table.grid .rowhead { font-size: 13px; }
+  table.grid .cell .badge { font-size: 13px; padding: 2px 8px; }
+  .cellname { font-size: 12px; }
+}

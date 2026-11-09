@@ -1,0 +1,69 @@
+---
+// The detail behind the call, folded away: evidence, analysis and sources.
+import '../../styles/verdict/detail.css';
+import Text from '../Text.astro';
+import { renderMarkdown } from '../../lib/markdown';
+import { CONFIDENCE_LABELS } from '../../lib/tiers';
+import type { RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+}
+const { record } = Astro.props;
+---
+
+<div class="folds">
+  <p class="folds-intro">The detail behind this call</p>
+
+  <section aria-labelledby="evidence-heading">
+    <details class="fold">
+      <summary><h2 id="evidence-heading">Evidence</h2> <span class="fold-hint">{record.evidence.length} items, as of {record.evidence_as_of}</span></summary>
+      <dl class="ev">
+        {record.evidence.map((e) => (
+          <div>
+            <dt>{e.label} · {CONFIDENCE_LABELS[e.confidence]}</dt>
+            <dd><Text text={e.text} /></dd>
+            <dd class="meta-line">
+              As of {e.as_of} ·{' '}
+              {e.source_url.startsWith('http') ? (
+                <a href={e.source_url}>Source<span class="sr-only"> for {e.label}</span></a>
+              ) : (
+                <span class="placeholder">{e.source_url}</span>
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+      {record.epss && (
+        <p class="note">
+          EPSS (Exploit Prediction Scoring System, an estimate of how likely a flaw is to be exploited) is {Math.round(record.epss.score * 100)}% as of {record.epss.as_of}.
+          At 50% or above it raises a call that rests on exploitation or a public exploit by one tier. It never lowers one.
+        </p>
+      )}
+      <p class="note">Any CVSS (Common Vulnerability Scoring System, a general severity score) figure quoted is for reference. It did not set a tier.</p>
+    </details>
+  </section>
+
+  {record.analysis && (
+    <section aria-labelledby="analysis-heading">
+      <details class="fold">
+        <summary><h2 id="analysis-heading">Analysis</h2></summary>
+        <div class="md prose" set:html={renderMarkdown(record.analysis)} />
+      </details>
+    </section>
+  )}
+
+  <section aria-labelledby="sources-heading">
+    <details class="fold">
+      <summary><h2 id="sources-heading">Sources</h2> <span class="fold-hint">{record.sources.length}</span></summary>
+      <ul class="list">
+        {record.sources.map((s) => (
+          <li>
+            {s.url.startsWith('http') ? <a href={s.url}>{s.title}</a> : <><span>{s.title}</span> <span class="placeholder">{s.url}</span></>}
+            <span class="meta-line"> · accessed {s.accessed}</span>
+          </li>
+        ))}
+      </ul>
+    </details>
+  </section>
+</div>

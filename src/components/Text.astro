@@ -1,0 +1,6 @@
+---
+// Renders record text, turning `backticks` into <code> and leaving everything else as escaped plain text.
+const { text } = Astro.props as { text: string };
+const parts = text.split('`');
+---
+{parts.map((part, i) => (i % 2 === 1 ? <code>{part}</code> : part))}

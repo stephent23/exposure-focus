@@ -1,0 +1,156 @@
+---
+// The rubric page: how a tier is worked out from placement, impact and evidence.
+import Base from '../../layouts/Base.astro';
+import '../../styles/rubric.css';
+import { TIERS, TIER_NUMBERS } from '../../lib/tiers';
+import { EPSS_ESCALATION_THRESHOLD, EVIDENCE_COLUMNS, IMPACT_LEVELS, IMPACT_TABLE, type TriageImpact } from '../../rubric/triage';
+
+const epssPct = `${EPSS_ESCALATION_THRESHOLD * 100}%`;
+
+const columns = EVIDENCE_COLUMNS;
+const descriptions: Record<TriageImpact, { level: string; description: string }> = {
+  critical: {
+    level: 'Critical',
+    description:
+      'Control of the system, your most sensitive data (customer or regulated data, credentials, a production database), or an essential service going down and staying down.'
+  },
+  significant: {
+    level: 'Significant',
+    description:
+      'A foothold that needs another step, moderately valuable data, or an essential service going down but recovering on its own, such as a restart.'
+  },
+  limited: {
+    level: 'Limited',
+    description:
+      'Low-value information that does not help an attacker go further, such as version numbers, or a non-essential service going down.'
+  }
+};
+const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IMPACT_TABLE[impact] }));
+---
+
+<Base title="How we decide" current="rubric">
+  <section class="hero">
+    <p class="eyebrow">The rubric</p>
+    <h1>How we decide.</h1>
+    <p class="lede">
+      Every call is worked out from facts about your placement, not typed in. If a record ever differs from the rubric, it says so, with a reason.
+    </p>
+  </section>
+
+  <section class="sec" aria-labelledby="tiers-heading">
+    <h2 id="tiers-heading">The four tiers</h2>
+    <ul class="tiercards">
+      {TIER_NUMBERS.map((tier) => (
+        <li class={`tiercard t${tier}`}>
+          <span class={`badge t${tier}`}>Tier {tier}</span>
+          <h3>{TIERS[tier].name}</h3>
+          <p>{TIERS[tier].meaning}</p>
+        </li>
+      ))}
+    </ul>
+    <p class="sub">
+      We say what each tier means but never give a time frame. That depends on your risk appetite and SLAs, so you set it.
+    </p>
+  </section>
+
+  <section class="sec" aria-labelledby="gates-heading">
+    <h2 id="gates-heading">Step 1: the gates</h2>
+    <p class="sub">These are checked first and can settle the tier on their own.</p>
+    <ul class="list">
+      <li>If the vendor states a condition for exposure is false, it is not exposed: Tier 4, Routine.</li>
+      <li>If it is not reachable from the internet, it is Tier 4, Routine. Normal patching is enough.</li>
+    </ul>
+    <p class="note">If we cannot tell whether something is exposed we treat it as exposed.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="table-heading">
+    <h2 id="table-heading">Step 2: business impact and evidence</h2>
+    <p class="sub">
+      Pick the row for your placement and the column for the evidence. The same flaw can be Critical on the server that holds your customer database and Limited on a test box.
+    </p>
+    <p class="axis" aria-hidden="true"><span>Business impact (rows)</span><span>Evidence of attack (columns)</span></p>
+    <div class="table-wrap" role="region" aria-label="Tier by impact and evidence, scrollable" tabindex="0">
+      <table class="grid">
+        <caption class="sr-only">Tier by business impact (rows) and evidence of attack (columns)</caption>
+        <thead>
+          <tr>
+            <th scope="col">Impact</th>
+            {columns.map((column) => <th scope="col">{column.label}</th>)}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr>
+              <th scope="row" class="rowhead">{row.level}</th>
+              {row.cells.map((tier) => (
+                <td class={`cell t${tier}`}><span class={`badge t${tier}`}>Tier {tier}</span><span class="cellname">{TIERS[tier].name}</span></td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    <div class="keys">
+      <div>
+        <h3>Impact rows</h3>
+        <dl>
+          {rows.map((row) => (
+            <div>
+              <dt>{row.level}</dt>
+              <dd>{row.description}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+      <div>
+        <h3>Evidence columns</h3>
+        <dl>
+          {columns.map((column) => (
+            <div>
+              <dt>{column.label}</dt>
+              <dd>{column.description}</dd>
+            </div>
+          ))}
+        </dl>
+      </div>
+    </div>
+    <p class="note">
+      Evidence counts for what it actually achieves. Attacks or a proof of concept that only crash a service do not make a takeover urgent, however capable the flaw is. The call follows the lesser outcome, and the full outcome counts only as demonstrated.
+    </p>
+    <p class="note">
+      “Imminent” is a judgement. It means a reliable exploit for the full outcome is public or circulating, attackers are scanning for it, or the patch is trivial to turn into an exploit. Every record that uses it explains why and cites the source.
+    </p>
+    <p class="note">If you cannot tell how bad it would be, use the Critical row.</p>
+  </section>
+
+  <section class="sec" aria-labelledby="adjust-heading">
+    <h2 id="adjust-heading">Step 3: two adjustments</h2>
+    <ul class="list">
+      <li>If it needs a login or an unusual configuration, the call drops one tier.</li>
+      <li>If EPSS is at or above {epssPct}, a call that rests on exploitation or a public exploit rises one tier. EPSS never lowers a tier.</li>
+    </ul>
+  </section>
+
+  <section class="sec" aria-labelledby="chains-heading">
+    <h2 id="chains-heading">Exploit chains</h2>
+    <p class="sub">
+      Attackers rarely stop at one flaw. A flaw that is minor on its own can be the first step in a known chain that ends in a takeover.
+    </p>
+    <ul class="list">
+      <li>We rate a flaw by the worst outcome of any known chain with other flaws that are likely to be on the same system.</li>
+      <li>We use the evidence for the chain as a whole, and if the chain gets round a login, the login adjustment does not apply.</li>
+      <li>If you have already fixed the other link, rate the flaw on its own. Every record that relies on a chain names it and cites the source.</li>
+    </ul>
+  </section>
+
+  <section class="panel" aria-labelledby="cvss-heading">
+    <h2 id="cvss-heading">Where CVSS fits</h2>
+    <p class="prose">
+      CVSS scores how bad a flaw could be in the worst case, for anyone, anywhere. It does not know what you run, whether it can be reached, or whether anyone is attacking it.
+    </p>
+    <p class="prose">
+      So a 9.8 on a system nobody can reach is Tier 4, and a 6.5 that attackers are using against your VPN can be Tier 2.
+      The score never sets a tier. The business impact row does that job, in terms of your own systems. We still show the score on each record for reference.
+    </p>
+  </section>
+</Base>

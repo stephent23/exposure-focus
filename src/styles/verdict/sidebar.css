@@ -1,0 +1,43 @@
+/* Sidebar: key dates timeline, leadership summary and page navigation. */
+.sidebar { display: grid; gap: 16px; align-content: start; font-size: 14px; }
+.sidebar .side-block { background: #fff; border: 1px solid var(--line-strong); border-radius: 10px; padding: 18px 20px; min-width: 0; }
+.sidebar h2 { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.sidebar .sub { margin: 4px 0 0; font-size: 13px; line-height: 1.4; }
+
+/* Key dates: dots on a thin vertical line, oldest first */
+.dates { list-style: none; margin: 16px 0 0; padding: 0; }
+.date-row { position: relative; display: flex; flex-direction: column; gap: 1px; padding: 0 0 16px 24px; }
+.date-row:last-child { padding-bottom: 0; }
+.date-row::after { content: ""; position: absolute; left: 4px; top: 16px; bottom: -5px; width: 1px; background: var(--line-strong); }
+.date-row:last-child::after { display: none; }
+.date-row::before { content: ''; position: absolute; left: 0; top: 5px; width: 9px; height: 9px; box-sizing: border-box; border-radius: 50%; background: #fff; border: 2px solid var(--ink-2); }
+.date-row:first-child::before { background: var(--ink-2); }
+.date-row time { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.date-time { font-weight: 400; color: var(--muted); }
+.date-event { color: var(--ink-2); font-size: 14px; line-height: 1.45; }
+.date-src { margin-top: 2px; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
+/* For leadership */
+.sidebar blockquote { margin: 12px 0 0; padding-left: 12px; border-left: 2px solid var(--line-strong); font-size: 14px; line-height: 1.55; color: var(--ink-2); }
+.boss { display: flex; flex-direction: column; margin-top: 14px; }
+.copy-btn { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 16px; border: 1px solid var(--muted); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
+.copy-btn:hover { background: var(--panel); border-color: var(--ink); }
+.boss-status { font-size: 13px; color: var(--ink-2); }
+.boss-status:not(:empty) { margin-top: 8px; }
+.boss-fallback label { display: block; font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 6px; }
+.boss-fallback textarea { width: 100%; min-height: 160px; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5; padding: 10px; border: 1px solid var(--line-strong); border-radius: 8px; color: var(--ink); background: #fff; resize: vertical; }
+
+/* On this page: quiet list, wide screens only (it would only add length when stacked) */
+.toc { display: none; }
+.toc ul { list-style: none; margin: 10px 0 0; padding: 0; }
+.toc a { display: block; padding: 6px 0; font-size: 14px; color: var(--ink-2); text-decoration: none; }
+.toc a:hover { color: var(--link); text-decoration: underline; }
+
+/* Stacked layout: dates and leadership side by side where there is room */
+@media (min-width: 700px) {
+  .sidebar { grid-template-columns: 1fr 1fr; align-items: start; }
+}
+@media (min-width: 1000px) {
+  .sidebar { grid-template-columns: 1fr; }
+  .toc { display: block; }
+}

@@ -1,0 +1,86 @@
+---
+// Patch and mitigation options, then what to do if you were already hit.
+import '../../styles/verdict/protect.css';
+import Text from '../Text.astro';
+import { CONFIDENCE_LABELS } from '../../lib/tiers';
+import { effectByWay, isPlaceholder, letter } from '../../lib/verdict-view';
+import type { RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+}
+const { record } = Astro.props;
+---
+
+<section class="sec" aria-labelledby="protect-heading">
+  <h2 id="protect-heading">Patch and mitigate</h2>
+  <p class="sub">
+    {record.vectors.length === 1 ? 'There is one way in.' : `There are ${record.vectors.length} ways in.`}{' '}
+    Each option below says which it closes and which it leaves open.
+  </p>
+
+  <ul class="ways">
+    {record.vectors.map((vector, i) => (
+      <li><span class="way-letter">{letter(i)}</span><span>{isPlaceholder(vector) ? <span class="placeholder">{vector}</span> : vector}</span></li>
+    ))}
+  </ul>
+
+  <ol class="opts">
+    {record.mitigations.map((m, i) => (
+      <li class="opt">
+        <div class="opt-head">
+          <span class="opt-num" aria-hidden="true">{i + 1}</span>
+          <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
+          <span class="conf">{CONFIDENCE_LABELS[m.confidence]}</span>
+        </div>
+        <p class="opt-meta">
+          {effectByWay(record.vectors, m.effect).map((w) => (
+            <span class={`eff eff-${w.status}`}>
+              <span class="v">{w.letter}</span>
+              <b>{w.label}</b>
+            </span>
+          ))}
+        </p>
+        <p class="opt-sum"><Text text={m.summary} /></p>
+        <dl class="facts">
+          <div><dt>Effort</dt><dd><Text text={m.takes} /></dd></div>
+          {m.might_break && <div><dt>Might break</dt><dd><Text text={m.might_break} /></dd></div>}
+          {m.cost && <div><dt>Costs</dt><dd><Text text={m.cost} /></dd></div>}
+        </dl>
+        <details class="opt-more">
+          <summary>Check it worked, undo, official guides</summary>
+          <dl class="facts">
+            <div><dt>Check it worked</dt><dd><Text text={m.check_it_worked} /></dd></div>
+            <div><dt>Undo</dt><dd><Text text={m.undo} /></dd></div>
+            <div>
+              <dt>{m.official_guides.length === 1 ? 'Official guide' : 'Official guides'}</dt>
+              <dd>
+                {m.official_guides.map((g, gi) => (
+                  <>
+                    {gi > 0 && ' · '}
+                    {g.startsWith('http') ? (
+                      <a href={g}>Official guide{m.official_guides.length > 1 && ` ${gi + 1}`}<span class="sr-only"> for {m.title}</span></a>
+                    ) : (
+                      <span class="placeholder">{g}</span>
+                    )}
+                  </>
+                ))}
+              </dd>
+            </div>
+          </dl>
+        </details>
+      </li>
+    ))}
+  </ol>
+</section>
+
+{record.were_you_hit && (
+  <section class="sec hit" aria-labelledby="hit-heading">
+    <h2 id="hit-heading">Were you already hit?</h2>
+    <p class="hit-lead"><strong>Assume compromise when:</strong> {record.were_you_hit.assume_compromise_when}</p>
+    <ul class="hit-list">
+      {record.were_you_hit.check.map((c) => <li><b>Check</b><span>{c}</span></li>)}
+      {record.were_you_hit.rotate.map((c) => <li><b>Rotate</b><span>{c}</span></li>)}
+    </ul>
+  </section>
+)}

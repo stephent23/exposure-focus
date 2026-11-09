@@ -1,0 +1,56 @@
+---
+// Your tier by placement, then how to check whether the flaw applies to you.
+import '../../styles/verdict/placements.css';
+import Text from '../Text.astro';
+import type { TierNumber } from '../../lib/tiers';
+import { isPlaceholder } from '../../lib/verdict-view';
+import { placementResult, sortedPlacements, type RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+}
+const { record } = Astro.props;
+---
+
+<section class="sec" aria-labelledby="placement-heading">
+  <h2 id="placement-heading">Verdict by placement</h2>
+  <p class="sub">Your tier depends on where it runs. Find the line that matches your setup.</p>
+  <ul class="places" role="list">
+    {sortedPlacements(record).map((placement) => {
+      const result = placementResult(record, placement);
+      const tier = placement.tier as TierNumber;
+      return (
+        <li class={`place t${tier}`}>
+          <div class="place-main">
+            <span class={`badge t${tier}`}>Tier {tier}</span>
+            <div class="place-body">
+              <h3>{placement.name}</h3>
+              <p class="place-action"><Text text={placement.action} /></p>
+            </div>
+          </div>
+          <details class="reasoning">
+            <summary>Why Tier {tier}</summary>
+            <ul class="list">
+              {placement.why.map((w) => <li><Text text={w} /></li>)}
+            </ul>
+            <p class="meta-line">Rubric: {result.reason}</p>
+            {placement.override_reason && <p class="meta-line">Override: {placement.override_reason}</p>}
+          </details>
+        </li>
+      );
+    })}
+  </ul>
+</section>
+
+<section class="sec applies" aria-labelledby="applies-heading">
+  <h2 id="applies-heading">Does this apply to you?</h2>
+  <div class="applies-box">
+    {record.applies_check.map((item) => (
+      <div class="applies-item">
+        <h3>{item.question}</h3>
+        <p class="applies-how"><span class="how-label">How to check</span>{isPlaceholder(item.how_to_check) ? <span class="placeholder">{item.how_to_check}</span> : <Text text={item.how_to_check} />}</p>
+      </div>
+    ))}
+    <p class="applies-default">If you cannot tell, answer Yes.</p>
+  </div>
+</section>

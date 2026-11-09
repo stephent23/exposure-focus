@@ -1,0 +1,19 @@
+# Security headers for every path. Syntax: https://developers.cloudflare.com/workers/static-assets/headers/
+# script-src and style-src are 'self' only: no inline scripts, inline style tags or style="" attributes.
+# Page scripts are bundled files under /_astro/ and CSS is emitted as external files (astro.config.mjs).
+# tests/built.test.ts fails the build if an inline script or style, or 'unsafe-inline', comes back.
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; font-src 'self'; connect-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'none'; object-src 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Cross-Origin-Opener-Policy: same-origin
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Hashed build output never changes under the same name.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Font files can change without a new name, so cache them for 30 days only.
+/fonts/*
+  Cache-Control: public, max-age=2592000

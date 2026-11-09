@@ -1,0 +1,39 @@
+---
+// The corrections page: a public list of calls we got wrong and what we changed.
+import '../../styles/trust.css';
+import Base from '../../layouts/Base.astro';
+import { getCorrections } from '../../lib/corrections';
+import { getAllRecords } from '../../lib/records';
+import { isRealUrl } from '../../lib/site';
+
+const corrections = await getCorrections();
+const names = new Map((await getAllRecords()).map((record) => [record.slug, record.name]));
+---
+
+<Base title="Corrections" current="corrections">
+  <section class="hero">
+    <h1>Corrections</h1>
+    <p class="lede">When we get a call wrong we say so here, with what we missed and what we changed. We never edit history silently.</p>
+  </section>
+
+  <section class="sec prose trust">
+    {corrections.length === 0 ? (
+      <p>No corrections yet.</p>
+    ) : (
+      <ol class="plain">
+        {corrections.map((item) => (
+          <li class="correction">
+            <h2><a href={`/verdicts/${item.record}/`}>{names.get(item.record) ?? item.record}</a> <span class="mono">{item.date}</span></h2>
+            <dl>
+              <dt>What we said</dt><dd>{item.what_we_said}</dd>
+              <dt>What was wrong</dt><dd>{item.what_was_wrong}</dd>
+              <dt>What we changed</dt><dd>{item.what_we_changed}</dd>
+              <dt>Source</dt>
+              <dd>{isRealUrl(item.source_url) ? <a href={item.source_url} rel="noopener">Source<span class="sr-only"> for the correction to {names.get(item.record) ?? item.record}</span></a> : <span class="placeholder">{item.source_url}</span>}</dd>
+            </dl>
+          </li>
+        ))}
+      </ol>
+    )}
+  </section>
+</Base>

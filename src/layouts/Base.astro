@@ -1,0 +1,64 @@
+---
+// The page frame shared by every page: head, header, footer and global styles.
+import '../styles/global.css';
+import '../styles/fonts.css';
+import { SITE, isRealUrl } from '../lib/site';
+
+interface Props {
+  title: string;
+  description?: string;
+  current?: 'home' | 'rubric' | 'corrections' | 'about';
+}
+
+const { title, description = 'Independent, dated, reversible verdicts on which vulnerabilities need which response, by placement.', current } = Astro.props;
+const nav = [
+  { id: 'home', href: '/', label: 'Verdicts' },
+  { id: 'rubric', href: '/rubric/', label: 'How we decide' },
+  { id: 'corrections', href: '/corrections/', label: 'Corrections' },
+  { id: 'about', href: '/about/', label: 'About' }
+] as const;
+const newsletterUrl = isRealUrl(SITE.newsletterUrl) ? SITE.newsletterUrl : null;
+---
+
+<!doctype html>
+<html lang="en-GB">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="alternate" type="application/atom+xml" title="Exposure Focus" href="/feed.xml" />
+    <title>{title === 'Exposure Focus' ? title : `${title} — Exposure Focus`}</title>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="brand" href="/">Exposure Focus</a>
+        <nav aria-label="Main">
+          {nav.map((item) => (
+            <a href={item.href} aria-current={current === item.id ? 'page' : undefined}>{item.label}</a>
+          ))}
+        </nav>
+      </div>
+    </header>
+    <main id="main" class="wrap">
+      <slot />
+    </main>
+    <footer class="site-footer">
+      <div class="wrap">
+        <strong>Independent by design.</strong> No sponsors, no affiliate links, no product to sell.
+        {newsletterUrl && (
+          <section class="brief" aria-labelledby="brief-title">
+            <h2 id="brief-title">The weekly brief</h2>
+            <p>
+              <a class="button" href={newsletterUrl} rel="noopener">Get the weekly brief</a>
+            </p>
+            <p>This opens the sign-up page of our email provider. We collect and store nothing ourselves. We never sell or share your address.</p>
+          </section>
+        )}
+        <p class="foot-links"><a href="/feed.xml">Atom feed</a></p>
+        <small>Verdicts are guidance, not a guarantee. Check the evidence date on every record before acting. Dates are UTC.</small>
+      </div>
+    </footer>
+  </body>
+</html>
