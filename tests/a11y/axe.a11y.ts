@@ -71,11 +71,14 @@ test('keyboard: skip link first, then the first card link, with visible focus', 
     page.evaluate(() => {
       const el = document.activeElement as HTMLElement;
       const s = getComputedStyle(el);
+      // A card link shows focus as a ring on the whole card (.card:focus-within), not on the link itself.
+      const card = el.closest('.card');
+      const c = card ? getComputedStyle(card) : null;
       return {
         text: (el.textContent ?? '').trim().slice(0, 40),
         className: el.className,
-        inCard: Boolean(el.closest('.card')),
-        outline: s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0,
+        inCard: Boolean(card),
+        outline: (s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0) || Boolean(c && c.outlineStyle !== 'none' && parseFloat(c.outlineWidth) > 0),
         shadow: s.boxShadow !== 'none'
       };
     });
