@@ -253,3 +253,48 @@ describe('key dates (timeline)', () => {
     }
   });
 });
+
+describe('change log', () => {
+  const move = { date: '2026-11-01', placement: 'Internet-facing', from_tier: 2, to_tier: 1, reason: 'CISA added it to KEV.', source_url: 'https://vendor.test/kev' };
+  const note = { date: '2026-10-30', reason: 'Added a WAF mitigation.', source_url: 'https://vendor.test/waf' };
+  const withChanges = (changes: unknown) => ({ ...validRecord(), changes });
+
+  it('is optional', () => {
+    expect(parseRecord(validRecord()).changes).toBeUndefined();
+  });
+
+  it('accepts dated, sourced tier moves and plain notes', () => {
+    expect(parseRecord(withChanges([note, move])).changes).toHaveLength(2);
+  });
+
+  it('rejects an entry with no source, a bad date or no reason', () => {
+    for (const bad of [{ ...note, source_url: undefined }, { ...note, date: 'Oct 30' }, { ...note, reason: '' }]) {
+      expect(recordSchema.safeParse(withChanges([bad])).success).toBe(false);
+    }
+  });
+
+  it('needs placement, from_tier and to_tier together, with different tiers', () => {
+    for (const bad of [
+      { ...move, from_tier: undefined },
+      { ...move, to_tier: undefined },
+      { ...move, placement: undefined },
+      { ...move, from_tier: 1 }
+    ]) {
+      expect(recordSchema.safeParse(withChanges([bad])).success).toBe(false);
+    }
+  });
+
+  it('rejects a move for a placement the record does not have', () => {
+    expect(recordSchema.safeParse(withChanges([{ ...move, placement: 'Nowhere' }])).success).toBe(false);
+  });
+
+  it('rejects a change dated after the evidence date', () => {
+    expect(recordSchema.safeParse(withChanges([{ ...note, date: '2026-11-09' }])).success).toBe(false);
+  });
+
+  it('requires the latest move for a placement to end on its current tier', () => {
+    const older = { ...move, date: '2026-10-20', from_tier: 3, to_tier: 2 };
+    expect(recordSchema.safeParse(withChanges([older, move])).success).toBe(true);
+    expect(recordSchema.safeParse(withChanges([older])).success).toBe(false);
+  });
+});

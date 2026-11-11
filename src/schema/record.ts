@@ -97,6 +97,23 @@ const timelineSchema = z.object({
   confidence
 });
 
+// One dated entry in a verdict's public change log. A tier move names the placement and both tiers.
+const tierNumber = z.number().int().min(1).max(4);
+const changeSchema = z
+  .object({
+    date: dateString,
+    placement: text.optional(),
+    from_tier: tierNumber.optional(),
+    to_tier: tierNumber.optional(),
+    reason: text,
+    source_url: link
+  })
+  .strict()
+  .refine((c) => new Set([c.placement, c.from_tier, c.to_tier].map((v) => v === undefined)).size === 1, {
+    message: 'A tier move needs placement, from_tier and to_tier together.'
+  })
+  .refine((c) => c.from_tier === undefined || c.from_tier !== c.to_tier, { message: 'from_tier and to_tier must differ.' });
+
 const sourceSchema = z.object({
   title: text,
   url: link,
@@ -133,6 +150,7 @@ const baseRecordSchema = z.object({
   mitigations: z.array(mitigationSchema).min(1),
   evidence: z.array(evidenceSchema).min(1),
   timeline: z.array(timelineSchema).optional(),
+  changes: z.array(changeSchema).optional(),
   epss: epssSchema.optional(),
   were_you_hit: wereYouHitSchema.optional(),
   sources: z.array(sourceSchema).min(1),
@@ -185,6 +203,27 @@ export const recordSchema = baseRecordSchema.superRefine((record, ctx) => {
       path: ['evidence'],
       message: 'A placement relies on "exploitation about to start", so the evidence must include an item labelled "Exploitation outlook" saying why, with its source.'
     });
+  }
+
+  // The change log must agree with the verdict: real placements, no future dates, and each placement's latest move ends on its tier.
+  const latestMove = new Map<string, { date: string; to: number }>();
+  (record.changes ?? []).forEach((change, i) => {
+    if (change.date > record.evidence_as_of) {
+      ctx.addIssue({ code: 'custom', path: ['changes', i, 'date'], message: 'A change cannot be dated after evidence_as_of.' });
+    }
+    if (change.placement === undefined || change.to_tier === undefined) return;
+    if (!record.placements.some((p) => p.name === change.placement)) {
+      ctx.addIssue({ code: 'custom', path: ['changes', i, 'placement'], message: `No placement is named "${change.placement}".` });
+      return;
+    }
+    const seen = latestMove.get(change.placement);
+    if (!seen || change.date >= seen.date) latestMove.set(change.placement, { date: change.date, to: change.to_tier });
+  });
+  for (const [name, move] of latestMove) {
+    const tier = record.placements.find((p) => p.name === name)?.tier;
+    if (tier !== move.to) {
+      ctx.addIssue({ code: 'custom', path: ['changes'], message: `The latest change for "${name}" moves it to Tier ${move.to}, but its tier is ${tier}.` });
+    }
   }
 
   for (const hit of findTimeframes(record)) {

@@ -100,7 +100,7 @@ export function triage(facts: TriageFacts): { tier: Tier; reason: string } {
   const partial = attackEvidence && SEVERITY[achieves] < SEVERITY[impact];
 
   let tier = IMPACT_TABLE[impact][COLUMN_OF[evidence]];
-  let reason = `Reachable. Business impact: ${impact}${facts.impact ? '' : ' (not stated, so we assume the worst)'}. Evidence: ${evidence}.`;
+  let reason = `Reachable. Business impact: ${impact}${facts.impact ? '' : ' (not stated, so the worst is assumed)'}. Evidence: ${evidence}.`;
 
   if (partial) {
     // The evidence only shows the lesser outcome. Rate that outcome on the evidence, and the full outcome as no more than demonstrated.

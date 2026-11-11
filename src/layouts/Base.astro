@@ -13,7 +13,7 @@ interface Props {
 const { title, description = 'Independent, dated, reversible verdicts on which vulnerabilities need which response, by placement.', current } = Astro.props;
 const nav = [
   { id: 'home', href: '/', label: 'Verdicts' },
-  { id: 'rubric', href: '/rubric/', label: 'How we decide' },
+  { id: 'rubric', href: '/rubric/', label: 'The rubric' },
   { id: 'corrections', href: '/corrections/', label: 'Corrections' },
   { id: 'about', href: '/about/', label: 'About' }
 ] as const;
@@ -53,7 +53,7 @@ const newsletterUrl = isRealUrl(SITE.newsletterUrl) ? SITE.newsletterUrl : null;
             <p>
               <a class="button" href={newsletterUrl} rel="noopener">Get the weekly brief</a>
             </p>
-            <p>This opens the sign-up page of our email provider. We collect and store nothing ourselves. We never sell or share your address.</p>
+            <p>This opens the sign-up page of the email provider. This site collects and stores nothing itself. Your address is never sold or shared.</p>
           </section>
         )}
         <p class="foot-links"><a href="/feed.xml">Atom feed</a></p>

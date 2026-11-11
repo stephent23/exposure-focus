@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { effectByWay, isPlaceholder, letter, niceDate, sortedTimeline } from './verdict-view';
+import { changeHeadline, effectByWay, guideLabel, isPlaceholder, letter, niceDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
   it('letters ways in from A', () => {
@@ -41,4 +41,28 @@ describe('verdict view helpers', () => {
     ]);
   });
 
+  it('names the source of a guide, and only calls vendor or authority pages official', () => {
+    expect(guideLabel('https://aws.amazon.com/security/x')).toBe('AWS official guidance');
+    expect(guideLabel('https://developers.cloudflare.com/waf/')).toBe('Cloudflare official guidance');
+    expect(guideLabel('https://access.redhat.com/security/x')).toBe('Red Hat official guidance');
+    expect(guideLabel('https://www.cisa.gov/x')).toBe('CISA official guidance');
+    expect(guideLabel('https://www.akamai.com/blog/x')).toBe('Akamai write-up (not official)');
+    expect(guideLabel('https://www.bleepingcomputer.com/news/x')).toBe('BleepingComputer report (not official)');
+    expect(guideLabel('https://example.org/x')).toBe('example.org (source not checked)');
+  });
+});
+
+describe('sortedChanges', () => {
+  it('puts the newest change first and keeps file order on the same day', () => {
+    const c = (date: string, reason: string) => ({ date, reason, source_url: '[link to add]' });
+    expect(sortedChanges([c('2026-10-01', 'a'), c('2026-11-01', 'b'), c('2026-11-01', 'c')]).map((x) => x.reason)).toEqual(['b', 'c', 'a']);
+    expect(sortedChanges(undefined)).toEqual([]);
+  });
+
+  it('describes a tier move in words', () => {
+    expect(changeHeadline({ date: '2026-11-01', placement: 'Edge', from_tier: 3, to_tier: 1, reason: 'r', source_url: 'x' })).toBe(
+      'Edge: Tier 3 (Prioritised) to Tier 1 (Emergency)'
+    );
+    expect(changeHeadline({ date: '2026-11-01', reason: 'r', source_url: 'x' })).toBeNull();
+  });
 });

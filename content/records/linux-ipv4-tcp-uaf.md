@@ -124,4 +124,4 @@ sources:
 
 Some write-ups describe this as an MPTCP-only problem. Red Hat and Akamai both say the bug itself is not specific to MPTCP, while the researchers' exploit uses an MPTCP listener. The record therefore has separate rows for servers with and without one.
 
-As of 2026-11-09 we have not confirmed whether the flaw is in the CISA KEV catalogue.
+As of 2026-11-09 it has not been confirmed whether the flaw is in the CISA KEV catalogue.

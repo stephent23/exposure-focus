@@ -28,10 +28,10 @@ const descriptions: Record<TriageImpact, { level: string; description: string }>
 const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IMPACT_TABLE[impact] }));
 ---
 
-<Base title="How we decide" current="rubric">
+<Base title="How verdicts are decided" current="rubric">
   <section class="hero">
     <p class="eyebrow">The rubric</p>
-    <h1>How we decide.</h1>
+    <h1>How verdicts are decided.</h1>
     <p class="lede">
       Every call is worked out from facts about your placement, not typed in. If a record ever differs from the rubric, it says so, with a reason.
     </p>
@@ -49,7 +49,7 @@ const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IM
       ))}
     </ul>
     <p class="sub">
-      We say what each tier means but never give a time frame. That depends on your risk appetite and SLAs, so you set it.
+      Each tier says what it means but never gives a time frame. That depends on your risk appetite and SLAs, so you set it.
     </p>
   </section>
 
@@ -60,7 +60,7 @@ const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IM
       <li>If the vendor states a condition for exposure is false, it is not exposed: Tier 4, Routine.</li>
       <li>If it is not reachable from the internet, it is Tier 4, Routine. Normal patching is enough.</li>
     </ul>
-    <p class="note">If we cannot tell whether something is exposed we treat it as exposed.</p>
+    <p class="note">If it is unclear whether something is exposed, it is treated as exposed.</p>
   </section>
 
   <section class="sec" aria-labelledby="table-heading">
@@ -137,8 +137,8 @@ const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IM
       Attackers rarely stop at one flaw. A flaw that is minor on its own can be the first step in a known chain that ends in a takeover.
     </p>
     <ul class="list">
-      <li>We rate a flaw by the worst outcome of any known chain with other flaws that are likely to be on the same system.</li>
-      <li>We use the evidence for the chain as a whole, and if the chain gets round a login, the login adjustment does not apply.</li>
+      <li>A flaw is rated by the worst outcome of any known chain with other flaws that are likely to be on the same system.</li>
+      <li>The evidence for the chain as a whole is used, and if the chain gets round a login, the login adjustment does not apply.</li>
       <li>If you have already fixed the other link, rate the flaw on its own. Every record that relies on a chain names it and cites the source.</li>
     </ul>
   </section>
@@ -150,7 +150,7 @@ const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IM
     </p>
     <p class="prose">
       So a 9.8 on a system nobody can reach is Tier 4, and a 6.5 that attackers are using against your VPN can be Tier 2.
-      The score never sets a tier. The business impact row does that job, in terms of your own systems. We still show the score on each record for reference.
+      The score never sets a tier. The business impact row does that job, in terms of your own systems. The score is still shown on each verdict for reference.
     </p>
   </section>
 </Base>

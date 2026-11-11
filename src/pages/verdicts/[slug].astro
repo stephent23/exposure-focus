@@ -5,6 +5,7 @@ import '../../styles/verdict.css';
 import Summary from '../../components/verdict/Summary.astro';
 import Sidebar from '../../components/verdict/Sidebar.astro';
 import Placements from '../../components/verdict/Placements.astro';
+import Changes from '../../components/verdict/Changes.astro';
 import Protect from '../../components/verdict/Protect.astro';
 import Detail from '../../components/verdict/Detail.astro';
 import { bossSummary } from '../../lib/boss-summary';
@@ -29,6 +30,7 @@ const bossText = bossSummary(record, new URL(`/verdicts/${record.slug}/`, Astro.
       <Sidebar record={record} bossText={bossText} />
       <div class="verdict-main">
         <Placements record={record} />
+        <Changes record={record} />
         <Protect record={record} />
         <Detail record={record} />
       </div>

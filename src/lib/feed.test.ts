@@ -122,6 +122,30 @@ describe('buildFeed', () => {
     for (const e of entries(buildFeed([r], SITE))) expect(e).toContain('Some facts are not yet confirmed.');
   });
 
+  it('adds one entry per change, linked to the change log on the verdict page', () => {
+    const changes = [
+      { date: '2026-11-05', placement: 'Main', from_tier: 2, to_tier: 1, reason: 'CISA added it to KEV.', source_url: 'https://cisa.test/kev' },
+      { date: '2026-11-02', reason: 'Added a WAF mitigation & links.', source_url: 'https://waf.test/' }
+    ];
+    const xml = buildFeed([rec({ changes })], SITE);
+    assertWellFormed(xml);
+    const all = entries(xml);
+    expect(all).toHaveLength(3);
+    const move = all.find((e) => e.includes('2026-11-05T00:00:00Z'))!;
+    expect(move).toContain('<title>Alpha: Main: Tier 2 (Urgent) to Tier 1 (Emergency)</title>');
+    expect(move).toContain('CISA added it to KEV.');
+    expect(move).toContain('href="https://feeds.test/base/verdicts/alpha/#changes-heading"');
+    expect(move).toContain('<id>tag:exposure-focus,2026:alpha:change:2026-11-05:0</id>');
+    const note = all.find((e) => e.includes('2026-11-02T00:00:00Z'))!;
+    expect(note).toContain('<title>Alpha: verdict updated</title>');
+    expect(note).toContain('Added a WAF mitigation &amp; links.');
+  });
+
+  it('leaves changes to unpublished records out of the feed', () => {
+    const changes = [{ date: '2026-11-05', reason: 'x', source_url: 'https://cisa.test/' }];
+    expect(entries(buildFeed([rec({ status: 'draft', changes })], SITE))).toHaveLength(0);
+  });
+
   it('is a valid empty feed when nothing is published', () => {
     assertWellFormed(buildFeed([], SITE));
   });

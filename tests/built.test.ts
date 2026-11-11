@@ -118,9 +118,28 @@ describe('built site', () => {
     expect(csp).toMatch(/style-src 'self'(;|$)/);
   });
 
-  it('has a feed with one entry per published record', () => {
+  it('shows the change log, newest first, only where a record has one', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      expect(html.includes('id="changes-heading"'), `${r.slug} changes section`).toBe(Boolean(r.changes?.length));
+      expect(count(html, 'class="change"'), `${r.slug} change rows`).toBe(r.changes?.length ?? 0);
+      if (!r.changes) continue;
+      const section = html.slice(html.indexOf('id="changes-heading"'));
+      const shown = [...section.matchAll(/class="change"[^]*?<time datetime="([^"]+)"/g)].map((m) => m[1]);
+      expect(shown, `${r.slug} order`).toEqual(r.changes.map((c) => c.date).sort().reverse());
+    }
+  });
+
+  it('never speaks as "we" in visible text or the feed', () => {
+    // URLs are left out: paths such as /en/us/ are not speech.
+    const firstPerson = (s: string) => /\b(?:[Ww]e|[Oo]urs?|[Oo]urselves|us)\b/.exec(s.replace(/https?:\/\/\S+/g, ' '))?.[0];
+    for (const f of pages) expect(firstPerson(text(readFileSync(f, 'utf-8'))), f).toBeUndefined();
+    expect(firstPerson(read('feed.xml').replace(/<[^>]+>/g, ' '))).toBeUndefined();
+  });
+
+  it('has a feed with one entry per published record and one per change', () => {
     const xml = read('feed.xml');
-    expect(count(xml, '<entry>')).toBe(published.length);
+    expect(count(xml, '<entry>')).toBe(published.reduce((n, r) => n + 1 + (r.changes?.length ?? 0), 0));
     for (const r of records.filter((x) => x.status !== 'published')) expect(xml).not.toContain(`/verdicts/${r.slug}/`);
   });
 });

@@ -3,7 +3,7 @@
 import '../../styles/verdict/protect.css';
 import Text from '../Text.astro';
 import { CONFIDENCE_LABELS } from '../../lib/tiers';
-import { effectByWay, isPlaceholder, letter } from '../../lib/verdict-view';
+import { effectByWay, guideLabel, isPlaceholder, letter } from '../../lib/verdict-view';
 import type { RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -48,18 +48,18 @@ const { record } = Astro.props;
           {m.cost && <div><dt>Costs</dt><dd><Text text={m.cost} /></dd></div>}
         </dl>
         <details class="opt-more">
-          <summary>Check it worked, undo, official guides</summary>
+          <summary>Check it worked, undo, guides</summary>
           <dl class="facts">
             <div><dt>Check it worked</dt><dd><Text text={m.check_it_worked} /></dd></div>
             <div><dt>Undo</dt><dd><Text text={m.undo} /></dd></div>
             <div>
-              <dt>{m.official_guides.length === 1 ? 'Official guide' : 'Official guides'}</dt>
+              <dt>{m.official_guides.length === 1 ? 'Guide' : 'Guides'}</dt>
               <dd>
                 {m.official_guides.map((g, gi) => (
                   <>
                     {gi > 0 && ' · '}
                     {g.startsWith('http') ? (
-                      <a href={g}>Official guide{m.official_guides.length > 1 && ` ${gi + 1}`}<span class="sr-only"> for {m.title}</span></a>
+                      <a href={g}>{guideLabel(g)}<span class="sr-only"> for {m.title}</span></a>
                     ) : (
                       <span class="placeholder">{g}</span>
                     )}

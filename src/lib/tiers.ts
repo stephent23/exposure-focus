@@ -3,7 +3,7 @@ export const TIERS = {
   1: { name: 'Emergency', meaning: 'Drop everything. Give up the evening or weekend if you have to.' },
   2: { name: 'Urgent', meaning: 'Get it done as soon as you can, ahead of everything planned.' },
   3: { name: 'Prioritised', meaning: 'Sooner than your normal patching cycle. Schedule it.' },
-  4: { name: 'Routine', meaning: 'Normal patching. No special action, and we do not track it.' }
+  4: { name: 'Routine', meaning: 'Normal patching. No special action, and not tracked on this site.' }
 } as const;
 
 export type TierNumber = keyof typeof TIERS;

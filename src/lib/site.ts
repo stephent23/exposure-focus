@@ -13,7 +13,7 @@ export function isRealUrl(value: string | null | undefined): value is string {
 /** Owner-set configuration. Leave a link as null until the owner has chosen one. */
 export const SITE = {
   name: 'Exposure Focus',
-  /** A hosted sign-up page. We collect and store nothing ourselves. */
+  /** A hosted sign-up page. The site collects and stores nothing itself. */
   newsletterUrl: null as string | null,
   /** How readers reach the author. */
   contactUrl: null as string | null

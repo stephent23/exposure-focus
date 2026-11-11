@@ -3,7 +3,7 @@ slug: http2shell
 name: HTTP2Shell
 aliases: [Node2Shell, Broccoli2Shell]
 cves: [CVE-2026-111497]
-summary: A memory-corruption flaw in the Brotli decoder can let an attacker crash, read from or possibly run code in applications that decompress attacker-supplied Brotli data. CISA lists it as exploited, but no source we read reports code execution in the wild. We rate it Tier 3, an editorial call.
+summary: A memory-corruption flaw in the Brotli decoder can let an attacker crash, read from or possibly run code in applications that decompress attacker-supplied Brotli data. CISA lists it as exploited, but no source reviewed reports code execution in the wild. It is rated Tier 3, an editorial call.
 attack: rce
 status: published
 evidence_as_of: 2026-11-09
@@ -22,9 +22,9 @@ placements:
       - Listed in CISA KEV on 2026-10-27 (vendor-stated exploitation; the kind of exploitation is not described).
       - No login needed.
       - Memory corruption that can lead to code execution; a researcher demonstrated it on stock Node.js but needed multiple attempts.
-      - Reported attacks are attempts or reconnaissance; we treat what they achieve as at most a crash, an inference.
+      - Reported attacks are attempts or reconnaissance; what they achieve is treated as at most a crash, an inference.
     tier: 3
-    override_reason: "Editorial judgment, not a sourced fact. The rubric gives Tier 2: CISA lists exploitation, but no source we read shows attacks achieving code execution, and Imperva's code execution counts as demonstrated only. We rate it Tier 3 because the one demonstrated code execution needed multiple attempts and no source reports code execution in the wild. Zscaler reports reconnaissance and exploitation attempts. Wiz says no self-contained remote exploit for code execution has been publicly confirmed. The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild."
+    override_reason: "Editorial judgment, not a sourced fact. The rubric gives Tier 2: CISA lists exploitation, but no source reviewed shows attacks achieving code execution, and Imperva's code execution counts as demonstrated only. It is rated Tier 3 because the one demonstrated code execution needed multiple attempts and no source reports code execution in the wild. Zscaler reports reconnaissance and exploitation attempts. Wiz says no self-contained remote exploit for code execution has been publicly confirmed. The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild."
     action: "Prioritised: sooner than your normal patching cycle, schedule it. Update every affected runtime and library, rebuild container images and restart processes. If you cannot soon, block Brotli-compressed input first."
   - name: Only decodes Brotli from sources you control
     facts: { reachable: false, exploited: true, no_login: true, impact: critical }
@@ -100,7 +100,7 @@ evidence:
     source_url: https://www.wiz.io/vulnerability-database/cve/cve-2026-111497
     confidence: reported
   - label: Observed attacker activity
-    text: "Zscaler ThreatLabz reports its deception systems recorded reconnaissance and exploitation attempts after disclosure (40% reconnaissance, 60% exploitation attempts). The post does not report confirmed code execution; it lists crashes only as indicators to monitor. Aikido cited The Hacker News reporting no exploitation in the wild as of October 22, before CISA's listing. No source we read reports code execution achieved in the wild."
+    text: "Zscaler ThreatLabz reports its deception systems recorded reconnaissance and exploitation attempts after disclosure (40% reconnaissance, 60% exploitation attempts). The post does not report confirmed code execution; it lists crashes only as indicators to monitor. Aikido cited The Hacker News reporting no exploitation in the wild as of October 22, before CISA's listing. No source reviewed reports code execution achieved in the wild."
     as_of: 2026-11-09
     source_url: https://www.zscaler.com/blogs/security-research/cve-2026-111497-node2shell-http2shell-vulnerability-may-allow-rce
     confidence: reported
@@ -162,7 +162,7 @@ The "HTTP2" in the name is misleading: the flaw is in the shared Brotli decoder 
 
 Affected Brotli library versions and the CVSS vector are not stated here. The Node.js advisory and the CISA catalogue entry are the main sources.
 
-## Why our call is calmer than CISA's
+## Why this call is calmer than CISA's
 
 This section is an editorial judgment. It is not a sourced fact, and it overrides the rubric's Tier 2.
 
@@ -170,6 +170,6 @@ This section is an editorial judgment. It is not a sourced fact, and it override
 - Zscaler reports reconnaissance and exploitation attempts, not confirmed code execution.
 - Imperva demonstrated code execution on stock Node.js 24.22.0 (Linux arm64), but only after multiple attempts.
 - Wiz says the one public code-execution proof of concept is local and needs a deterministic memory layout, and that no self-contained remote exploit has been publicly confirmed.
-- No source we read reports code execution in the wild. That is not proof there has been none.
+- No source reviewed reports code execution in the wild. That is not proof there has been none.
 
 The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild.

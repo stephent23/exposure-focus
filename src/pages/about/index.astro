@@ -21,7 +21,7 @@ const contactUrl = isRealUrl(SITE.contactUrl) ? SITE.contactUrl : null;
       so you can make informed decisions about how urgent each one is for your setup and what to do about it.
     </p>
     <p>
-      Every verdict follows a published rubric, so you can see <a href="/rubric/">how we decide</a>.
+      Every verdict follows a published rubric, so you can see <a href="/rubric/">how each one is decided</a>.
       There are no sponsors, affiliate links, advertising, tracking or third-party scripts.
     </p>
 
@@ -29,19 +29,19 @@ const contactUrl = isRealUrl(SITE.contactUrl) ? SITE.contactUrl : null;
     <p>Every fact has a source link and an as-of date. Each carries one of three labels:</p>
     <ul>
       <li><strong>Vendor-stated:</strong> the maker of the product said it.</li>
-      <li><strong>Reported:</strong> someone credible reported it, and we have not confirmed it ourselves.</li>
-      <li><strong>Inference:</strong> our own reasoning from the facts above.</li>
+      <li><strong>Reported:</strong> someone credible reported it, and it has not been independently confirmed.</li>
+      <li><strong>Inference:</strong> reasoning from the facts above, not a sourced fact.</li>
     </ul>
-    <p>Claims we have not confirmed are labelled as such, never stated as fact. Every call can change as the evidence does, and the date on each verdict shows when it was last checked. Mistakes are listed on the <a href="/corrections/">corrections page</a>.</p>
+    <p>Unconfirmed claims are labelled as such, never stated as fact. Every call can change as the evidence does, and the date on each verdict shows when it was last checked. Mistakes are listed on the <a href="/corrections/">corrections page</a>.</p>
 
     {contactUrl && (
       <>
-        <h2>How to contact us</h2>
+        <h2>Contact</h2>
         <p><a href={contactUrl} rel="noopener">Contact the author</a></p>
       </>
     )}
 
     <h2>Verdicts are guidance, not a guarantee</h2>
-    <p>A verdict is our reading of the evidence on the date shown. It does not know your systems, so check the evidence date before you act.</p>
+    <p>A verdict is a reading of the evidence on the date shown. It does not know your systems, so check the evidence date before you act.</p>
   </section>
 </Base>

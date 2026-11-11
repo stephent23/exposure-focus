@@ -51,6 +51,7 @@ const timeline = sortedTimeline(record.timeline);
     <ul>
       <li><a href="#placement-heading">Your tier</a></li>
       <li><a href="#applies-heading">Does it apply to you?</a></li>
+      {(record.changes ?? []).length > 0 && <li><a href="#changes-heading">Changes</a></li>}
       <li><a href="#protect-heading">Patch and mitigate</a></li>
       {record.were_you_hit && <li><a href="#hit-heading">Were you already hit?</a></li>}
       <li><a href="#evidence-heading">Evidence</a></li>

@@ -17,7 +17,7 @@ review_until: 2026-12-08 # UTC date to recheck by; after it the record shows a s
 leadership_quote: Two or three sentences a boss can read.
 
 applies_check:
-  - question: Do we run the affected thing?
+  - question: Do you run the affected thing?
     how_to_check: "[steps to add]"
 
 # Placements: the FIRST one is the headline, so put the most common case first.
@@ -65,6 +65,13 @@ evidence:
 # Optional. Dated events, each with its own source. time is HH:MM in UTC and may be left out.
 # timeline:
 #   - { event: "Fix released", date: 2026-11-08, time: "16:00", source_url: "[link to add]", confidence: vendor-stated }
+
+# Optional. The public change log, added to whenever the verdict changes. Never edit or delete old entries.
+# A tier move names the placement (exactly as above) and both tiers; the latest move must match the current tier.
+# Each entry also appears in the feed, so subscribers see the change.
+# changes:
+#   - { date: 2026-11-08, placement: "Internet-facing", from_tier: 2, to_tier: 1, reason: "CISA added it to KEV.", source_url: "[link to add]" }
+#   - { date: 2026-11-08, reason: "Added a WAF mitigation.", source_url: "[link to add]" }
 
 # Optional. An EPSS score of 0.5 or more can raise a call by one tier. It needs its own date and source.
 # It does not apply with a login requirement or rare configuration, or when exploit_achieves is below impact.
