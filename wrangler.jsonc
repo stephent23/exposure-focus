@@ -5,5 +5,8 @@
     "directory": "./dist",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page"
-  }
+  },
+  // Worker Previews for pull-request branches (npx wrangler preview, Wrangler 4.135.0+).
+  // Empty: a preview uses the same static assets and needs no separate vars or bindings.
+  "previews": {}
 }
