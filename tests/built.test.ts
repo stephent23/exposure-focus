@@ -33,7 +33,8 @@ describe('built site', () => {
       const html = recordPage(r.slug);
       expect(html.includes('id="dates-heading"'), `${r.slug} dates section`).toBe(Boolean(r.timeline?.length));
       if (!r.timeline) continue;
-      const shown = [...html.matchAll(/<time datetime="([^"]+)"/g)].map((m) => m[1].slice(0, 10));
+      // Only the key-dates list: the change log on the same page has its own <time> elements.
+      const shown = [...html.matchAll(/class="date-row"[^>]*>\s*<time datetime="([^"]+)"/g)].map((m) => m[1].slice(0, 10));
       expect(shown, `${r.slug} order`).toEqual(r.timeline.map((t) => t.date).sort());
       expect(count(html, 'class="date-row"'), `${r.slug} rows`).toBe(r.timeline.length);
     }
