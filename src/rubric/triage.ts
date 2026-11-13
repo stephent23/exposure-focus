@@ -18,11 +18,16 @@ export type TriageFacts = {
   exploitation_imminent?: boolean;
   /** Working exploit code is public, but it is a proof of concept, not known to be reliable. */
   public_exploit?: boolean;
+  /**
+   * A researcher or vendor has PUBLISHED a demonstration of the outcome: a write-up, talk or code that shows it.
+   * A result shown only in a lab, an unreleased exploit, or a statement that something "has been demonstrated"
+   * without naming the research does not count. Record it as evidence, but leave this unset.
+   */
   credible_researcher_claim?: boolean;
   /**
    * What the exploit evidence above actually achieves, when that is less than `impact`
    * (for example attacks or a proof of concept that only crash a service that could be taken over).
-   * The evidence then counts against that lesser outcome, and the full outcome only as a researcher claim or no evidence.
+   * The evidence then counts against that lesser outcome, and the full outcome only as a published researcher demonstration or no evidence.
    */
   exploit_achieves?: TriageImpact;
   no_login?: boolean;
@@ -45,7 +50,7 @@ type Evidence = 'exploited' | 'exploitation imminent' | 'public exploit' | 'cred
 /** The three columns the rubric page shows, in table order. */
 export const EVIDENCE_COLUMNS = [
   { key: 'attack', label: 'Exploited or imminent', description: 'Attacks are happening, a reliable exploit is public or circulating, or attackers are scanning for it.' },
-  { key: 'demonstrated', label: 'Demonstrated', description: 'A proof of concept or a credible researcher claim, but no reliable exploit in use.' },
+  { key: 'demonstrated', label: 'Demonstrated', description: 'A public proof of concept, or a published researcher demonstration, but no reliable exploit in use.' },
   { key: 'none', label: 'No evidence', description: 'Nothing shows it can be exploited yet.' }
 ] as const;
 
