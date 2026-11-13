@@ -24,7 +24,8 @@ applies_check:
 # You set the facts and the tier. The build fails if the tier disagrees with the rubric,
 # unless the placement has a public override_reason.
 # Facts: reachable (true, false or "unknown"), exploited, public_exploit, no_login, requires_login,
-# common_configuration, rare_configuration, vendor_stated_exposure_condition, credible_researcher_claim,
+# common_configuration, rare_configuration, vendor_stated_exposure_condition, credible_researcher_claim (only for a
+# published demonstration: a write-up, talk or code; not a lab-only result, unreleased exploit or unnamed claim),
 # exploitation_imminent (needs an "Exploitation outlook" evidence item), exploit_achieves (use when the
 # attacks do less than the impact), chained_with (needs an "Exploit chain" evidence item), and
 # impact: the BUSINESS impact on this placement.

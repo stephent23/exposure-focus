@@ -115,7 +115,10 @@ const rows = IMPACT_LEVELS.map((impact) => ({ ...descriptions[impact], cells: IM
       </div>
     </div>
     <p class="note">
-      Evidence counts for what it actually achieves. Attacks or a proof of concept that only crash a service do not make a takeover urgent, however capable the flaw is. The call follows the lesser outcome, and the full outcome counts only as demonstrated.
+      Evidence counts for what it actually achieves. Attacks or a proof of concept that only crash a service do not make a takeover urgent, however capable the flaw is. The call follows the lesser outcome, and the full outcome counts as demonstrated only if a published demonstration shows it.
+    </p>
+    <p class="note">
+      A claim counts only when it is published. A researcher's or vendor's demonstration counts as Demonstrated when a write-up, talk or code shows the outcome. A result shown only in a lab under particular conditions, an unreleased exploit, or a statement that an exploit “has been demonstrated” without naming the research is reported in the evidence, but it does not raise the tier.
     </p>
     <p class="note">
       “Imminent” is a judgement. It means a reliable exploit for the full outcome is public or circulating, attackers are scanning for it, or the patch is trivial to turn into an exploit. Every record that uses it explains why and cites the source.

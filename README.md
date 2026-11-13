@@ -50,6 +50,7 @@ npm run test:a11y   # Playwright and axe against the built site (run after npm r
 These are enforced by tests, not by convention:
 
 - The tier matches the rubric, or the placement carries a public `override_reason`.
+- A researcher's or vendor's claim raises a tier only when the demonstration is published (a write-up, talk or code showing the outcome). Lab-only results, unreleased exploits and unnamed "has been demonstrated" statements are reported in the evidence but do not count.
 - CVSS never sets a tier. EPSS can raise a call by one tier, and only with its own date and source.
 - No hour or day counts in records or on built pages.
 - Links are real https sources or explicit placeholders. Every published record cites its sources.
