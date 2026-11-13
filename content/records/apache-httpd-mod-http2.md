@@ -3,13 +3,13 @@ slug: apache-httpd-mod-http2
 name: Apache HTTP Server mod_http2 remote code execution
 aliases: ["mod_http2 assign_headers race"]
 cves: [CVE-2026-119618]
-summary: "A flaw in the HTTP/2 module of Apache HTTP Server 2.4.55 to 2.4.70 lets an outsider with no login corrupt the server's memory, and possibly run commands, on a web server that has HTTP/2 turned on. It is fixed in 2.4.71 and in distribution packages. Public proof-of-concept code crashes the server, Red Hat says a reliable exploit has been demonstrated, and no attacks have been reported."
+summary: "A flaw in the HTTP/2 module of Apache HTTP Server 2.4.55 to 2.4.70 lets an outsider with no login corrupt the server's memory, and possibly run commands, on a web server that has HTTP/2 turned on. It is fixed in 2.4.71 and in distribution packages. Public proof-of-concept code only crashes Apache worker processes, Red Hat says a reliable exploit has been demonstrated without naming it, and no attacks have been reported. It is rated Tier 3, an editorial call."
 attack: rce
 status: published
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
 
-leadership_quote: "A flaw in the HTTP/2 part of the Apache web server, one of the most widely used web servers, can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is switched on, and no attacks have been reported so far. The Apache project rates it critical and Red Hat says a reliable attack has been demonstrated, so internet-facing Apache servers with HTTP/2 on should be updated, or have HTTP/2 switched off, sooner than the normal cycle."
+leadership_quote: "A flaw in the HTTP/2 part of the Apache web server, one of the most widely used web servers, can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is switched on, and no attacks have been reported so far. The public attack code only crashes the server, and the reported takeover has not been shown in public, so internet-facing Apache servers with HTTP/2 on should have the update scheduled ahead of normal patching, with HTTP/2 switched off where no update is available yet."
 
 applies_check:
   - question: Do you run an affected Apache HTTP Server or mod_http2 build?
@@ -27,10 +27,11 @@ placements:
       - No login needed (Apache and Red Hat).
       - Code execution would mean control of the server process and the data it serves.
       - Public proof-of-concept code reproduces heap corruption and crashes of Apache worker processes, which Apache restarts; it does not show code execution.
-      - Red Hat says public research has demonstrated a reliable exploit against a default-configured server, but names no exploit. Code execution is counted as demonstrated, not as an exploit in use.
-      - No exploitation in the wild has been reported.
-    tier: 2
-    action: "Urgent: update to Apache HTTP Server 2.4.71 or your distribution's fixed package sooner than your normal patching cycle, and restart Apache. Where no fixed package exists yet (for example the archived standalone mod_h2 module, or a vendor still preparing one), switch HTTP/2 off until it does. Moves to Emergency if exploit code for code execution is published or attacks are reported."
+      - Red Hat says public research has demonstrated a reliable exploit against a default-configured server, but names no research and no code-execution exploit is public. Treated as a lab result, an editorial call.
+      - No exploitation in the wild has been reported, for either the crash or code execution.
+    tier: 3
+    override_reason: "Editorial judgment, not a sourced fact. The rubric gives Tier 2 because Red Hat's statement counts as a credible claim of demonstrated code execution. It is rated Tier 3 because that claim names no research, Wiz reported no exploit, and the only public proof of concept stops at crashes of worker processes that Apache restarts. EPSS is also very low (0.00398 on Tenable's page, undated); the rubric only lets EPSS raise a call, so this is supporting context, not a reason on its own. The call moves to Tier 2 if the crash is exploited in the wild or a working code-execution exploit is published, and to Tier 1 if code execution is exploited in the wild."
+    action: "Prioritised: schedule the update to Apache HTTP Server 2.4.71 or your distribution's fixed package ahead of your normal patching cycle, and restart Apache. Where no fixed package exists yet (for example the archived standalone mod_h2 module, or a vendor still preparing one), switch HTTP/2 off until it does. Watch for attacks or a public code-execution exploit, which would move this up."
   - name: Apache with HTTP/2 not enabled
     facts: { vendor_stated_exposure_condition: false }
     why:
@@ -115,6 +116,9 @@ timeline:
   - { event: "Ubuntu publishes fixes (USN-9090-1)", date: 2026-11-12, source_url: "https://ubuntu.com/security/CVE-2026-119618", confidence: vendor-stated }
   - { event: "Red Hat publishes bulletin RHSB-2026-017", date: 2026-11-12, time: "18:03", source_url: "https://access.redhat.com/security/vulnerabilities/RHSB-2026-017", confidence: vendor-stated }
 
+changes:
+  - { date: 2026-11-13, placement: "Internet-facing Apache 2.4.55 to 2.4.70 with HTTP/2 enabled", from_tier: 2, to_tier: 3, reason: "Editorial call: the only public proof of concept crashes worker processes, and Red Hat's code-execution claim names no research, so the call rests on what is shown in public.", source_url: "https://github.com/googlesky/CVE-2026-119618" }
+
 sources:
   - title: Apache HTTP Server 2.4 vulnerabilities
     url: https://httpd.apache.org/security/vulnerabilities_24.html
@@ -154,6 +158,16 @@ sources:
     accessed: 2026-11-13
 ---
 
-The tier rests on two pieces of evidence. Public proof-of-concept code crashes Apache worker processes, a lesser outcome that Apache recovers from. Red Hat's statement that a reliable exploit has been demonstrated counts as a credible claim for code execution, not as an exploit in use, because the research is not named and no code-execution exploit has been found. If such code is published or attacks are reported, the headline placement moves to Emergency.
+## Why this call is calmer than the rubric
+
+This section is an editorial judgment. It is not a sourced fact, and it overrides the rubric's Tier 2.
+
+- The rubric counts Red Hat's statement that a reliable exploit has been demonstrated as a credible claim of code execution, which gives Tier 2.
+- Red Hat does not name the research, and Wiz said on 2026-11-11 that no exploit was available.
+- The only public proof of concept reproduces heap corruption and crashes of Apache worker processes, which Apache restarts. It does not show code execution.
+- No attacks have been reported, for the crash or for code execution.
+- EPSS, which estimates the chance of exploitation, is very low: 0.00398 on Tenable's page, which gives no date. The rubric uses EPSS only to raise a call, so this supports the judgment rather than deciding it.
+
+The call moves to Tier 2 if the crash is exploited in the wild or a working code-execution exploit is published, and to Tier 1 if code execution is exploited in the wild.
 
 No WAF or CDN vendor rule for this CVE was found. HTTP/2 is often terminated at a CDN or load balancer, which may shield Apache behind it, but no vendor has said so for this flaw.
