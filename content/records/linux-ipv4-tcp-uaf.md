@@ -3,12 +3,12 @@ slug: linux-ipv4-tcp-uaf
 name: Linux IPv4 TCP use-after-free
 aliases: []
 cves: [CVE-2026-98432]
-summary: Red Hat says a race in the Linux kernel's IPv4 TCP code may let a remote attacker corrupt kernel memory without login. Researchers report remote root on MPTCP servers; no exploit is public.
+summary: Red Hat says a race in the Linux kernel's IPv4 TCP code lets a remote attacker corrupt kernel memory without login. Anthropic reports lab-only remote root; no exploit is public, no attacks reported.
 attack: rce
 status: published
-evidence_as_of: 2026-11-09
-review_until: 2026-11-23
-leadership_quote: A serious Linux kernel flaw could let an outsider take over an internet-facing server. Researchers report it works, but the exploit is not public and no attacks are reported. Patch internet-facing Linux servers ahead of the normal cycle and keep watching.
+evidence_as_of: 2026-11-13
+review_until: 2026-11-27
+leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.
 affected:
   - product: "Linux kernel 5.10, 5.15, 6.1, 6.6"
     vulnerable: "[versions to confirm]"
@@ -16,11 +16,11 @@ affected:
   - product: "Linux kernel 6.12, 6.18, 7.2, 7.3"
     vulnerable: "[versions to confirm]"
     fixed: "6.12.113, 6.18.56, 7.2.10, 7.3"
-  - product: RHEL 8, 9, 10 and OpenShift Container Platform 4
+  - product: "RHEL 8, 9, 10 and OpenShift Container Platform 4"
     vulnerable: Listed by Red Hat as affected; MPTCP is off by default
 exposed_when:
   - Server accepts IPv4 TCP connections from the internet
-  - "Researchers' remote root exploit: an MPTCP listener (the bug itself is not specific to MPTCP)"
+  - "The reported lab exploit: an MPTCP listener (the bug itself is not specific to MPTCP)"
   - "Similar flaw: request-socket migration is enabled"
 
 applies_check:
@@ -29,14 +29,14 @@ applies_check:
 
 placements:
   - name: Internet-facing server with an MPTCP listener
-    facts: { reachable: true, credible_researcher_claim: true, no_login: true, impact: critical }
+    facts: { reachable: true, no_login: true, impact: critical }
     why:
       - Reachable from the internet.
       - No login needed.
-      - Remote root reported by researchers against MPTCP listeners.
-      - Exploit not released. No exploitation reported.
-    tier: 2
-    action: Handle ahead of your normal cycle. Patch the kernel and reboot.
+      - Anthropic reports remote root in its lab against an MPTCP listener, but has not published the exploit, kernel version or setup, so under the rubric it does not raise the tier.
+      - No public exploit and no exploitation reported.
+    tier: 3
+    action: Schedule the kernel update and reboot ahead of your normal cycle. Move up if a working exploit is published or attacks are reported.
   - name: Internet-facing server without an MPTCP listener
     facts: { reachable: true, no_login: true, impact: critical }
     why:
@@ -61,7 +61,7 @@ mitigations:
     summary: "Red Hat calls kernel updates the only complete solution. Upstream fixes are in 5.10.272, 5.15.223, 6.1.190, 6.6.159, 6.12.113, 6.18.56, 7.2.10 and 7.3. Check your distribution's tracker for its fixed kernel."
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: closed }
-      - { vector: Request-socket migration, if enabled (a similar flaw), status: closed }
+      - { vector: "Request-socket migration, if enabled (a similar flaw)", status: closed }
     takes: A kernel update and a reboot of each server. Live patching can avoid the reboot where offered.
     might_break: A new kernel can change drivers and behaviour. Test first on a representative host.
     official_guides:
@@ -84,7 +84,7 @@ mitigations:
     summary: "Akamai suggests setting `net.mptcp.enabled=0` and `net.ipv4.tcp_migrate_req=0`. Akamai and Red Hat both say this does not stop exploitation, because the bug is not specific to MPTCP. It only blocks the route used in the researchers' exploit."
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: open }
-      - { vector: Request-socket migration, if enabled (a similar flaw), status: weaker }
+      - { vector: "Request-socket migration, if enabled (a similar flaw)", status: weaker }
     takes: Two sysctl changes, which can be applied at runtime.
     might_break: Services that rely on MPTCP stop using it.
     official_guides: [https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack]
@@ -103,6 +103,11 @@ evidence:
     as_of: 2026-11-09
     source_url: https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack
     confidence: reported
+  - label: Exploit evidence (recheck)
+    text: "Rechecked on 2026-11-13: Akamai's post (2026-11-02) still says Anthropic has not released its exploit and Akamai knew of no public working exploit. PBX Science (2026-11-05) says Anthropic has not released the exploit code, kernel version or exact configuration, and that a hosting vendor could not reproduce it; it also says security vendors warned that scanning has begun, which no other source reviewed confirms. Field Effect (2026-11-03) reports no exploitation in the wild. No CISA KEV listing is reported."
+    as_of: 2026-11-13
+    source_url: https://pbxscience.com/cve-2026-98432-a-critical-linux-tcp-flaw-a-reported-ai-built-exploit-and-a-patch-gap-on-ubuntu/
+    confidence: reported
   - label: Exploitation status
     text: "BleepingComputer reported on 2026-10-30 that there were no confirmed reports of exploitation in the wild. Red Hat and Akamai do not state otherwise."
     as_of: 2026-11-09
@@ -120,6 +125,9 @@ timeline:
   - { event: "Anthropic reports a root exploit, not released", date: 2026-10-27, source_url: "https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack", confidence: reported }
   - { event: "Red Hat publishes its security bulletin RHSB-2026-016", date: 2026-10-30, source_url: "https://access.redhat.com/security/vulnerabilities/RHSB-2026-016", confidence: vendor-stated }
 
+changes:
+  - { date: 2026-11-13, placement: "Internet-facing server with an MPTCP listener", from_tier: 2, to_tier: 3, reason: "The rubric now counts a researcher's claim only when the demonstration is published, and Anthropic's root exploit, kernel version and setup remain unpublished.", source_url: "https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack" }
+
 sources:
   - title: Red Hat bulletin RHSB-2026-016
     url: https://access.redhat.com/security/vulnerabilities/RHSB-2026-016
@@ -129,7 +137,13 @@ sources:
     accessed: 2026-11-09
   - title: "Akamai: CVE-2026-98432, remote use-after-free in the Linux kernel TCP stack"
     url: https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack
-    accessed: 2026-11-09
+    accessed: 2026-11-13
+  - title: "PBX Science: CVE-2026-98432, a critical Linux TCP flaw, a reported AI-built exploit and a patch gap on Ubuntu"
+    url: https://pbxscience.com/cve-2026-98432-a-critical-linux-tcp-flaw-a-reported-ai-built-exploit-and-a-patch-gap-on-ubuntu/
+    accessed: 2026-11-13
+  - title: "Field Effect: Researchers achieve root access through Linux TCP flaw"
+    url: https://fieldeffect.com/blog/researchers-achieve-root-access-through-linux-tcp-flaw
+    accessed: 2026-11-13
   - title: "BleepingComputer: Linux kernel exploit enables remote root attacks on MPTCP servers"
     url: https://www.bleepingcomputer.com/news/security/linux-kernel-exploit-enables-remote-root-attacks-on-mptcp-servers
     accessed: 2026-11-09
@@ -137,4 +151,6 @@ sources:
 
 Some write-ups describe this as an MPTCP-only problem. Red Hat and Akamai both say the bug itself is not specific to MPTCP, while the researchers' exploit uses an MPTCP listener. The record therefore has separate rows for servers with and without one.
 
-As of 2026-11-09 it has not been confirmed whether the flaw is in the CISA KEV catalogue.
+As of 2026-11-13 no source reviewed reports the flaw in the CISA KEV catalogue; the catalogue itself was not checked.
+
+Both internet-facing rows are Tier 3. The researchers' exploit is described in Anthropic's own write-up, but without the code, kernel version or configuration, so it counts as a lab result rather than a published demonstration.

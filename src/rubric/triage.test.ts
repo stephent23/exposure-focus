@@ -187,7 +187,7 @@ describe('triage: what the evidence actually achieves', () => {
     expect(triage({ ...base, exploited: true, exploit_achieves: 'limited' }).tier).toBe(3);
   });
 
-  it('the full outcome is still counted as demonstrated when researchers have shown it', () => {
+  it('the full outcome is still counted as demonstrated when researchers have published a demonstration', () => {
     expect(triage({ ...base, exploited: true, exploit_achieves: 'limited', credible_researcher_claim: true }).tier).toBe(2);
   });
 

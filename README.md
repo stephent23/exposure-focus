@@ -50,6 +50,7 @@ npm run test:a11y   # Playwright and axe against the built site (run after npm r
 These are enforced by tests, not by convention:
 
 - The tier matches the rubric, or the placement carries a public `override_reason`.
+- A researcher's or vendor's claim raises a tier only when the demonstration is published (a write-up, talk or code showing the outcome). Lab-only results, unreleased exploits and unnamed "has been demonstrated" statements are reported in the evidence but do not count.
 - CVSS never sets a tier. EPSS can raise a call by one tier, and only with its own date and source.
 - No hour or day counts in records or on built pages.
 - Links are real https sources or explicit placeholders. Every published record cites its sources.
@@ -62,7 +63,7 @@ These are enforced by tests, not by convention:
 The site is built into `dist/` and served using `wrangler.jsonc`. It needs no secrets.
 
 1. In Cloudflare **Workers & Pages**, create an application from this GitHub repository, with the Cloudflare GitHub app limited to this repository. Production branch: `main`.
-2. Build command: `npm run build`. Deploy command: `npx wrangler deploy`. Non-production branch deploy command: `npx wrangler versions upload`. The Worker name must equal `name` in `wrangler.jsonc`.
+2. Build command: `npm run build`. Deploy command: `npx wrangler deploy`. Preview command for pull-request branches: `npx wrangler preview` (Wrangler 4.135.0 or later; `wrangler.jsonc` has an empty `previews` block). The Worker name must equal `name` in `wrangler.jsonc`.
 3. Add the custom domain, then set `site` in `astro.config.mjs` to the real site URL. It is currently the placeholder `https://example.com`. The Atom feed and links in the leadership summaries use it.
 4. In GitHub, protect `main`: require a pull request and the `test` and `a11y` checks from `.github/workflows/ci.yml`.
 
