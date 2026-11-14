@@ -1,9 +1,9 @@
 /* Verdict page: the decision in one column, key dates beside it on wide screens. Each part has its own stylesheet in styles/verdict/. */
 .record { display: grid; grid-template-columns: minmax(0, 1fr); }
 .record > * { min-width: 0; }
-.record code { font-family: var(--font-mono); font-size: 0.9em; background: var(--panel); padding: 1px 4px; border-radius: 2px; overflow-wrap: anywhere; }
+.record code { font-family: var(--font-mono); font-size: 0.9em; background: var(--panel); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
 .record .sec { margin-top: 28px; }
-.record .sec > h2, .timeline h2, .folds-intro { padding-bottom: 6px; border-bottom: 1px solid var(--ink); font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+.record .sec > h2, .timeline h2, .folds-intro { padding-bottom: 6px; border-bottom: 1px solid var(--line-strong); font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
 
 @media (min-width: 960px) {
   .record { grid-template-columns: minmax(0, 1fr) 290px; column-gap: 48px; }

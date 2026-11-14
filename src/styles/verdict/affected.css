@@ -1,7 +1,7 @@
 /* Are you affected: versions table, conditions and checks. Rows stack on phones so nothing scrolls sideways. */
 .affected { width: 100%; border-collapse: collapse; font-size: 13.5px; }
 .affected th, .affected td { padding: 6px 12px 6px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
-.affected thead th, .exposed-label { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.affected thead th, .exposed-label { font-size: 12px; font-weight: 500; color: var(--muted); }
 .affected tbody th { font-weight: 600; }
 .affected td { color: var(--ink-2); }
 .exposed-label { margin-top: 12px; }
