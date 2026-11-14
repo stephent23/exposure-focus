@@ -8,12 +8,16 @@ import { getAllRecords } from '../lib/records';
 import { TIERS, TIER_NUMBERS } from '../lib/tiers';
 import { freshness, groupForHome, lastChanged, recentActivity } from '../lib/home';
 import { niceDate, shortDate } from '../lib/verdict-view';
+import { cveLink, getWatching } from '../lib/watching';
 import { isStale, sortedPlacements } from '../schema/record';
 
 const today = buildDate();
 const groups = groupForHome(await getAllRecords());
 const records = groups.flatMap((g) => g.records);
 const activity = recentActivity(records);
+// Anything that already has a published verdict drops off the watching list by itself.
+const rated = new Set(records.flatMap((r) => r.cves));
+const watching = (await getWatching()).filter((w) => !w.cves.some((id) => rated.has(id)));
 const checked = records.map((r) => r.evidence_as_of).sort().at(-1);
 const exploited = (r: (typeof records)[number]) => r.placements.some((p) => p.facts.exploited === true);
 const FRESH = { new: 'New', changed: 'Changed' } as const;
@@ -46,7 +50,11 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
           {activity.map((a) => (
             <li class="activity-row">
               <time datetime={a.date}>{shortDate(a.date)}</time>
-              <span><a href={`/verdicts/${a.slug}/`}>{a.name}</a> <span class="activity-detail">{a.detail}</span></span>
+              <span>
+                <a href={`/verdicts/${a.slug}/`}>{a.name}</a>
+                <span class="activity-detail">{a.detail}</span>
+                {a.reason && <span class="activity-reason">{a.reason}</span>}
+              </span>
             </li>
           ))}
         </ol>
@@ -113,7 +121,7 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
                 <p class="when">
                   {fresh && <span class="fresh">{FRESH[fresh]}</span>}
                   <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>
-                  {changed && <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>}
+                  {changed && changed !== record.published && <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>}
                 </p>
               </article>
             );
@@ -123,6 +131,26 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
     ))}
   </div>
   <p id="none" class="note" hidden>No verdicts match these filters. Clear them to see every verdict.</p>
+
+  {watching.length > 0 && (
+    <section class="watching" aria-labelledby="watching-heading">
+      <header>
+        <h2 id="watching-heading">Watching, not yet rated</h2>
+        <p>Publicised and being looked at. No verdict yet, so no tier: absence from this site is not a rating.</p>
+      </header>
+      <ul>
+        {watching.map((w) => (
+          <li class="watch-row">
+            <span class="watch-name">{w.name}</span>
+            <span class="mono">
+              {w.cves.map((id, i) => <>{i > 0 && ' · '}<a href={cveLink(id)}>{id}</a></>)}
+            </span>
+            <span class="watch-date">Noted <time datetime={w.noted}>{shortDate(w.noted)}</time></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )}
 
   <p class="note home-foot">Each verdict gives a tier per placement: where the software sits in your setup. <a href="/rubric/">How verdicts are decided</a></p>
 

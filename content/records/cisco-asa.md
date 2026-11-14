@@ -10,12 +10,16 @@ published: 2026-11-09
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: This is an outage risk, not a breach. Attackers are exploiting a flaw that can restart Cisco VPN firewalls without a login. Where the VPN is how the business works, handle it ahead of the normal cycle; where it is a backup, schedule it sooner than usual.
+tier_reason: "It is exploited and needs no login, but the effect is a reload: an outage, not a breach. That is Urgent, not Emergency, where the VPN is business-critical."
+would_change:
+  - Moves to Emergency if the flaw is shown to do more than reload the device
+  - Drops to Routine as soon as any one of the exposure conditions is false
 affected:
   - product: Cisco ASA
-    vulnerable: "[versions to confirm]"
+    vulnerable: "Releases before the first fixed release of each train; Cisco lists no ranges"
     fixed: "9.16.4.104, 9.18.4.96, 9.20.4.50, 9.22.3.200, 9.23.1.48, 9.24.1.27 or 9.24.10.1"
   - product: Cisco FTD
-    vulnerable: "[versions to confirm]"
+    vulnerable: "Releases before the first fixed release of each train; Cisco lists no ranges"
     fixed: "7.0.11, 7.2.13, 7.4.9, 7.6.7, 7.7.14, 10.0.3, 10.1.1"
 exposed_when:
   - SSL remote access VPN login service is reachable

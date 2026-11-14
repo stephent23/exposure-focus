@@ -11,7 +11,7 @@ export function groupForHome(records: RecordEntry[]) {
   }));
 }
 
-export type Activity = { date: string; slug: string; name: string; kind: 'new' | 'moved' | 'updated'; detail: string };
+export type Activity = { date: string; slug: string; name: string; kind: 'new' | 'moved' | 'updated'; detail: string; reason?: string };
 
 /** What happened lately across all published verdicts: first publication and every logged change, newest first. */
 export function recentActivity(records: RecordEntry[], limit = 6): Activity[] {
@@ -20,13 +20,15 @@ export function recentActivity(records: RecordEntry[], limit = 6): Activity[] {
     .flatMap((r): Activity[] => {
       const top = headlineTier(r);
       const base = { slug: r.slug, name: r.name };
-      // Changes first, so on a shared date a change sorts above the first publication.
+      // A change on the day of first publication is part of the new verdict, so it is not listed twice.
       return [
-        ...(r.changes ?? []).map((c): Activity =>
-          c.from_tier === undefined
-            ? { ...base, date: c.date, kind: 'updated', detail: 'Verdict updated' }
-            : { ...base, date: c.date, kind: 'moved', detail: `Tier ${c.from_tier} to Tier ${c.to_tier}: ${c.placement}` }
-        ),
+        ...(r.changes ?? [])
+          .filter((c) => c.date !== r.published)
+          .map((c): Activity =>
+            c.from_tier === undefined
+              ? { ...base, date: c.date, kind: 'updated', detail: 'Verdict updated', reason: c.reason }
+              : { ...base, date: c.date, kind: 'moved', detail: `Tier ${c.from_tier} to Tier ${c.to_tier}: ${c.placement}`, reason: c.reason }
+          ),
         { ...base, date: r.published, kind: 'new', detail: `New verdict: Tier ${top} (${TIERS[top].name})` }
       ];
     });

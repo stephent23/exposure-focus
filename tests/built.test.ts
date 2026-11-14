@@ -3,6 +3,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
 import { recentActivity } from '../src/lib/home';
+import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
 import { coverageLine, keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
@@ -36,8 +37,9 @@ const recordBody = (html: string) => {
   return html.slice(start, end === -1 ? undefined : end);
 };
 // The page is a dashboard, not a report: the main column, without opening a fold, must stay short.
+// 520 leaves room for the "why this tier" and "what would change it" lines (up to about 90 words together).
 // The key-dates list beside it is counted separately: at most eight dated events.
-const VISIBLE_WORD_BUDGET = 450;
+const VISIBLE_WORD_BUDGET = 520;
 // A home card shows badges, a name, a summary and placement rows only.
 const CARD_WORD_BUDGET = 90;
 
@@ -252,6 +254,39 @@ describe('built site', () => {
       const start = home.indexOf(`data-record="${r.slug}"`);
       expect(home.slice(start, home.indexOf('</article>', start)), `${r.slug} added date`).toContain(`<time datetime="${r.published}">`);
     }
+  });
+
+  it('says why each tier moved, right on the home page', () => {
+    for (const a of recentActivity(listed)) if (a.reason) expect(plain(home), a.slug).toContain(a.reason);
+  });
+
+  it('lists what is being watched but not yet rated, without repeating a published verdict', async () => {
+    const rated = new Set(published.flatMap((r) => r.cves));
+    const watching = (await getWatching()).filter((w) => !w.cves.some((id) => rated.has(id)));
+    expect(count(home, 'class="watch-row"')).toBe(watching.length);
+    for (const w of watching) expect(home, w.name).toContain(`${w.cves[0]}</a>`);
+  });
+
+  it('shows why the tier was chosen and what would change it, without opening a fold', () => {
+    for (const r of published) {
+      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))));
+      expect(visible, `${r.slug} tier reason`).toContain(r.tier_reason);
+      for (const w of r.would_change) expect(visible, `${r.slug} trigger`).toContain(w);
+    }
+  });
+
+  it('backs every definite key fact with a source and date', () => {
+    for (const r of published) {
+      for (const f of keyFacts(r)) {
+        if (f.tone === 'unknown') continue;
+        expect(f.source, `${r.slug}: ${f.label} needs an evidence item it can cite`).toBeDefined();
+        expect(recordPage(r.slug), `${r.slug}: ${f.label}`).toContain(`href="${f.source!.url.replace(/&/g, '&amp;')}"`);
+      }
+    }
+  });
+
+  it('never publishes a placeholder in an affected table', () => {
+    for (const r of published) for (const a of r.affected) expect(`${a.product} ${a.vulnerable} ${a.fixed ?? ''}`, r.slug).not.toContain('[');
   });
 
   it('shows when each verdict was published and last checked', () => {

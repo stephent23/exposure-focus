@@ -10,21 +10,25 @@ published: 2026-11-09
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but sources reviewed report no takeovers. Update ahead of normal patching where untrusted data is unpacked.
+tier_reason: "CISA lists it as exploited, which the rubric rates Tier 2. It is held at Tier 3 as an editorial call: no source reviewed reports code execution in the wild."
+would_change:
+  - Moves up if a reliable public exploit for code execution appears
+  - Moves up if code execution is reported in the wild
 affected:
   - product: Node.js 22.x
-    vulnerable: 22.x releases before 22.23.4
+    vulnerable: 22.x line (Node.js names the line, not a range)
     fixed: 22.23.4
   - product: Node.js 24.x
-    vulnerable: 24.x releases before 24.22.1
+    vulnerable: 24.x line (Node.js names the line, not a range)
     fixed: 24.22.1
   - product: Node.js 26.x
-    vulnerable: 26.x releases before 26.12.1
+    vulnerable: 26.x line (Node.js names the line, not a range)
     fixed: 26.12.1
   - product: Google Brotli library
-    vulnerable: "[versions to confirm]"
+    vulnerable: Range not stated in Google's release notes
     fixed: v1.2.1
   - product: Other products that bundle the Brotli decoder
-    vulnerable: "[versions to confirm]"
+    vulnerable: Depends on the bundled Brotli version; ask the vendor
 exposed_when:
   - An application decompresses Brotli data that an attacker can supply
   - "Your code or middleware calls the decoder: receiving a Brotli body alone does not decode it"

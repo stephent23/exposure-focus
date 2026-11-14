@@ -15,6 +15,8 @@ function validRecord() {
     evidence_as_of: '2026-11-08',
     review_until: '2026-12-08',
     leadership_quote: 'A sentence a boss can read.',
+    tier_reason: 'Exploited and reachable, so it is at the top of the rubric.',
+    would_change: ['Moves down once patched'],
     affected: [{ product: 'Sample 1.x', vulnerable: 'below 1.2.3', fixed: '1.2.3' }],
     applies_check: [{ question: 'Is it exposed?', how_to_check: 'Check the listener.' }],
     placements: [
@@ -315,7 +317,7 @@ describe('affected and exposed_when', () => {
   });
 
   it('allows a row with no fix, and rejects unknown keys', () => {
-    ok({ ...base(), affected: [{ product: 'Sample', vulnerable: '[versions to confirm]' }] });
+    ok({ ...base(), affected: [{ product: 'Sample', vulnerable: 'all releases' }] });
     bad({ ...base(), affected: [{ product: 'Sample', vulnerable: 'all', extra: 'x' }] });
   });
 
@@ -372,5 +374,41 @@ describe('published date', () => {
   it('cannot be after evidence_as_of', () => {
     expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-08' }).success).toBe(true);
     expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-09' }).success).toBe(false);
+  });
+});
+
+describe('tier reason and what would change the call', () => {
+  const without = (key: string) => {
+    const rest = { ...validRecord() } as Record<string, unknown>;
+    delete rest[key];
+    return rest;
+  };
+  it('requires both', () => {
+    expect(recordSchema.safeParse(without('tier_reason')).success).toBe(false);
+    expect(recordSchema.safeParse(without('would_change')).success).toBe(false);
+  });
+  it('takes one to three short triggers', () => {
+    const ok = (would_change: string[]) => recordSchema.safeParse({ ...validRecord(), would_change }).success;
+    expect(ok([])).toBe(false);
+    expect(ok(['a', 'b', 'c'])).toBe(true);
+    expect(ok(['a', 'b', 'c', 'd'])).toBe(false);
+    expect(ok(['a'.repeat(CAPS.wouldChange + 1)])).toBe(false);
+    expect(recordSchema.safeParse({ ...validRecord(), tier_reason: 'a'.repeat(CAPS.tierReason + 1) }).success).toBe(false);
+  });
+});
+
+describe('placeholders in the affected table', () => {
+  const withRow = (over: Record<string, unknown>) => ({
+    ...validRecord(),
+    affected: [{ product: 'Sample 1.x', vulnerable: '[versions to confirm]', fixed: '1.2.3' }],
+    ...over
+  });
+  it('are refused on a published verdict with a Tier 1 or 2 placement', () => {
+    const tiers = validRecord().placements.map((p) => p.tier);
+    expect(Math.min(...tiers)).toBeLessThanOrEqual(2);
+    expect(recordSchema.safeParse(withRow({})).success).toBe(false);
+  });
+  it('are allowed on a draft', () => {
+    expect(recordSchema.safeParse(withRow({ status: 'draft' })).success).toBe(true);
   });
 });

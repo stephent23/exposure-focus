@@ -79,28 +79,40 @@ const fact = (r: RecordEntry, label: string) => keyFacts(r).find((f) => f.label 
 
 describe('keyFacts', () => {
   it('always returns the four facts in order', () => {
-    expect(keyFacts(rec([{}], [{}])).map((f) => f.label)).toEqual(['Exploited in attacks', 'Public exploit', 'Login needed', 'Fix']);
+    expect(keyFacts(rec([{}], [{}])).map((f) => f.label)).toEqual(['Exploited in attacks', 'Public exploit code', 'Attacker needs a login', 'Fix']);
   });
 
   it('reads exploited and public exploit from any placement', () => {
     expect(fact(rec([{}, { exploited: true }], [{}]), 'Exploited in attacks')).toMatchObject({ value: 'Yes', tone: 'bad' });
     expect(fact(rec([{ exploited: false }], [{}]), 'Exploited in attacks')).toMatchObject({ value: 'Not known', tone: 'unknown' });
-    expect(fact(rec([{}, { public_exploit: true }], [{}]), 'Public exploit')).toMatchObject({ value: 'Yes', tone: 'bad' });
-    expect(fact(rec([{}], [{}]), 'Public exploit')).toMatchObject({ value: 'Not known', tone: 'unknown' });
+    expect(fact(rec([{}, { public_exploit: true }], [{}]), 'Public exploit code')).toMatchObject({ value: 'Yes', tone: 'bad' });
+    expect(fact(rec([{}], [{}]), 'Public exploit code')).toMatchObject({ value: 'Not known', tone: 'unknown' });
   });
 
   it('reads login from the headline placement only', () => {
-    expect(fact(rec([{ no_login: true }], [{}]), 'Login needed')).toMatchObject({ value: 'No', tone: 'bad' });
-    expect(fact(rec([{ requires_login: true }], [{}]), 'Login needed')).toMatchObject({ value: 'Yes', tone: 'ok' });
-    expect(fact(rec([{}, { no_login: true }], [{}]), 'Login needed')).toMatchObject({ value: 'Not stated', tone: 'unknown' });
+    expect(fact(rec([{ no_login: true }], [{}]), 'Attacker needs a login')).toMatchObject({ value: 'No', tone: 'bad' });
+    expect(fact(rec([{ requires_login: true }], [{}]), 'Attacker needs a login')).toMatchObject({ value: 'Yes', tone: 'ok' });
+    expect(fact(rec([{}, { no_login: true }], [{}]), 'Attacker needs a login')).toMatchObject({ value: 'Not stated', tone: 'unknown' });
   });
 
   it('summarises the fix across affected rows', () => {
     expect(fact(rec([{}], [{ fixed: '1.2' }, { fixed: '2.3' }]), 'Fix')).toMatchObject({ value: 'Available', tone: 'ok' });
-    expect(fact(rec([{}], [{ fixed: '1.2' }, {}]), 'Fix')).toMatchObject({ value: 'Partial', tone: 'bad' });
+    expect(fact(rec([{}], [{ fixed: '1.2' }, {}]), 'Fix')).toMatchObject({ value: 'For some versions', tone: 'bad' });
     expect(fact(rec([{}], [{}]), 'Fix')).toMatchObject({ value: 'None yet', tone: 'bad' });
     expect(fact(rec([{}], [{ fixed: '[fix to confirm]' }]), 'Fix')).toMatchObject({ value: 'To confirm', tone: 'unknown' });
     expect(fact(rec([{}], [{ fixed: '1.2', vulnerable: '[versions to confirm]' }]), 'Fix')).toMatchObject({ value: 'Available', tone: 'ok' });
+  });
+
+  it('attaches the evidence behind each definite answer, and none to an unknown', () => {
+    const r = { ...rec([{ exploited: true, no_login: true }], [{ fixed: '1.2' }]), evidence: [
+      { label: 'Vendor advisory', source_url: 'https://vendor.test/a', as_of: '2026-11-02' },
+      { label: 'CISA KEV', source_url: '[link to add]', as_of: '2026-11-01' },
+      { label: 'Exploitation status', source_url: 'https://news.test/b', as_of: '2026-11-03' }
+    ] } as unknown as RecordEntry;
+    expect(fact(r, 'Exploited in attacks').source).toEqual({ url: 'https://news.test/b', as_of: '2026-11-03' });
+    expect(fact(r, 'Fix').source).toEqual({ url: 'https://vendor.test/a', as_of: '2026-11-02' });
+    expect(fact(r, 'Attacker needs a login').source?.url).toBe('https://vendor.test/a');
+    expect(fact(r, 'Public exploit code').source).toBeUndefined();
   });
 });
 

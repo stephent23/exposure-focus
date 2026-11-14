@@ -71,3 +71,18 @@ describe('lastChanged and freshness', () => {
     expect(freshness(rec({ published: '2026-11-10', changes: [{ date: '2026-11-11' }] }), '2026-11-12')).toBe('new');
   });
 });
+
+describe('recentActivity reasons', () => {
+  it('carries the reason for a change and folds a publication-day change into the new verdict', () => {
+    const a = rec({
+      changes: [
+        { date: '2026-11-01', placement: 'Edge', from_tier: 1, to_tier: 2, reason: 'same day', source_url: 'x' },
+        { date: '2026-11-04', placement: 'Edge', from_tier: 3, to_tier: 2, reason: 'Now exploited.', source_url: 'x' }
+      ]
+    });
+    expect(recentActivity([a]).map((x) => [x.date, x.kind, x.reason])).toEqual([
+      ['2026-11-04', 'moved', 'Now exploited.'],
+      ['2026-11-01', 'new', undefined]
+    ]);
+  });
+});

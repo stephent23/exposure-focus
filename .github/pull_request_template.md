@@ -10,5 +10,7 @@
 - [ ] Every mitigation says what it leaves open and what it might break or cost.
 - [ ] The leadership sentence is neutral and readable by a non-specialist.
 - [ ] Summary, leadership sentence, actions and checks are within the length caps, and the affected table lists versions from a primary source.
+- [ ] "Why this tier" answers the severity-score question in one sentence, and "what would change it" names real triggers.
+- [ ] `content/watching.yaml` no longer lists anything this pull request publishes.
 - [ ] A changed verdict has a new `changes` entry; old entries are untouched.
 - [ ] `status: published` only when it should go live on merge.

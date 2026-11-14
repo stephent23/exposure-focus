@@ -18,7 +18,9 @@ export const CAPS = {
   product: 60,
   vulnerable: 80,
   fixed: 80,
-  exposedWhen: 140
+  exposedWhen: 140,
+  tierReason: 220,
+  wouldChange: 140
 } as const;
 
 const LINK_PLACEHOLDER = '[link to add]';
@@ -172,6 +174,10 @@ const baseRecordSchema = z.object({
   evidence_as_of: dateString,
   review_until: dateString,
   leadership_quote: capped(CAPS.leadershipQuote),
+  /** One sentence: why this tier and not a higher or lower one. Shown under the summary. */
+  tier_reason: capped(CAPS.tierReason),
+  /** What would move the call, up or down. Shown under the summary. */
+  would_change: z.array(capped(CAPS.wouldChange)).min(1).max(3),
   affected: z.array(affectedSchema).min(1),
   exposed_when: z.array(capped(CAPS.exposedWhen)).min(1).max(4).optional(),
   applies_check: z.array(appliesCheckSchema).min(1),
@@ -237,6 +243,12 @@ export const recordSchema = baseRecordSchema.superRefine((record, ctx) => {
 
   if (record.published > record.evidence_as_of) {
     ctx.addIssue({ code: 'custom', path: ['published'], message: 'published cannot be after evidence_as_of.' });
+  }
+
+  // A placeholder in the affected table is tolerable on a draft or a low-tier verdict, never on a published Tier 1 or 2.
+  const placeholderRow = record.affected.some((a) => [a.product, a.vulnerable, a.fixed ?? ''].some((v) => v.includes('[')));
+  if (record.status === 'published' && placeholderRow && record.placements.some((p) => p.tier <= 2)) {
+    ctx.addIssue({ code: 'custom', path: ['affected'], message: 'A published verdict with a Tier 1 or 2 placement cannot have a placeholder in the affected table.' });
   }
 
   // The change log must agree with the verdict: real placements, no future dates, and each placement's latest move ends on its tier.

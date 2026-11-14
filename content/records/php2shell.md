@@ -10,6 +10,10 @@ published: 2026-11-09
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw has no fix yet, and PHP suggests turning off one feature until it does.
+tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
+would_change:
+  - Internal-only PHP moves up if it becomes reachable from the internet
+  - "The third flaw, CVE-2026-115560, starts to count if exploitation or a public exploit is reported"
 affected:
   - product: PHP 8.2
     vulnerable: below 8.2.35
@@ -24,7 +28,7 @@ affected:
     vulnerable: below 8.5.12
     fixed: 8.5.12
   - product: PHP 8.1 and older
-    vulnerable: "[versions to confirm]"
+    vulnerable: "Not listed in PHP's advisories; end of life, no fix from PHP"
   - product: "CVE-2026-115560 (third flaw)"
     vulnerable: Fully patched releases, including 8.5.12 (Cloudflare)
 exposed_when:

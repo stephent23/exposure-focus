@@ -3,7 +3,7 @@
 import '../../styles/verdict/summary.css';
 import { ATTACKS } from '../../lib/attacks';
 import { TIERS, type TierNumber } from '../../lib/tiers';
-import { keyFacts, niceDate } from '../../lib/verdict-view';
+import { keyFacts, niceDate, shortDate } from '../../lib/verdict-view';
 import { headlineTier, type RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -36,8 +36,20 @@ const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
       <div class={`keyfact tone-${f.tone}`}>
         <dt>{f.label}</dt>
         <dd>{f.value}</dd>
+        {f.source && (
+          <dd class="keyfact-src">
+            <a href={f.source.url}>Source<span class="sr-only"> for {f.label}</span></a>, <time datetime={f.source.as_of}>{shortDate(f.source.as_of)}</time>
+          </dd>
+        )}
       </div>
     ))}
+  </dl>
+  <dl class="why">
+    <div><dt>Why Tier {top}</dt><dd>{record.tier_reason}</dd></div>
+    <div>
+      <dt>What would change it</dt>
+      <dd>{record.would_change.length === 1 ? record.would_change[0] : <ul>{record.would_change.map((w) => <li>{w}</li>)}</ul>}</dd>
+    </div>
   </dl>
   <p class="meta">
     Published <time datetime={record.published}>{niceDate(record.published)}</time> · Evidence checked <time datetime={record.evidence_as_of}>{niceDate(record.evidence_as_of)}</time> · Review by <time datetime={record.review_until}>{niceDate(record.review_until)}</time> (UTC)

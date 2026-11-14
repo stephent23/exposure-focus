@@ -17,3 +17,13 @@
 .keyfact.tone-ok dd::before { background: #1b6e3c; border-color: #1b6e3c; border-radius: 50%; }
 .meta { margin-top: 8px; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
 @media (min-width: 560px) { .keyfacts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+
+/* Where each key fact comes from, and the reasoning in two short lines. */
+.keyfact dd.keyfact-src { margin: 1px 0 0; display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.keyfact dd.keyfact-src::before { content: none; }
+.why { margin: 12px 0 0; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; }
+.why > div { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 12px; }
+.why dt { font-weight: 600; color: var(--ink-2); }
+.why dd { margin: 0; max-width: 62ch; }
+.why ul { margin: 0; padding-left: 16px; }
+@media (max-width: 560px) { .why > div { grid-template-columns: 1fr; gap: 0; } }

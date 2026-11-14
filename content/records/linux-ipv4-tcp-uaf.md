@@ -10,13 +10,19 @@ published: 2026-11-09
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
 leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.
+tier_reason: "Remote root is reported only from a lab, with no published exploit, kernel version or setup, and no attacks are reported. The rubric counts published demonstrations only."
+would_change:
+  - Moves up if a working exploit is published
+  - Moves up if attacks are reported
 affected:
   - product: "Linux kernel 5.10, 5.15, 6.1, 6.6"
-    vulnerable: "[versions to confirm]"
+    vulnerable: "5.10 to 5.10.271, 5.15 to 5.15.222, 6.1 to 6.1.189, 6.6 to 6.6.158 (Akamai)"
     fixed: "5.10.272, 5.15.223, 6.1.190, 6.6.159"
   - product: "Linux kernel 6.12, 6.18, 7.2, 7.3"
-    vulnerable: "[versions to confirm]"
+    vulnerable: "6.12 to 6.12.112, 6.18 to 6.18.55, 7.2 to 7.2.9 (Akamai)"
     fixed: "6.12.113, 6.18.56, 7.2.10, 7.3"
+  - product: "Older branches from 4.4 without stable updates"
+    vulnerable: Affected, according to Akamai
   - product: "RHEL 8, 9, 10 and OpenShift Container Platform 4"
     vulnerable: Listed by Red Hat as affected; MPTCP is off by default
 exposed_when:
