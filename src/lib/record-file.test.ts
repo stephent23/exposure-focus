@@ -12,6 +12,8 @@ status: draft
 evidence_as_of: 2026-11-08
 review_until: 2026-12-08
 leadership_quote: A sentence a boss can read.
+affected:
+  - { product: Sample 1.x, vulnerable: below 1.2.3, fixed: 1.2.3 }
 applies_check:
   - question: Is it exposed?
     how_to_check: Check the listener.

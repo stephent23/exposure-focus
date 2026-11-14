@@ -7,7 +7,7 @@ import { buildDate } from '../lib/today';
 import { getAllRecords } from '../lib/records';
 import { TIERS, TIER_NUMBERS } from '../lib/tiers';
 import { groupForHome } from '../lib/home';
-import { headlinePlacement, isStale, sortedPlacements } from '../schema/record';
+import { isStale, sortedPlacements } from '../schema/record';
 
 const today = buildDate();
 const groups = groupForHome(await getAllRecords());
@@ -22,7 +22,6 @@ const asOf = records.map((r) => r.evidence_as_of).sort().at(-1);
     <p class="lede">
       Independent verdicts for security teams. Every call shows its evidence and its date, so you can defend it to your boss.
     </p>
-    <p class="note">A placement is where the software sits in your setup, for example internet-facing or inside your network. Each verdict gives a tier for every placement.</p>
     <ul class="pills" aria-label="Verdicts by highest tier">
       {groups.map(({ tier, records: group }) => (
         <li>
@@ -62,52 +61,41 @@ const asOf = records.map((r) => r.evidence_as_of).sort().at(-1);
           <p>{TIERS[tier].meaning}</p>
         </header>
         <div class="cards">
-          {group.map((record) => {
-            const primary = headlinePlacement(record);
-            return (
-              <article
-                class="card"
-                data-record={record.slug}
-                data-tiers={[...new Set(record.placements.map((p) => p.tier))].join(' ')}
-                data-kind={record.attack}
-                data-text={[record.name, ...record.cves, ...record.aliases].join(' ').toLowerCase()}
-              >
-                <div class="badges">
-                  <span class="badge plain">{ATTACKS[record.attack].name}</span>
-                  {record.evidence.some((e) => e.confidence === 'reported') && <span class="badge plain">Some facts unconfirmed</span>}
-                  {isStale(record, today) && <span class="badge stale">Overdue for review</span>}
-                </div>
-                <div>
-                  <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
-                  <p class="mono">{record.cves.join(' · ')}{record.aliases.length > 0 && ` · also ${record.aliases.join(', ')}`}</p>
-                </div>
-                <p class="summary">{record.summary}</p>
-                <ul class="rows" aria-label="Placements">
-                  {sortedPlacements(record).map((placement) => (
-                    <li>
-                      <span>{placement.name}</span>
-                      <span class={`badge t${placement.tier}`}>Tier {placement.tier}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p class="todo"><strong>{primary.name}:</strong> {primary.action}</p>
-              </article>
-            );
-          })}
+          {group.map((record) => (
+            <article
+              class="card"
+              data-record={record.slug}
+              data-tiers={[...new Set(record.placements.map((p) => p.tier))].join(' ')}
+              data-kind={record.attack}
+              data-text={[record.name, ...record.cves, ...record.aliases].join(' ').toLowerCase()}
+            >
+              <div class="badges">
+                <span class="badge plain">{ATTACKS[record.attack].name}</span>
+                {record.evidence.some((e) => e.confidence === 'reported') && <span class="badge plain">Some facts unconfirmed</span>}
+                {isStale(record, today) && <span class="badge stale">Overdue for review</span>}
+              </div>
+              <div>
+                <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
+                <p class="mono">{record.cves.join(' · ')}{record.aliases.length > 0 && ` · also ${record.aliases.join(', ')}`}</p>
+              </div>
+              <p class="summary">{record.summary}</p>
+              <ul class="rows" aria-label="Placements">
+                {sortedPlacements(record).map((placement) => (
+                  <li>
+                    <span>{placement.name}</span>
+                    <span class={`badge t${placement.tier}`}>Tier {placement.tier}</span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
         </div>
       </section>
     ))}
   </div>
   <p id="none" class="note" hidden>No verdicts match these filters. Clear them to see every verdict.</p>
 
-  <aside class="panel">
-    <h2>Why every verdict is split by placement</h2>
-    <p class="prose">
-      A vulnerability is not urgent everywhere it exists. The same flaw can need an emergency response on an internet-facing server and
-      your normal patching inside the network. Each placement gets its own tier, so effort goes where it reduces real risk.
-    </p>
-    <p><a href="/rubric/">See how verdicts are decided</a></p>
-  </aside>
+  <p class="note">Each verdict gives a tier per placement: where the software sits in your setup. <a href="/rubric/">How verdicts are decided</a></p>
 
   <script>
     import '../scripts/filters';

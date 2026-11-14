@@ -1,0 +1,27 @@
+---
+// The leadership summary, with a copy button (src/scripts/copy.ts). The plain-text fallback is folded away.
+import '../../styles/verdict/leadership.css';
+import type { RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+  bossText: string;
+}
+const { record, bossText } = Astro.props;
+---
+
+<section class="sec leadership" aria-labelledby="leadership-heading">
+  <h2 id="leadership-heading">For leadership</h2>
+  <blockquote>{record.leadership_quote}</blockquote>
+  <div class="boss">
+    <button type="button" id="boss-copy" class="copy-btn" hidden>Copy summary for leadership</button>
+    <p id="boss-status" class="boss-status" role="status" aria-live="polite"></p>
+    <div id="boss-fallback" class="boss-fallback">
+      <details class="boss-more">
+        <summary>Summary as plain text</summary>
+        <label for="boss-text">Summary you can copy and paste</label>
+        <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
+      </details>
+    </div>
+  </div>
+</section>

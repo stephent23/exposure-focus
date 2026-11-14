@@ -1,7 +1,6 @@
 /* Home page: summary pills, filters, tier bands and verdict cards. */
 /* Home: hero and summary pills */
 .hero + .sec { margin-top: 32px; }
-.hero > .note { margin-top: 16px; font-size: 15px; max-width: 680px; }
 .pills { list-style: none; margin: 24px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 10px; }
 .pill { background: var(--wash); display: flex; align-items: center; gap: 8px; min-height: 44px; padding: 6px 16px 6px 6px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); text-decoration: none; font-size: 15px; }
 a.pill:hover { background: var(--panel); color: var(--ink); }
@@ -45,8 +44,7 @@ a.pill:hover { background: var(--panel); color: var(--ink); }
 .rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
 .rows li { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 14px; color: var(--ink-2); }
 .rows .badge { flex: none; min-width: 58px; text-align: center; font-size: 12px; padding: 1px 6px; }
-.todo { grid-column: 1 / -1; padding-left: 12px; border-left: 3px solid var(--edge); font-size: 14px; color: var(--ink); }
-.card > :not(.rows, .todo) { grid-column: 1; }
+.card > :not(.rows) { grid-column: 1; }
 .card .rows { grid-column: 2; grid-row: 1 / span 3; }
 @media (max-width: 760px) {
   .card { grid-template-columns: minmax(0, 1fr); }

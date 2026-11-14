@@ -3,16 +3,27 @@ slug: cisco-asa
 name: Cisco ASA and FTD SSL VPN denial of service
 aliases: [cisco-sa-asaftd-tunnel-dos-s6mgkb75]
 cves: [CVE-2026-76418]
-summary: A crafted request to the SSL remote access VPN can make a Cisco ASA or FTD firewall reload, with no login, when secondary authentication is configured on a tunnel group. It is being exploited. The only effect is an outage, not a breach, so it matters most where the VPN is business-critical.
+summary: A crafted request can make a Cisco ASA or FTD firewall reload without a login when secondary authentication is set on a tunnel group. It is being exploited; the effect is an outage, not a breach.
 attack: dos
 status: published
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: This is an outage risk, not a breach. Attackers are exploiting a flaw that can restart Cisco VPN firewalls without a login. Where the VPN is how the business works, handle it ahead of the normal cycle; where it is a backup, schedule it sooner than usual.
+affected:
+  - product: Cisco ASA
+    vulnerable: "[versions to confirm]"
+    fixed: "9.16.4.104, 9.18.4.96, 9.20.4.50, 9.22.3.200, 9.23.1.48, 9.24.1.27 or 9.24.10.1"
+  - product: Cisco FTD
+    vulnerable: "[versions to confirm]"
+    fixed: "7.0.11, 7.2.13, 7.4.9, 7.6.7, 7.7.14, 10.0.3, 10.1.1"
+exposed_when:
+  - SSL remote access VPN login service is reachable
+  - "`webvpn` with SSL VPN enabled on at least one interface"
+  - "A tunnel group has `secondary-authentication-server-group`"
 
 applies_check:
-  - question: Do you run a Cisco ASA or FTD with SSL remote access VPN and secondary authentication on a tunnel group?
-    how_to_check: "All of these must be true for a device to be vulnerable. It runs a vulnerable release (see the fixed releases below). The SSL remote access VPN login service is reachable. The running configuration contains `webvpn` with SSL VPN enabled on at least one interface. A tunnel group has `secondary-authentication-server-group`. If `tunnel-group-list enable` is set, check every tunnel group including DefaultWEBVPNGroup, not just the ones shown on the login page. If it is not set, check DefaultWEBVPNGroup. On FTD, review the deployed remote access VPN policy in FMC or FDM. A successful VPN login is not needed to reach the affected code."
+  - question: Do you run a Cisco ASA or FTD with SSL VPN and secondary authentication on a tunnel group?
+    how_to_check: "Look for `webvpn` with SSL VPN on an interface, and `secondary-authentication-server-group` on any tunnel group, including DefaultWEBVPNGroup. On FTD, review the deployed remote access VPN policy in FMC or FDM."
 
 placements:
   - name: All conditions true, VPN is business-critical
@@ -52,7 +63,7 @@ mitigations:
     check_it_worked: Confirm the running version on each firewall is at or above the first fixed release for its train.
     undo: Boot the previous image. This reopens the flaw.
     confidence: vendor-stated
-  - title: "Remove the tunnel group list (when the default group has no secondary authentication)"
+  - title: "Remove the tunnel group list if the default group lacks secondary auth"
     summary: "Cisco's mitigation, if DefaultWEBVPNGroup does not use secondary authentication: enter `no tunnel-group-list enable` in WebVPN configuration mode. Cisco calls this a mitigation, not a workaround, and says it was tested in a lab and is temporary."
     effect:
       - { vector: Crafted request to the SSL remote access VPN login service, status: closed_for_that_app }
@@ -102,6 +113,8 @@ sources:
     url: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json
     accessed: 2026-11-09
 ---
+
+All of Cisco's conditions must be true for a device to be vulnerable: a vulnerable release, a reachable SSL remote access VPN login service, `webvpn` with SSL VPN enabled on at least one interface, and a tunnel group with `secondary-authentication-server-group`. If `tunnel-group-list enable` is set, check every tunnel group including DefaultWEBVPNGroup, not just the ones shown on the login page. If it is not set, check DefaultWEBVPNGroup. A successful VPN login is not needed to reach the affected code.
 
 Cisco lists two mitigations that avoid an upgrade. Cisco says there are no workarounds, and calls both mitigations temporary. It recommends upgrading.
 

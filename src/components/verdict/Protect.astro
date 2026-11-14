@@ -1,9 +1,9 @@
 ---
-// Patch and mitigation options, then what to do if you were already hit.
+// What to do: one compact row per option, with the full detail behind a disclosure.
 import '../../styles/verdict/protect.css';
 import Text from '../Text.astro';
-import { CONFIDENCE_LABELS } from '../../lib/tiers';
-import { effectByWay, guideLabel, isPlaceholder, letter } from '../../lib/verdict-view';
+import { CONFIDENCE_LABELS, EFFECT_LABELS } from '../../lib/tiers';
+import { coverageLine, guideLabel, isPlaceholder, letter } from '../../lib/verdict-view';
 import type { RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -13,43 +13,30 @@ const { record } = Astro.props;
 ---
 
 <section class="sec" aria-labelledby="protect-heading">
-  <h2 id="protect-heading">Patch and mitigate</h2>
-  <p class="sub">
-    {record.vectors.length === 1 ? 'There is one way in.' : `There are ${record.vectors.length} ways in.`}{' '}
-    Each option below says which it closes and which it leaves open.
-  </p>
-
-  <ul class="ways">
-    {record.vectors.map((vector, i) => (
-      <li><span class="way-letter">{letter(i)}</span><span>{isPlaceholder(vector) ? <span class="placeholder">{vector}</span> : vector}</span></li>
-    ))}
-  </ul>
-
+  <h2 id="protect-heading">What to do</h2>
   <ol class="opts">
-    {record.mitigations.map((m, i) => (
+    {record.mitigations.map((m) => (
       <li class="opt">
-        <div class="opt-head">
-          <span class="opt-num" aria-hidden="true">{i + 1}</span>
-          <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
-          <span class="conf">{CONFIDENCE_LABELS[m.confidence]}</span>
-        </div>
-        <p class="opt-meta">
-          {effectByWay(record.vectors, m.effect).map((w) => (
-            <span class={`eff eff-${w.status}`}>
-              <span class="v">{w.letter}</span>
-              <b>{w.label}</b>
-            </span>
-          ))}
-        </p>
-        <p class="opt-sum"><Text text={m.summary} /></p>
-        <dl class="facts">
-          <div><dt>Effort</dt><dd><Text text={m.takes} /></dd></div>
-          {m.might_break && <div><dt>Might break</dt><dd><Text text={m.might_break} /></dd></div>}
-          {m.cost && <div><dt>Costs</dt><dd><Text text={m.cost} /></dd></div>}
-        </dl>
+        <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
+        <p class="opt-cover">{coverageLine(record.vectors, m.effect)}</p>
+        <p class="opt-effort">Effort: <Text text={m.takes} /></p>
         <details class="opt-more">
-          <summary>Check it worked, undo, guides</summary>
+          <summary>Details<span class="sr-only"> for {m.title}</span></summary>
+          <p class="opt-sum"><Text text={m.summary} /></p>
+          <ul class="opt-ways">
+            {record.vectors.map((vector, i) => {
+              const effect = m.effect.find((e) => e.vector === vector);
+              return (
+                <li class={`eff-${effect?.status ?? 'open'}`}>
+                  <span class="v">{letter(i)}</span>
+                  <span>{isPlaceholder(vector) ? <span class="placeholder">{vector}</span> : vector}: <b>{EFFECT_LABELS[effect?.status ?? 'open'].text}</b></span>
+                </li>
+              );
+            })}
+          </ul>
           <dl class="facts">
+            {m.might_break && <div><dt>Might break</dt><dd><Text text={m.might_break} /></dd></div>}
+            {m.cost && <div><dt>Costs</dt><dd><Text text={m.cost} /></dd></div>}
             <div><dt>Check it worked</dt><dd><Text text={m.check_it_worked} /></dd></div>
             <div><dt>Undo</dt><dd><Text text={m.undo} /></dd></div>
             <div>
@@ -67,20 +54,10 @@ const { record } = Astro.props;
                 ))}
               </dd>
             </div>
+            <div><dt>Confidence</dt><dd>{CONFIDENCE_LABELS[m.confidence]}</dd></div>
           </dl>
         </details>
       </li>
     ))}
   </ol>
 </section>
-
-{record.were_you_hit && (
-  <section class="sec hit" aria-labelledby="hit-heading">
-    <h2 id="hit-heading">Were you already hit?</h2>
-    <p class="hit-lead"><strong>Assume compromise when:</strong> {record.were_you_hit.assume_compromise_when}</p>
-    <ul class="hit-list">
-      {record.were_you_hit.check.map((c) => <li><b>Check</b><span>{c}</span></li>)}
-      {record.were_you_hit.rotate.map((c) => <li><b>Rotate</b><span>{c}</span></li>)}
-    </ul>
-  </section>
-)}

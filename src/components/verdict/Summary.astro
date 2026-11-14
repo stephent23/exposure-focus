@@ -1,9 +1,10 @@
 ---
-// The top of a verdict: what the flaw is and how urgent it is.
+// The top of a verdict: what the flaw is, how urgent it is, and four facts at a glance.
 import '../../styles/verdict/summary.css';
 import { ATTACKS } from '../../lib/attacks';
 import { TIERS, type TierNumber } from '../../lib/tiers';
-import { headlinePlacement, headlineTier, type RecordEntry } from '../../schema/record';
+import { keyFacts } from '../../lib/verdict-view';
+import { headlineTier, type RecordEntry } from '../../schema/record';
 
 interface Props {
   record: RecordEntry;
@@ -11,31 +12,31 @@ interface Props {
 }
 const { record, stale } = Astro.props;
 const top = headlineTier(record) as TierNumber;
-const primary = headlinePlacement(record);
-const tiersDiffer = new Set(record.placements.map((p) => p.tier)).size > 1;
 const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
 ---
 
 <header class="summary">
-  <div class="top">
-    <a class="back" href="/"><span aria-hidden="true">←</span> All verdicts</a>
-    <p class="meta">Evidence as of {record.evidence_as_of} (UTC) · Review by {record.review_until}</p>
-  </div>
+  <a class="back" href="/"><span aria-hidden="true">←</span> All verdicts</a>
   <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
   <p class="cve">{record.cves.join(' · ')}</p>
 
   <section class={`verdict t${top}`} aria-label="Verdict">
     <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
     <p class="verdict-summary">{record.summary}</p>
-    <p class="note">
-      This tier is for “{primary.name}”.
-      {tiersDiffer && ' Other placements are higher or lower; see below.'}
-    </p>
+    <p class="meta">Evidence as of {record.evidence_as_of} (UTC) · Review by {record.review_until}</p>
     <div class="badges">
       <span class="badge plain">{ATTACKS[record.attack].name}</span>
-      <span class="badge plain">Breaks: {ATTACKS[record.attack].property}</span>
       {unconfirmed && <span class="badge plain">Some facts unconfirmed</span>}
       {stale && <span class="badge stale">Overdue for review</span>}
     </div>
   </section>
+
+  <dl class="keyfacts">
+    {keyFacts(record).map((f) => (
+      <div class={`keyfact tone-${f.tone}`}>
+        <dt>{f.label}</dt>
+        <dd>{f.value}</dd>
+      </div>
+    ))}
+  </dl>
 </header>

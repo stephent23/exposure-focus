@@ -38,6 +38,14 @@ describe('content/records', async () => {
     }
   });
 
+  it('gives every published record, and the template, at least one affected row', async () => {
+    for (const record of records.filter((r) => r.status === 'published')) {
+      expect(record.affected.length, record.slug).toBeGreaterThan(0);
+    }
+    const source = await readFile(new URL('../content/template.md', import.meta.url), 'utf-8');
+    expect(parseRecordFile(source, 'template.md').affected.length).toBeGreaterThan(0);
+  });
+
   it('gives every published record real sources', () => {
     for (const record of records.filter((r) => r.status === 'published')) {
       expect(record.sources.some((s) => s.url.startsWith('https://')), record.slug).toBe(true);

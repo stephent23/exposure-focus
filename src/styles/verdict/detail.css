@@ -1,5 +1,5 @@
 /* The folded detail: evidence, analysis and sources. */
-.folds { margin-top: 56px; display: grid; gap: 8px; }
+.folds { margin-top: 40px; display: grid; gap: 8px; }
 .folds-intro { margin-bottom: 4px; font-size: 13px; font-weight: 600; color: var(--muted); }
 .fold { border: 1px solid var(--line-strong); border-radius: 10px; background: #fff; }
 .fold > summary { display: flex; align-items: center; gap: 12px; padding: 0 16px; min-height: 48px; cursor: pointer; list-style: none; border-radius: 10px; }
@@ -22,6 +22,26 @@
 .ev dt { font-size: 13px; font-weight: 600; color: var(--muted); }
 .ev dd { margin: 4px 0 0; }
 .fold .meta-line { font-size: 13px; }
+
+/* Key dates: dots on a thin vertical line, oldest first */
+.dates { list-style: none; padding: 0; }
+.date-row { position: relative; display: flex; flex-direction: column; gap: 1px; padding: 0 0 16px 24px; }
+.date-row:last-child { padding-bottom: 0; }
+.date-row::after { content: ""; position: absolute; left: 4px; top: 16px; bottom: -5px; width: 1px; background: var(--line-strong); }
+.date-row:last-child::after { display: none; }
+.date-row::before { content: ''; position: absolute; left: 0; top: 5px; width: 9px; height: 9px; box-sizing: border-box; border-radius: 50%; background: #fff; border: 2px solid var(--ink-2); }
+.date-row:first-child::before { background: var(--ink-2); }
+.date-row time { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.5; }
+.date-time { font-weight: 400; color: var(--muted); }
+.date-event { color: var(--ink-2); font-size: 14px; line-height: 1.45; }
+.date-src { margin-top: 2px; font-size: 12.5px; color: var(--muted); line-height: 1.4; }
+
+/* Were you already hit */
+.hit-lead { font-size: 14px; color: var(--ink-2); }
+.hit-list { list-style: none; padding: 0; display: grid; gap: 10px; font-size: 14px; }
+.hit-list li { display: grid; grid-template-columns: 5.5em 1fr; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-strong); color: var(--ink-2); }
+.hit-list b { font-size: 13px; color: var(--muted); }
+@media (max-width: 640px) { .hit-list li { grid-template-columns: 1fr; gap: 2px; } }
 
 /* Markdown analysis body */
 .md > * + * { margin-top: 12px; }

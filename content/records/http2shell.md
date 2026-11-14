@@ -3,16 +3,34 @@ slug: http2shell
 name: HTTP2Shell
 aliases: [Node2Shell, Broccoli2Shell]
 cves: [CVE-2026-111497]
-summary: A memory-corruption flaw in the Brotli decoder can let an attacker crash, read from or possibly run code in applications that decompress attacker-supplied Brotli data. CISA lists it as exploited, but no source reviewed reports code execution in the wild. It is rated Tier 3, an editorial call.
+summary: A Brotli decoder flaw may let attackers crash or possibly run code in apps that decode untrusted Brotli. CISA lists it as exploited; no source reports code execution in the wild. Tier 3 is editorial.
 attack: rce
 status: published
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
-leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but the sources reviewed report no attackers taking over systems with it. Where an application unpacks untrusted compressed data, schedule the update ahead of normal patching.
+leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but sources reviewed report no takeovers. Update ahead of normal patching where untrusted data is unpacked.
+affected:
+  - product: Node.js 22.x
+    vulnerable: 22.x releases before 22.23.4
+    fixed: 22.23.4
+  - product: Node.js 24.x
+    vulnerable: 24.x releases before 24.22.1
+    fixed: 24.22.1
+  - product: Node.js 26.x
+    vulnerable: 26.x releases before 26.12.1
+    fixed: 26.12.1
+  - product: Google Brotli library
+    vulnerable: "[versions to confirm]"
+    fixed: v1.2.1
+  - product: Other products that bundle the Brotli decoder
+    vulnerable: "[versions to confirm]"
+exposed_when:
+  - An application decompresses Brotli data that an attacker can supply
+  - "Your code or middleware calls the decoder: receiving a Brotli body alone does not decode it"
 
 applies_check:
   - question: Does any application you run decompress Brotli data that an outsider can influence?
-    how_to_check: "Check Node.js (`node --version`) against the fixed releases 22.23.4, 24.22.1 and 26.12.1, and look for other products that bundle Google's Brotli decoder: Python's brotli package, other runtimes, proxies and container images. Receiving a Brotli body does not decode it; something in your code or middleware has to call the decoder, so also ask which services decompress request bodies or replies from servers you do not control."
+    how_to_check: "Run `node --version`; look for other products that bundle Google's Brotli decoder: Python's brotli package, other runtimes, proxies, container images. Ask which services decompress request bodies or replies from servers you do not control."
 
 placements:
   - name: Application that decodes untrusted Brotli data
@@ -25,7 +43,7 @@ placements:
       - Reported attacks are attempts or reconnaissance; what they achieve is treated as at most a crash, an inference.
     tier: 3
     override_reason: "Editorial judgment, not a sourced fact. The rubric gives Tier 2: CISA lists exploitation, but no source reviewed shows attacks achieving code execution, and Imperva's code execution counts as demonstrated only. It is rated Tier 3 because the one demonstrated code execution needed multiple attempts and no source reports code execution in the wild. Zscaler reports reconnaissance and exploitation attempts. Wiz says no self-contained remote exploit for code execution has been publicly confirmed. The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild."
-    action: "Prioritised: sooner than your normal patching cycle, schedule it. Update every affected runtime and library, rebuild container images and restart processes. If you cannot soon, block Brotli-compressed input first."
+    action: "Update sooner than your normal cycle: every runtime and library, rebuild images, restart. If you cannot soon, block Brotli input first."
   - name: Only decodes Brotli from sources you control
     facts: { reachable: false, exploited: true, no_login: true, impact: critical }
     why:
