@@ -3,6 +3,7 @@
 import Base from '../../layouts/Base.astro';
 import '../../styles/verdict.css';
 import Summary from '../../components/verdict/Summary.astro';
+import Timeline from '../../components/verdict/Timeline.astro';
 import Leadership from '../../components/verdict/Leadership.astro';
 import Affected from '../../components/verdict/Affected.astro';
 import Placements from '../../components/verdict/Placements.astro';
@@ -26,6 +27,7 @@ const bossText = bossSummary(record, new URL(`/verdicts/${record.slug}/`, Astro.
 <Base title={record.name} description={record.summary}>
   <div class="record">
     <Summary record={record} stale={stale} />
+    <Timeline record={record} />
     <Leadership record={record} bossText={bossText} />
     <Affected record={record} />
     <Placements record={record} />

@@ -1,11 +1,11 @@
 /* For leadership: the quote and the copy button. */
-.leadership blockquote { margin: 10px 0 0; padding-left: 14px; border-left: 3px solid var(--line-strong); font-size: 15px; line-height: 1.55; color: var(--ink-2); max-width: 66ch; }
-.boss { margin-top: 12px; }
-.copy-btn { font: inherit; font-size: 14px; font-weight: 600; min-height: 44px; padding: 0 16px; border: 1px solid var(--muted); border-radius: 8px; background: #fff; color: var(--ink); cursor: pointer; }
-.copy-btn:hover { background: var(--panel); border-color: var(--ink); }
-.boss-status { font-size: 13px; color: var(--ink-2); }
-.boss-status:not(:empty) { margin-top: 8px; }
-.boss-more > summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 44px; font-size: 13.5px; font-weight: 600; color: var(--link); border-radius: 4px; }
+.leadership blockquote { margin: 10px 0 0; padding-left: 12px; border-left: 3px solid var(--ink); max-width: 68ch; font-size: 14.5px; line-height: 1.55; }
+.boss { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.copy-btn { font-family: var(--font-mono); font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; min-height: 32px; padding: 0 10px; border: 1px solid var(--ink); border-radius: 2px; background: transparent; color: var(--ink); cursor: pointer; }
+.copy-btn:hover { background: var(--ink); color: #fff; }
+.boss-status { font-size: 12.5px; color: var(--ink-2); }
+.boss-fallback { flex: 1 1 100%; }
+.boss-more > summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 32px; font-size: 12.5px; font-weight: 600; color: var(--link); }
 .boss-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
-.boss-more label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 600; color: var(--muted); }
-.boss-more textarea { width: 100%; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.5; padding: 10px; border: 1px solid var(--line-strong); border-radius: 8px; color: var(--ink); background: #fff; resize: vertical; }
+.boss-more label { display: block; margin-bottom: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.boss-more textarea { width: 100%; font-family: var(--font-mono); font-size: 12px; line-height: 1.5; padding: 8px; border: 1px solid var(--line-strong); border-radius: 2px; color: var(--ink); background: #fff; resize: vertical; }

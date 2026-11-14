@@ -6,6 +6,7 @@ cves: [CVE-2026-76418]
 summary: A crafted request can make a Cisco ASA or FTD firewall reload without a login when secondary authentication is set on a tunnel group. It is being exploited; the effect is an outage, not a breach.
 attack: dos
 status: published
+published: 2026-11-09
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: This is an outage risk, not a breach. Attackers are exploiting a flaw that can restart Cisco VPN firewalls without a login. Where the VPN is how the business works, handle it ahead of the normal cycle; where it is a backup, schedule it sooner than usual.

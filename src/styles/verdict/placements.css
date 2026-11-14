@@ -1,23 +1,22 @@
-/* Tier by placement: one compact row each. */
-.places { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
-.place { background: #fff; border: 1px solid var(--line-strong); border-left: 4px solid var(--edge); border-radius: 8px; padding: 12px 16px 0; }
-.place-main { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 14px; align-items: start; }
-.place-main .badge { text-align: center; font-size: 13px; padding: 4px 0; }
-.place-body h3 { font-size: 15px; line-height: 1.4; font-weight: 600; color: var(--ink); }
-.place-action { margin-top: 2px; font-size: 14px; line-height: 1.5; color: var(--ink-2); }
-.reasoning { margin: 2px 0 0 164px; }
-.reasoning > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 8px; min-height: 40px; font-size: 13.5px; font-weight: 600; color: var(--link); list-style: none; }
-.reasoning > summary::-webkit-details-marker { display: none; }
-.reasoning > summary::before { content: ""; width: 6px; height: 6px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: rotate(-45deg); transition: transform .15s; }
-.reasoning[open] > summary::before { transform: rotate(45deg); }
-.reasoning > summary:hover { color: var(--link-hover); }
-.reasoning > summary:focus-visible { outline: 2px solid var(--link); outline-offset: 2px; border-radius: 4px; }
-.reasoning .list { margin-top: 2px; font-size: 14px; max-width: 62ch; }
-.reasoning .list li { margin-top: 6px; }
-.reasoning .meta-line { margin: 8px 0 14px; font-size: 13px; }
+/* Tier by placement: one ruled row each. Also the small "+" disclosure links shared with the options list. */
+.places { list-style: none; margin: 0; padding: 0; }
+.place { padding: 10px 0 2px; border-bottom: 1px solid var(--line); }
+.place-main { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: start; }
+.place-main .badge { padding: 3px 0; text-align: center; }
+.place-body h3 { font-size: 14.5px; line-height: 1.35; }
+.place-action { margin-top: 2px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+.reasoning { margin-left: 162px; }
+.reasoning > summary, .opt-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; font-size: 12.5px; font-weight: 600; color: var(--link); list-style: none; }
+.reasoning > summary::-webkit-details-marker, .opt-more > summary::-webkit-details-marker { display: none; }
+.reasoning > summary::before, .opt-more > summary::before { content: '+'; font-family: var(--font-mono); font-weight: 400; }
+.reasoning[open] > summary::before, .opt-more[open] > summary::before { content: '−'; }
+.reasoning > summary:hover, .opt-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
+.reasoning .list { margin-top: 0; font-size: 13.5px; max-width: 66ch; }
+.reasoning .list li { margin-top: 4px; }
+.reasoning .meta-line { margin: 6px 0 12px; font-size: 12.5px; }
 
 @media (max-width: 640px) {
-  .place-main { grid-template-columns: 1fr; gap: 8px; }
-  .place-main .badge { justify-self: start; padding: 4px 12px; }
+  .place-main { grid-template-columns: 1fr; gap: 6px; }
+  .place-main .badge { justify-self: start; padding: 3px 8px; }
   .reasoning { margin-left: 0; }
 }

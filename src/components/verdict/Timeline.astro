@@ -1,0 +1,30 @@
+---
+// Key dates beside the summary, oldest first. Each links to where it was stated; unconfirmed dates say so.
+import '../../styles/verdict/timeline.css';
+import { CONFIDENCE_LABELS } from '../../lib/tiers';
+import { niceDate, sortedTimeline } from '../../lib/verdict-view';
+import type { RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+}
+const timeline = sortedTimeline(Astro.props.record.timeline);
+---
+
+{timeline.length > 0 && (
+  <aside class="timeline" aria-labelledby="dates-heading">
+    <h2 id="dates-heading">Key dates</h2>
+    <ol class="dates">
+      {timeline.map((t) => (
+        <li class="date-row">
+          <time datetime={t.time ? `${t.date}T${t.time}Z` : t.date}>{niceDate(t.date)}{t.time && <span class="date-time"> {t.time}</span>}</time>
+          <span class="date-event">{t.event}</span>
+          <span class="date-src">
+            {t.confidence !== 'vendor-stated' && <>{CONFIDENCE_LABELS[t.confidence]} · </>}
+            {t.source_url.startsWith('http') ? <a href={t.source_url}>Source<span class="sr-only"> for {t.event}</span></a> : <span class="placeholder">{t.source_url}</span>}
+          </span>
+        </li>
+      ))}
+    </ol>
+  </aside>
+)}

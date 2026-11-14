@@ -1,20 +1,21 @@
 /* Are you affected: versions table, conditions and checks. Rows stack on phones so nothing scrolls sideways. */
-.affected { width: 100%; margin-top: 12px; border-collapse: collapse; font-size: 14px; }
-.affected th, .affected td { padding: 8px 12px 8px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line-strong); overflow-wrap: anywhere; }
-.affected thead th { font-size: 12px; font-weight: 600; color: var(--muted); }
-.affected tbody th { font-weight: 600; color: var(--ink); }
+.affected { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.affected th, .affected td { padding: 6px 12px 6px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.affected thead th, .exposed-label { font-family: var(--font-mono); font-size: 10.5px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.affected tbody th { font-weight: 600; }
 .affected td { color: var(--ink-2); }
-.exposed-label { margin-top: 16px; font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); }
-.exposed { margin: 4px 0 0; padding-left: 20px; font-size: 14px; color: var(--ink-2); }
-.applies-item { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); max-width: 64ch; }
-.applies-item h3 { font-size: 15px; line-height: 1.45; font-weight: 600; }
-.applies-how { margin-top: 4px; font-size: 14px; color: var(--ink-2); }
-.applies-default { margin: 16px 0 0; padding: 8px 14px; background: var(--panel); border: 1px solid var(--line-strong); border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--ink); max-width: max-content; }
+.exposed-label { margin-top: 12px; }
+.exposed { margin: 2px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+.applies-item { margin-top: 12px; max-width: 72ch; }
+.applies-item h3 { font-size: 14px; line-height: 1.4; }
+.applies-how { margin-top: 2px; font-size: 13.5px; color: var(--ink-2); }
+.applies-default { margin-top: 12px; font-size: 13px; font-weight: 600; }
 
 @media (max-width: 640px) {
   .affected thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
   .affected, .affected tbody, .affected tr, .affected th, .affected td { display: block; }
-  .affected tr { padding: 8px 0; border-bottom: 1px solid var(--line-strong); }
-  .affected th, .affected td { padding: 2px 0; border: 0; }
-  .affected td::before { content: attr(data-label) ': '; font-weight: 600; color: var(--muted); }
+  .affected tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .affected th { padding: 0; border: 0; }
+  .affected td { display: inline; padding: 0; border: 0; margin-right: 14px; }
+  .affected td::before { content: attr(data-label) ': '; color: var(--muted); }
 }

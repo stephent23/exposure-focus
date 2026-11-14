@@ -6,6 +6,7 @@ cves: [CVE-2026-98432]
 summary: Red Hat says a race in the Linux kernel's IPv4 TCP code lets a remote attacker corrupt kernel memory without login. Anthropic reports lab-only remote root; no exploit is public, no attacks reported.
 attack: rce
 status: published
+published: 2026-11-09
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
 leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.

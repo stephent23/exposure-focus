@@ -1,9 +1,9 @@
 ---
-// The top of a verdict: what the flaw is, how urgent it is, and four facts at a glance.
+// The top of a verdict: tier, what the flaw is, four facts at a glance, and when it was last checked.
 import '../../styles/verdict/summary.css';
 import { ATTACKS } from '../../lib/attacks';
 import { TIERS, type TierNumber } from '../../lib/tiers';
-import { keyFacts } from '../../lib/verdict-view';
+import { keyFacts, niceDate } from '../../lib/verdict-view';
 import { headlineTier, type RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -17,18 +17,18 @@ const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
 
 <header class="summary">
   <a class="back" href="/"><span aria-hidden="true">←</span> All verdicts</a>
-  <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
-  <p class="cve">{record.cves.join(' · ')}</p>
-
   <section class={`verdict t${top}`} aria-label="Verdict">
-    <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
+    <p class="kicker">
+      <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
+      <span class="cve">{record.cves.join(' · ')}</span>
+    </p>
+    <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
     <p class="verdict-summary">{record.summary}</p>
-    <p class="meta">Evidence as of {record.evidence_as_of} (UTC) · Review by {record.review_until}</p>
-    <div class="badges">
-      <span class="badge plain">{ATTACKS[record.attack].name}</span>
-      {unconfirmed && <span class="badge plain">Some facts unconfirmed</span>}
-      {stale && <span class="badge stale">Overdue for review</span>}
-    </div>
+    <p class="tags">
+      <span>{ATTACKS[record.attack].name}</span>
+      {unconfirmed && <span>Some facts unconfirmed</span>}
+      {stale && <span class="tag-stale">Overdue for review</span>}
+    </p>
   </section>
 
   <dl class="keyfacts">
@@ -39,4 +39,7 @@ const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
       </div>
     ))}
   </dl>
+  <p class="meta">
+    Published <time datetime={record.published}>{niceDate(record.published)}</time> · Evidence checked <time datetime={record.evidence_as_of}>{niceDate(record.evidence_as_of)}</time> · Review by <time datetime={record.review_until}>{niceDate(record.review_until)}</time> (UTC)
+  </p>
 </header>

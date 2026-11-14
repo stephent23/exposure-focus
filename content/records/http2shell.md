@@ -6,6 +6,7 @@ cves: [CVE-2026-111497]
 summary: A Brotli decoder flaw may let attackers crash or possibly run code in apps that decode untrusted Brotli. CISA lists it as exploited; no source reports code execution in the wild. Tier 3 is editorial.
 attack: rce
 status: published
+published: 2026-11-09
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but sources reviewed report no takeovers. Update ahead of normal patching where untrusted data is unpacked.

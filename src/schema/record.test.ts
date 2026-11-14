@@ -11,6 +11,7 @@ function validRecord() {
     summary: 'A sample record.',
     attack: 'rce',
     status: 'published',
+    published: '2026-11-01',
     evidence_as_of: '2026-11-08',
     review_until: '2026-12-08',
     leadership_quote: 'A sentence a boss can read.',
@@ -360,4 +361,16 @@ describe('length caps', () => {
       expect(JSON.stringify(result.error?.issues)).toContain(`${cap}`);
     });
   }
+});
+
+describe('published date', () => {
+  it('is required', () => {
+    const rest = { ...validRecord() } as Record<string, unknown>;
+    delete rest.published;
+    expect(recordSchema.safeParse(rest).success).toBe(false);
+  });
+  it('cannot be after evidence_as_of', () => {
+    expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-08' }).success).toBe(true);
+    expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-09' }).success).toBe(false);
+  });
 });

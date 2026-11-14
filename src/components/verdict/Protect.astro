@@ -19,7 +19,6 @@ const { record } = Astro.props;
       <li class="opt">
         <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
         <p class="opt-cover">{coverageLine(record.vectors, m.effect)}</p>
-        <p class="opt-effort">Effort: <Text text={m.takes} /></p>
         <details class="opt-more">
           <summary>Details<span class="sr-only"> for {m.title}</span></summary>
           <p class="opt-sum"><Text text={m.summary} /></p>
@@ -35,6 +34,7 @@ const { record } = Astro.props;
             })}
           </ul>
           <dl class="facts">
+            <div><dt>Effort</dt><dd><Text text={m.takes} /></dd></div>
             {m.might_break && <div><dt>Might break</dt><dd><Text text={m.might_break} /></dd></div>}
             {m.cost && <div><dt>Costs</dt><dd><Text text={m.cost} /></dd></div>}
             <div><dt>Check it worked</dt><dd><Text text={m.check_it_worked} /></dd></div>

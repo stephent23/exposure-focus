@@ -6,6 +6,7 @@ cves: [CVE-2026-109618, CVE-2026-109619, CVE-2026-115560]
 summary: Two flaws in the PHP runtime let an attacker run code from a web request with no login, and both are exploited. Internet-facing PHP needs an out-of-cycle response; internal-only PHP does not.
 attack: rce
 status: published
+published: 2026-11-09
 evidence_as_of: 2026-11-09
 review_until: 2026-11-23
 leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw has no fix yet, and PHP suggests turning off one feature until it does.

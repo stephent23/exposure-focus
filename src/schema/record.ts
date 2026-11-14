@@ -167,6 +167,8 @@ const baseRecordSchema = z.object({
   summary: capped(CAPS.summary),
   attack: z.enum(ATTACK_KEYS),
   status: z.enum(['draft', 'published', 'retired']),
+  /** UTC date the verdict was first published. */
+  published: dateString,
   evidence_as_of: dateString,
   review_until: dateString,
   leadership_quote: capped(CAPS.leadershipQuote),
@@ -231,6 +233,10 @@ export const recordSchema = baseRecordSchema.superRefine((record, ctx) => {
       path: ['evidence'],
       message: 'A placement relies on "exploitation about to start", so the evidence must include an item labelled "Exploitation outlook" saying why, with its source.'
     });
+  }
+
+  if (record.published > record.evidence_as_of) {
+    ctx.addIssue({ code: 'custom', path: ['published'], message: 'published cannot be after evidence_as_of.' });
   }
 
   // The change log must agree with the verdict: real placements, no future dates, and each placement's latest move ends on its tier.

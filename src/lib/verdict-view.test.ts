@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { RecordEntry } from '../schema/record';
-import { changeHeadline, coverageLine, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, sortedChanges, sortedTimeline } from './verdict-view';
+import { changeHeadline, coverageLine, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
   it('letters ways in from A', () => {
@@ -16,6 +16,7 @@ describe('verdict view helpers', () => {
   it('writes dates the way people read them', () => {
     expect(niceDate('2026-10-05')).toBe('5 Oct 2026');
     expect(niceDate('2026-12-31')).toBe('31 Dec 2026');
+    expect(shortDate('2026-10-05')).toBe('5 Oct');
   });
 
   it('orders key dates oldest first, then by time', () => {

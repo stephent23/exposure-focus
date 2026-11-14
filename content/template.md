@@ -11,6 +11,7 @@ cves: ["[CVE to confirm]"]
 summary: One plain sentence. # at most 200 characters
 attack: rce # rce, privilege-escalation, auth-bypass, data-exposure, data-tampering or dos
 status: draft # draft is hidden from the home page; published is listed there
+published: 2026-11-08 # UTC date this verdict was first published; never changes afterwards
 evidence_as_of: 2026-11-08 # UTC date the evidence was last checked
 review_until: 2026-12-08 # UTC date to recheck by; after it the record shows a stale badge
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
+import { recentActivity } from '../src/lib/home';
 import { getAllRecords } from '../src/lib/records';
 import { coverageLine, keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
@@ -34,7 +35,8 @@ const recordBody = (html: string) => {
   const end = html.indexOf('</main>', start);
   return html.slice(start, end === -1 ? undefined : end);
 };
-// The page is a dashboard, not a report: what is visible without opening a fold must stay short.
+// The page is a dashboard, not a report: the main column, without opening a fold, must stay short.
+// The key-dates list beside it is counted separately: at most eight dated events.
 const VISIBLE_WORD_BUDGET = 450;
 // A home card shows badges, a name, a summary and placement rows only.
 const CARD_WORD_BUDGET = 90;
@@ -81,7 +83,7 @@ describe('built site', () => {
       const html = recordPage(r.slug);
       for (const id of ['leadership', 'applies', 'placement', 'protect']) expect(folded(html, id), `${r.slug} ${id} visible`).toBe(false);
       const foldedIds = ['evidence', 'sources'];
-      if (r.timeline?.length) foldedIds.push('dates');
+      if (r.timeline?.length) expect(folded(html, 'dates'), `${r.slug} key dates visible`).toBe(false);
       if (r.changes?.length) foldedIds.push('changes');
       if (r.were_you_hit) foldedIds.push('hit');
       if (r.analysis) foldedIds.push('analysis');
@@ -93,7 +95,8 @@ describe('built site', () => {
 
   it('keeps the visible text of a record page within the word budget', () => {
     for (const r of published) {
-      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))));
+      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))).replace(/<aside[\s\S]*?<\/aside>/g, ' '));
+      expect(r.timeline?.length ?? 0, `${r.slug} key dates`).toBeLessThanOrEqual(8);
       expect(words(visible), `${r.slug} visible words`).toBeLessThanOrEqual(VISIBLE_WORD_BUDGET);
     }
   });
@@ -238,5 +241,23 @@ describe('built site', () => {
     const xml = read('feed.xml');
     expect(count(xml, '<entry>')).toBe(published.reduce((n, r) => n + 1 + (r.changes?.length ?? 0), 0));
     for (const r of records.filter((x) => x.status !== 'published')) expect(xml).not.toContain(`/verdicts/${r.slug}/`);
+  });
+
+  it('leads the home page with the latest changes and dates every card', () => {
+    const activity = recentActivity(listed);
+    expect(count(home, 'class="activity-row"')).toBe(activity.length);
+    expect(home.indexOf('id="activity-heading"')).toBeLessThan(home.indexOf('data-record="'));
+    for (const a of activity) expect(home, a.slug).toContain(`<time datetime="${a.date}">`);
+    for (const r of listed) {
+      const start = home.indexOf(`data-record="${r.slug}"`);
+      expect(home.slice(start, home.indexOf('</article>', start)), `${r.slug} added date`).toContain(`<time datetime="${r.published}">`);
+    }
+  });
+
+  it('shows when each verdict was published and last checked', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      for (const d of [r.published, r.evidence_as_of, r.review_until]) expect(html, `${r.slug} ${d}`).toContain(`<time datetime="${d}">`);
+    }
   });
 });

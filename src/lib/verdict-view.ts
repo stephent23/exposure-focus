@@ -117,3 +117,6 @@ export function coverageLine(vectors: string[], effects: { vector: string; statu
   ];
   return parts.filter(Boolean).join(' · ');
 }
+
+/** 2026-10-05 → "5 Oct", for dense lists where the year is obvious. */
+export const shortDate = (iso: string) => niceDate(iso).slice(0, -5);

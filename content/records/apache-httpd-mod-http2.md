@@ -6,6 +6,7 @@ cves: [CVE-2026-119618]
 summary: "A flaw in Apache HTTP Server's HTTP/2 module lets an outsider with no login corrupt memory, and possibly run commands, where HTTP/2 is on. Public code only crashes workers; no attacks are reported."
 attack: rce
 status: published
+published: 2026-11-13
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
 
