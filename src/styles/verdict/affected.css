@@ -1,0 +1,21 @@
+/* Are you affected: versions table, conditions and checks. Rows stack on phones so nothing scrolls sideways. */
+.affected { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.affected th, .affected td { padding: 6px 12px 6px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.affected thead th, .exposed-label { font-size: 12px; font-weight: 500; color: var(--muted); }
+.affected tbody th { font-weight: 600; }
+.affected td { color: var(--ink-2); }
+.exposed-label { margin-top: 12px; }
+.exposed { margin: 2px 0 0; padding-left: 18px; font-size: 13.5px; color: var(--ink-2); }
+.applies-item { margin-top: 12px; max-width: 72ch; }
+.applies-item h3 { font-size: 14px; line-height: 1.4; }
+.applies-how { margin-top: 2px; font-size: 13.5px; color: var(--ink-2); }
+.applies-default { margin-top: 12px; font-size: 13px; font-weight: 600; }
+
+@media (max-width: 640px) {
+  .affected thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }
+  .affected, .affected tbody, .affected tr, .affected th, .affected td { display: block; }
+  .affected tr { padding: 6px 0; border-bottom: 1px solid var(--line); }
+  .affected th { padding: 0; border: 0; }
+  .affected td { display: inline; padding: 0; border: 0; margin-right: 14px; }
+  .affected td::before { content: attr(data-label) ': '; color: var(--muted); }
+}

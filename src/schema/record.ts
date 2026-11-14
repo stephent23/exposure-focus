@@ -5,11 +5,28 @@ import { ATTACK_KEYS } from '../lib/attacks';
 import { isRealUrl } from '../lib/site';
 import { triage, type Tier } from '../rubric/triage';
 
+/** Length caps in characters. Long detail belongs in folded sections, not in these fields. */
+export const CAPS = {
+  summary: 200,
+  leadershipQuote: 320,
+  placementName: 70,
+  placementAction: 140,
+  question: 100,
+  howToCheck: 240,
+  mitigationTitle: 80,
+  mitigationTakes: 120,
+  product: 60,
+  vulnerable: 80,
+  fixed: 80,
+  exposedWhen: 140
+} as const;
+
 const LINK_PLACEHOLDER = '[link to add]';
 const CVE_PLACEHOLDER = '[CVE to confirm]';
 
 export const dateString = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Use a YYYY-MM-DD date (UTC).');
 export const text = z.string().trim().min(1);
+const capped = (max: number) => text.max(max, `Keep this to ${max} characters or fewer.`);
 
 // Rule 6: placeholders stay until the owner fills them in. Only https links to real hosts pass.
 export const link = z.union([
@@ -23,9 +40,18 @@ const cve = z.union([z.literal(CVE_PLACEHOLDER), z.string().regex(/^CVE-\d{4}-\d
 const confidence = z.enum(['vendor-stated', 'reported', 'inference']);
 
 const appliesCheckSchema = z.object({
-  question: text,
-  how_to_check: text,
+  question: capped(CAPS.question),
+  how_to_check: capped(CAPS.howToCheck),
 });
+
+// One row of the "Are you affected?" table. Omit fixed when no fix exists.
+const affectedSchema = z
+  .object({
+    product: capped(CAPS.product),
+    vulnerable: capped(CAPS.vulnerable),
+    fixed: capped(CAPS.fixed).optional()
+  })
+  .strict();
 
 // Mirrors TriageFacts. EPSS is not accepted here; it is a dated, sourced record-level field.
 const triageFactsSchema = z
@@ -48,17 +74,17 @@ const triageFactsSchema = z
   .strict();
 
 const placementSchema = z.object({
-  name: text,
+  name: capped(CAPS.placementName),
   facts: triageFactsSchema,
   why: z.array(text).min(1),
   tier: z.number().int().min(1).max(4),
-  action: text,
+  action: capped(CAPS.placementAction),
   override_reason: text.optional()
 });
 
 const mitigationSchema = z
   .object({
-    title: text,
+    title: capped(CAPS.mitigationTitle),
     summary: text,
     effect: z
       .array(
@@ -68,7 +94,7 @@ const mitigationSchema = z
         })
       )
       .min(1),
-    takes: text,
+    takes: capped(CAPS.mitigationTakes),
     might_break: text.optional(),
     cost: text.optional(),
     official_guides: z.array(link),
@@ -138,12 +164,16 @@ const baseRecordSchema = z.object({
   name: text,
   aliases: z.array(text),
   cves: z.array(cve).min(1),
-  summary: text,
+  summary: capped(CAPS.summary),
   attack: z.enum(ATTACK_KEYS),
   status: z.enum(['draft', 'published', 'retired']),
+  /** UTC date the verdict was first published. */
+  published: dateString,
   evidence_as_of: dateString,
   review_until: dateString,
-  leadership_quote: text,
+  leadership_quote: capped(CAPS.leadershipQuote),
+  affected: z.array(affectedSchema).min(1),
+  exposed_when: z.array(capped(CAPS.exposedWhen)).min(1).max(4).optional(),
   applies_check: z.array(appliesCheckSchema).min(1),
   placements: z.array(placementSchema).min(1),
   vectors: z.array(text).min(1),
@@ -203,6 +233,10 @@ export const recordSchema = baseRecordSchema.superRefine((record, ctx) => {
       path: ['evidence'],
       message: 'A placement relies on "exploitation about to start", so the evidence must include an item labelled "Exploitation outlook" saying why, with its source.'
     });
+  }
+
+  if (record.published > record.evidence_as_of) {
+    ctx.addIssue({ code: 'custom', path: ['published'], message: 'published cannot be after evidence_as_of.' });
   }
 
   // The change log must agree with the verdict: real placements, no future dates, and each placement's latest move ends on its tier.

@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { changeHeadline, effectByWay, guideLabel, isPlaceholder, letter, niceDate, sortedChanges, sortedTimeline } from './verdict-view';
+import type { RecordEntry } from '../schema/record';
+import { changeHeadline, coverageLine, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
   it('letters ways in from A', () => {
@@ -15,6 +16,7 @@ describe('verdict view helpers', () => {
   it('writes dates the way people read them', () => {
     expect(niceDate('2026-10-05')).toBe('5 Oct 2026');
     expect(niceDate('2026-12-31')).toBe('31 Dec 2026');
+    expect(shortDate('2026-10-05')).toBe('5 Oct');
   });
 
   it('orders key dates oldest first, then by time', () => {
@@ -64,5 +66,69 @@ describe('sortedChanges', () => {
       'Edge: Tier 3 (Prioritised) to Tier 1 (Emergency)'
     );
     expect(changeHeadline({ date: '2026-11-01', reason: 'r', source_url: 'x' })).toBeNull();
+  });
+});
+
+type Facts = Record<string, boolean>;
+const rec = (placements: Facts[], affected: { fixed?: string; vulnerable?: string }[]) =>
+  ({
+    placements: placements.map((facts) => ({ facts })),
+    affected: affected.map((a) => ({ product: 'P', vulnerable: 'below 1', ...a }))
+  }) as unknown as RecordEntry;
+const fact = (r: RecordEntry, label: string) => keyFacts(r).find((f) => f.label === label)!;
+
+describe('keyFacts', () => {
+  it('always returns the four facts in order', () => {
+    expect(keyFacts(rec([{}], [{}])).map((f) => f.label)).toEqual(['Exploited in attacks', 'Public exploit', 'Login needed', 'Fix']);
+  });
+
+  it('reads exploited and public exploit from any placement', () => {
+    expect(fact(rec([{}, { exploited: true }], [{}]), 'Exploited in attacks')).toMatchObject({ value: 'Yes', tone: 'bad' });
+    expect(fact(rec([{ exploited: false }], [{}]), 'Exploited in attacks')).toMatchObject({ value: 'Not known', tone: 'unknown' });
+    expect(fact(rec([{}, { public_exploit: true }], [{}]), 'Public exploit')).toMatchObject({ value: 'Yes', tone: 'bad' });
+    expect(fact(rec([{}], [{}]), 'Public exploit')).toMatchObject({ value: 'Not known', tone: 'unknown' });
+  });
+
+  it('reads login from the headline placement only', () => {
+    expect(fact(rec([{ no_login: true }], [{}]), 'Login needed')).toMatchObject({ value: 'No', tone: 'bad' });
+    expect(fact(rec([{ requires_login: true }], [{}]), 'Login needed')).toMatchObject({ value: 'Yes', tone: 'ok' });
+    expect(fact(rec([{}, { no_login: true }], [{}]), 'Login needed')).toMatchObject({ value: 'Not stated', tone: 'unknown' });
+  });
+
+  it('summarises the fix across affected rows', () => {
+    expect(fact(rec([{}], [{ fixed: '1.2' }, { fixed: '2.3' }]), 'Fix')).toMatchObject({ value: 'Available', tone: 'ok' });
+    expect(fact(rec([{}], [{ fixed: '1.2' }, {}]), 'Fix')).toMatchObject({ value: 'Partial', tone: 'bad' });
+    expect(fact(rec([{}], [{}]), 'Fix')).toMatchObject({ value: 'None yet', tone: 'bad' });
+    expect(fact(rec([{}], [{ fixed: '[fix to confirm]' }]), 'Fix')).toMatchObject({ value: 'To confirm', tone: 'unknown' });
+    expect(fact(rec([{}], [{ fixed: '1.2', vulnerable: '[versions to confirm]' }]), 'Fix')).toMatchObject({ value: 'Available', tone: 'ok' });
+  });
+});
+
+describe('coverageLine', () => {
+  type S = 'closed' | 'closed_for_that_app' | 'open' | 'weaker';
+  const v = ['a', 'b', 'c'];
+  const e = (...s: S[]) => s.map((status, i) => ({ vector: v[i], status }));
+
+  it('says all ways in are closed', () => {
+    expect(coverageLine(v, e('closed', 'closed_for_that_app', 'closed'))).toBe('Closes all 3 ways in');
+    expect(coverageLine(['a'], e('closed'))).toBe('Closes the one way in');
+  });
+
+  it('counts closed, partial and open parts', () => {
+    expect(coverageLine(v, e('closed', 'closed', 'open'))).toBe('Closes 2 of 3 ways in · 1 left open');
+    expect(coverageLine(v, e('closed', 'weaker', 'open'))).toBe('Closes 1 of 3 ways in · partial for 1 · 1 left open');
+    expect(coverageLine(v, e('closed', 'closed', 'weaker'))).toBe('Closes 2 of 3 ways in · partial for 1');
+  });
+
+  it('starts with a capital when nothing is closed', () => {
+    expect(coverageLine(v, e('weaker', 'weaker', 'weaker'))).toBe('Partial for 3 of 3 ways in');
+    expect(coverageLine(v, e('weaker', 'open', 'open'))).toBe('Partial for 1 of 3 ways in · 2 left open');
+    expect(coverageLine(v, e('open', 'open', 'open'))).toBe('Leaves all 3 ways in open');
+  });
+
+  it('treats a way in with no effect entry as open, and uses the singular for one', () => {
+    expect(coverageLine(v, e('closed'))).toBe('Closes 1 of 3 ways in · 2 left open');
+    expect(coverageLine(['a'], [])).toBe('Leaves the one way in open');
+    expect(coverageLine(['a'], e('weaker'))).toBe('Partial for 1 of 1 way in');
   });
 });

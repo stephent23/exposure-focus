@@ -1,5 +1,5 @@
 ---
-// The public change log: every dated change to this verdict, newest first, each with its source.
+// The public change log as a fold: every dated change to this verdict, newest first, each with its source.
 import '../../styles/verdict/changes.css';
 import Text from '../Text.astro';
 import { changeHeadline, niceDate, sortedChanges } from '../../lib/verdict-view';
@@ -12,32 +12,33 @@ const changes = sortedChanges(Astro.props.record.changes);
 ---
 
 {changes.length > 0 && (
-  <section class="sec" aria-labelledby="changes-heading">
-    <h2 id="changes-heading">How this verdict has changed</h2>
-    <p class="sub">Every change is dated and linked to the evidence behind it. Newest first.</p>
-    <ol class="changes">
-      {changes.map((c) => {
-        const headline = changeHeadline(c);
-        return (
-          <li class="change">
-            <time datetime={c.date}>{niceDate(c.date)}</time>
-            <div class="change-body">
-              {headline && (
-                <p class="change-move">
-                  {c.placement}:{' '}
-                  <span class={`badge t${c.from_tier}`}>Tier {c.from_tier}</span>
-                  <span aria-hidden="true"> → </span><span class="sr-only"> to </span>
-                  <span class={`badge t${c.to_tier}`}>Tier {c.to_tier}</span>
+  <section aria-labelledby="changes-heading">
+    <details class="fold">
+      <summary><h2 id="changes-heading">How this verdict has changed</h2> <span class="fold-hint">{changes.length}</span></summary>
+      <ol class="changes">
+        {changes.map((c) => {
+          const headline = changeHeadline(c);
+          return (
+            <li class="change">
+              <time datetime={c.date}>{niceDate(c.date)}</time>
+              <div class="change-body">
+                {headline && (
+                  <p class="change-move">
+                    {c.placement}:{' '}
+                    <span class={`badge t${c.from_tier}`}>Tier {c.from_tier}</span>
+                    <span aria-hidden="true"> → </span><span class="sr-only"> to </span>
+                    <span class={`badge t${c.to_tier}`}>Tier {c.to_tier}</span>
+                  </p>
+                )}
+                <p class="change-reason"><Text text={c.reason} /></p>
+                <p class="change-src">
+                  {c.source_url.startsWith('http') ? <a href={c.source_url}>Source<span class="sr-only"> for the change on {niceDate(c.date)}</span></a> : <span class="placeholder">{c.source_url}</span>}
                 </p>
-              )}
-              <p class="change-reason"><Text text={c.reason} /></p>
-              <p class="change-src">
-                {c.source_url.startsWith('http') ? <a href={c.source_url}>Source<span class="sr-only"> for the change on {niceDate(c.date)}</span></a> : <span class="placeholder">{c.source_url}</span>}
-              </p>
-            </div>
-          </li>
-        );
-      })}
-    </ol>
+              </div>
+            </li>
+          );
+        })}
+      </ol>
+    </details>
   </section>
 )}

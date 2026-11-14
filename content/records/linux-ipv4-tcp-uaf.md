@@ -3,16 +3,30 @@ slug: linux-ipv4-tcp-uaf
 name: Linux IPv4 TCP use-after-free
 aliases: []
 cves: [CVE-2026-98432]
-summary: Red Hat says a race in the Linux kernel's IPv4 TCP code lets an unauthenticated remote attacker corrupt kernel memory. Anthropic reports remote root in its own lab against a server with an MPTCP listener, but the exploit, kernel version and setup are not published and no exploitation is reported.
+summary: Red Hat says a race in the Linux kernel's IPv4 TCP code lets a remote attacker corrupt kernel memory without login. Anthropic reports lab-only remote root; no exploit is public, no attacks reported.
 attack: rce
 status: published
+published: 2026-11-09
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
-leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab, but has not published how, and no attacks are reported. Internet-facing Linux servers should have the kernel update scheduled ahead of normal patching, with a watch for any public exploit.
+leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.
+affected:
+  - product: "Linux kernel 5.10, 5.15, 6.1, 6.6"
+    vulnerable: "[versions to confirm]"
+    fixed: "5.10.272, 5.15.223, 6.1.190, 6.6.159"
+  - product: "Linux kernel 6.12, 6.18, 7.2, 7.3"
+    vulnerable: "[versions to confirm]"
+    fixed: "6.12.113, 6.18.56, 7.2.10, 7.3"
+  - product: "RHEL 8, 9, 10 and OpenShift Container Platform 4"
+    vulnerable: Listed by Red Hat as affected; MPTCP is off by default
+exposed_when:
+  - Server accepts IPv4 TCP connections from the internet
+  - "The reported lab exploit: an MPTCP listener (the bug itself is not specific to MPTCP)"
+  - "Similar flaw: request-socket migration is enabled"
 
 applies_check:
-  - question: Do you run Linux servers that accept IPv4 TCP connections from the internet, and are their kernels unpatched?
-    how_to_check: "Check each server's kernel with `uname -r` against your distribution's security tracker for CVE-2026-98432. Upstream fixes are in 5.10.272, 5.15.223, 6.1.190, 6.6.159, 6.12.113, 6.18.56, 7.2.10 and 7.3, but vendor kernels carry their own version numbers, so use the distribution's tracker. To see whether MPTCP listeners exist (the route used in the researchers' exploit), check `sysctl net.mptcp.enabled` and the listening services."
+  - question: Do internet-facing Linux servers accept IPv4 TCP, and are their kernels unpatched?
+    how_to_check: "Run `uname -r` and compare with your distribution's security tracker for CVE-2026-98432; vendor kernels carry their own version numbers. For MPTCP listeners, check `sysctl net.mptcp.enabled` and the listening services."
 
 placements:
   - name: Internet-facing server with an MPTCP listener
@@ -49,7 +63,7 @@ mitigations:
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: closed }
       - { vector: "Request-socket migration, if enabled (a similar flaw)", status: closed }
-    takes: A kernel update and a reboot of each server. Live patching, where your distribution offers it for this flaw, can avoid the reboot.
+    takes: A kernel update and a reboot of each server. Live patching can avoid the reboot where offered.
     might_break: A new kernel can change drivers and behaviour. Test first on a representative host.
     official_guides:
       - https://access.redhat.com/security/vulnerabilities/RHSB-2026-016

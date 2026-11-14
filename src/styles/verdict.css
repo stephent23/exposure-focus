@@ -1,15 +1,12 @@
-/* Verdict page: the two-column layout and styles shared by its parts. Each part has its own stylesheet in styles/verdict/. */
-.record code { font-family: var(--font-mono); font-size: 0.9em; background: #f2f4f7; padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
-.sec > .sub { max-width: 66ch; margin-top: 6px; font-size: 14px; color: var(--muted); }
+/* Verdict page: the decision in one column, key dates beside it on wide screens. Each part has its own stylesheet in styles/verdict/. */
+.record { display: grid; grid-template-columns: minmax(0, 1fr); }
+.record > * { min-width: 0; }
+.record code { font-family: var(--font-mono); font-size: 0.9em; background: var(--panel); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
+.record .sec { margin-top: 28px; }
+.record .sec > h2, .timeline h2, .folds-intro { padding-bottom: 6px; border-bottom: 1px solid var(--line-strong); font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
 
-/* Main column on the left, a narrow sidebar on the right that stays in view on wide screens. */
-.verdict-layout { margin-top: 40px; }
-.verdict-main > :first-child { margin-top: 0; }
-.verdict-layout .sidebar { margin-bottom: 40px; }
-
-@media (min-width: 1000px) {
-  .verdict-layout { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 56px; align-items: stretch; }
-  .verdict-layout .sidebar { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; gap: 16px; margin-bottom: 0; }
-  .verdict-layout .toc { position: sticky; top: 24px; width: 100%; }
-  .verdict-main { grid-column: 1; grid-row: 1; }
+@media (min-width: 960px) {
+  .record { grid-template-columns: minmax(0, 1fr) 290px; column-gap: 48px; }
+  .record > * { grid-column: 1; }
+  .record > .timeline { grid-column: 2; grid-row: 1 / span 6; align-self: start; position: sticky; top: 16px; }
 }

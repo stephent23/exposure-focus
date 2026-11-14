@@ -3,21 +3,30 @@ slug: apache-httpd-mod-http2
 name: Apache HTTP Server mod_http2 remote code execution
 aliases: ["mod_http2 assign_headers race"]
 cves: [CVE-2026-119618]
-summary: "A flaw in the HTTP/2 module of Apache HTTP Server 2.4.55 to 2.4.70 lets an outsider with no login corrupt the server's memory, and possibly run commands, on a web server that has HTTP/2 turned on. It is fixed in 2.4.71 and in distribution packages. Public proof-of-concept code only crashes Apache worker processes, Red Hat says a reliable exploit has been demonstrated without naming it, and no attacks have been reported."
+summary: "A flaw in Apache HTTP Server's HTTP/2 module lets an outsider with no login corrupt memory, and possibly run commands, where HTTP/2 is on. Public code only crashes workers; no attacks are reported."
 attack: rce
 status: published
+published: 2026-11-13
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
 
-leadership_quote: "A flaw in the HTTP/2 part of the Apache web server, one of the most widely used web servers, can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is switched on, and no attacks have been reported so far. The public attack code only crashes the server, and the reported takeover has not been shown in public, so internet-facing Apache servers with HTTP/2 on should have the update scheduled ahead of normal patching, with HTTP/2 switched off where no update is available yet."
+leadership_quote: "A flaw in the Apache web server can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is on, and no attacks are reported. Schedule the update for internet-facing servers ahead of normal patching; switch HTTP/2 off where no update exists yet."
+affected:
+  - product: Apache HTTP Server 2.4
+    vulnerable: 2.4.55 to 2.4.70
+    fixed: "2.4.71, or a distribution package with the fix"
+  - product: Standalone mod_h2 module
+    vulnerable: 2.0.8 to 2.0.42
+exposed_when:
+  - "HTTP/2 is on: a Protocols directive lists h2 or h2c and mod_http2 is loaded"
 
 applies_check:
   - question: Do you run an affected Apache HTTP Server or mod_http2 build?
-    how_to_check: "Upstream, httpd 2.4.55 to 2.4.70 and the standalone mod_h2 module 2.0.8 to 2.0.42 are affected. Run `httpd -v`, `apache2 -v` or `apachectl -v`, then check the distribution package, because distributions fix it without moving to 2.4.71: Ubuntu's fixed packages carry numbers such as `2.4.58-1ubuntu8.19`, so a scanner that only compares with 2.4.71 will report fixed Ubuntu servers as vulnerable. On RHEL check `rpm -q mod_http2`; Red Hat says mod_http2 before 2.0.8 lacks the affected code and RHEL 8 and earlier are not affected. Tenable lists detection plugins, including 115821 (Web App Scanning) and per-distribution Nessus plugins. Also look inside container images and appliances that bundle Apache."
+    how_to_check: "Run `httpd -v` or `apache2 -v`, then check the distribution package: distributions fix it without moving to 2.4.71. Check container images and appliances too."
   - question: Is HTTP/2 turned on anywhere in your Apache configuration?
-    how_to_check: "Search the configuration for the `Protocols` directive, server-wide and in every virtual host: Red Hat suggests `grep -r 'Protocols' /etc/httpd/conf/ /etc/httpd/conf.d/` (on Debian and Ubuntu, search `/etc/apache2`). HTTP/2 is on where the list includes `h2` (over TLS) or `h2c` (cleartext). Check that mod_http2 is loaded with `httpd -M | grep http2`, or on RHEL `grep http2 /etc/httpd/conf.modules.d/*.conf`."
+    how_to_check: "Search every `Protocols` directive for `h2` or `h2c`: `grep -r 'Protocols' /etc/httpd/conf/ /etc/httpd/conf.d/` (or `/etc/apache2`). Confirm with `httpd -M | grep http2`."
   - question: Can an outsider talk HTTP/2 to Apache directly?
-    how_to_check: "Red Hat's client check is `curl -kI --http2 https://localhost`: a reply of `HTTP/2 200` means HTTP/2 is on, `HTTP/1.1 200 OK` means it is off. If a load balancer, CDN or reverse proxy sits in front, also find out whether it passes HTTP/2 through to Apache or speaks HTTP/1.1 to it; a test from outside only shows the front door."
+    how_to_check: "Run `curl -kI --http2 https://localhost`: `HTTP/2 200` means it is on. Find out whether any proxy or CDN in front passes HTTP/2 through to Apache."
 
 placements:
   - name: Internet-facing Apache 2.4.55 to 2.4.70 with HTTP/2 enabled
@@ -30,19 +39,19 @@ placements:
       - Red Hat says public research has demonstrated a reliable exploit against a default-configured server, but names no research and no code-execution demonstration is published, so under the rubric it does not count.
       - No exploitation in the wild has been reported, for either the crash or code execution.
     tier: 3
-    action: "Prioritised: schedule the update to Apache HTTP Server 2.4.71 or your distribution's fixed package ahead of your normal patching cycle, and restart Apache. Where no fixed package exists yet (for example the archived standalone mod_h2 module, or a vendor still preparing one), switch HTTP/2 off until it does. Watch for attacks or a public code-execution exploit, which would move this up."
+    action: "Schedule the update to 2.4.71 or your distribution's fixed package ahead of normal patching. Where no fix exists yet, switch HTTP/2 off."
   - name: Apache with HTTP/2 not enabled
     facts: { vendor_stated_exposure_condition: false }
     why:
       - Apache and Red Hat say only servers with HTTP/2 (h2 or h2c) enabled through the Protocols directive are affected; servers serving only HTTP/1.1 are not.
     tier: 4
-    action: Routine patching. Check every virtual host before relying on this, and update anyway in your normal cycle.
+    action: Routine patching. Check every virtual host before relying on this.
   - name: Apache with HTTP/2 reachable only from internal networks
     facts: { reachable: false, no_login: true, public_exploit: true, exploit_achieves: significant, impact: critical }
     why:
       - An outsider cannot reach the server directly.
     tier: 4
-    action: Routine patching. Move up if the server can be reached from the internet or from untrusted networks, including through a proxy that passes HTTP/2 through.
+    action: Routine patching. Move up if reachable from the internet or untrusted networks.
 
 vectors:
   - Attacker sends crafted HTTP/2 traffic to the web server
@@ -167,3 +176,13 @@ sources:
 The call moves to Tier 2 if the crash is exploited in the wild or a code-execution exploit is published, and to Tier 1 if code execution is exploited in the wild.
 
 No WAF or CDN vendor rule for this CVE was found. HTTP/2 is often terminated at a CDN or load balancer, which may shield Apache behind it, but no vendor has said so for this flaw.
+
+## Checking in more detail
+
+Upstream, httpd 2.4.55 to 2.4.70 and the standalone mod_h2 module 2.0.8 to 2.0.42 are affected. Run `httpd -v`, `apache2 -v` or `apachectl -v`, then check the distribution package, because distributions fix it without moving to 2.4.71: Ubuntu's fixed packages carry numbers such as `2.4.58-1ubuntu8.19`, so a scanner that only compares with 2.4.71 will report fixed Ubuntu servers as vulnerable. On RHEL check `rpm -q mod_http2`; Red Hat says mod_http2 before 2.0.8 lacks the affected code and RHEL 8 and earlier are not affected. Tenable lists detection plugins, including 115821 (Web App Scanning) and per-distribution Nessus plugins. Also look inside container images and appliances that bundle Apache.
+
+Search the configuration for the `Protocols` directive, server-wide and in every virtual host: Red Hat suggests `grep -r 'Protocols' /etc/httpd/conf/ /etc/httpd/conf.d/` (on Debian and Ubuntu, search `/etc/apache2`). HTTP/2 is on where the list includes `h2` (over TLS) or `h2c` (cleartext). Check that mod_http2 is loaded with `httpd -M | grep http2`, or on RHEL `grep http2 /etc/httpd/conf.modules.d/*.conf`.
+
+Red Hat's client check is `curl -kI --http2 https://localhost`: a reply of `HTTP/2 200` means HTTP/2 is on, `HTTP/1.1 200 OK` means it is off. If a load balancer, CDN or reverse proxy sits in front, also find out whether it passes HTTP/2 through to Apache or speaks HTTP/1.1 to it; a test from outside only shows the front door.
+
+Where no fixed package exists yet, for example the archived standalone mod_h2 module or a vendor still preparing one, HTTP/2 stays off until it does.

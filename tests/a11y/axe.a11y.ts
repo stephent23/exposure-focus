@@ -65,6 +65,22 @@ test.describe('axe at phone width', () => {
   }
 });
 
+test('keyboard: a record page fold summary is focusable and shows visible focus', async ({ page }) => {
+  await page.goto(recordRoute);
+  const summary = page.locator('summary:visible').first(); // the plain-text fallback's summary is hidden once the copy button works
+  await summary.focus();
+  const info = await summary.evaluate((el) => {
+    const s = getComputedStyle(el);
+    return {
+      focused: document.activeElement === el,
+      outline: s.outlineStyle !== 'none' && parseFloat(s.outlineWidth) > 0,
+      shadow: s.boxShadow !== 'none'
+    };
+  });
+  expect(info.focused, 'first summary takes focus').toBe(true);
+  expect(info.outline || info.shadow, 'first summary focus is visible').toBe(true);
+});
+
 test('keyboard: skip link first, then the first card link, with visible focus', async ({ page }) => {
   await page.goto('/');
   const focusInfo = () =>

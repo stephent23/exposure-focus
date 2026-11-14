@@ -1,69 +1,88 @@
 ---
-// The home page: every verdict grouped by tier, with a filter.
+// The home page: a briefing. What changed lately, then every verdict as one dense row, most urgent first.
 import Base from '../layouts/Base.astro';
 import '../styles/home.css';
 import { ATTACKS } from '../lib/attacks';
 import { buildDate } from '../lib/today';
 import { getAllRecords } from '../lib/records';
 import { TIERS, TIER_NUMBERS } from '../lib/tiers';
-import { groupForHome } from '../lib/home';
-import { headlinePlacement, isStale, sortedPlacements } from '../schema/record';
+import { freshness, groupForHome, lastChanged, recentActivity } from '../lib/home';
+import { niceDate, shortDate } from '../lib/verdict-view';
+import { isStale, sortedPlacements } from '../schema/record';
 
 const today = buildDate();
 const groups = groupForHome(await getAllRecords());
 const records = groups.flatMap((g) => g.records);
-const asOf = records.map((r) => r.evidence_as_of).sort().at(-1);
+const activity = recentActivity(records);
+const checked = records.map((r) => r.evidence_as_of).sort().at(-1);
+const exploited = (r: (typeof records)[number]) => r.placements.some((p) => p.facts.exploited === true);
+const FRESH = { new: 'New', changed: 'Changed' } as const;
 ---
 
 <Base title="Exposure Focus" current="home">
   <section class="hero">
-    <p class="eyebrow">Evidence as of {asOf ?? 'n/a'} (UTC)</p>
-    <h1>What needs a response, and what can wait.</h1>
-    <p class="lede">
-      Independent verdicts for security teams. Every call shows its evidence and its date, so you can defend it to your boss.
-    </p>
-    <p class="note">A placement is where the software sits in your setup, for example internet-facing or inside your network. Each verdict gives a tier for every placement.</p>
-    <ul class="pills" aria-label="Verdicts by highest tier">
-      {groups.map(({ tier, records: group }) => (
-        <li>
-          {group.length > 0 ? (
-            <a class={`pill t${tier}`} href={`#tier-${tier}`}><b>{group.length}</b> <span>{TIERS[tier].name}</span></a>
-          ) : (
-            <span class={`pill t${tier} empty`}><b>0</b> <span>{TIERS[tier].name}</span></span>
-          )}
-        </li>
-      ))}
-    </ul>
-
-    <form class="filters" id="filters" role="search" aria-label="Filter verdicts">
-      <label class="sr-only" for="q">Search name, CVE or alias</label>
-      <input id="q" class="search" type="search" placeholder="Search name, CVE or alias" autocomplete="off" />
-      <fieldset class="seg">
-        <legend class="sr-only">Show verdicts with a tier of</legend>
-        {TIER_NUMBERS.map((tier) => (
-          <label class={`seg-item t${tier}`}><input type="checkbox" name="tier" value={tier} /><span>Tier {tier}</span></label>
+    <div class="brief-head">
+      <p class="eyebrow">Evidence checked to {checked ? niceDate(checked) : 'n/a'} (UTC)</p>
+      <h1>What needs a response, and what can wait.</h1>
+      <p class="lede">Independent verdicts on publicised vulnerabilities: one tier per placement, each with its evidence and date.</p>
+      <ul class="tally" aria-label="Verdicts by highest tier">
+        {groups.map(({ tier, records: group }) => (
+          <li class={`t${tier}`}>
+            {group.length > 0 ? (
+              <a href={`#tier-${tier}`}><b>{group.length}</b> <span>{TIERS[tier].name}</span></a>
+            ) : (
+              <span class="empty"><b>0</b> <span>{TIERS[tier].name}</span></span>
+            )}
+          </li>
         ))}
-      </fieldset>
-      <label class="sr-only" for="kind">Type of attack</label>
-      <select id="kind" class="select">
-        <option value="">All attack types</option>
-        {Object.entries(ATTACKS).map(([key, a]) => <option value={key}>{a.name}</option>)}
-      </select>
-      <button type="reset" class="reset" id="reset" hidden>Clear</button>
-      <p class="count" id="count" role="status" aria-live="polite">{records.length} verdicts</p>
-    </form>
+        <li class="tally-hot"><span><b>{records.filter(exploited).length}</b> <span>Exploited in attacks</span></span></li>
+      </ul>
+    </div>
+
+    {activity.length > 0 && (
+      <section class="activity" aria-labelledby="activity-heading">
+        <h2 id="activity-heading">Latest changes</h2>
+        <ol>
+          {activity.map((a) => (
+            <li class="activity-row">
+              <time datetime={a.date}>{shortDate(a.date)}</time>
+              <span><a href={`/verdicts/${a.slug}/`}>{a.name}</a> <span class="activity-detail">{a.detail}</span></span>
+            </li>
+          ))}
+        </ol>
+      </section>
+    )}
   </section>
+
+  <form class="filters" id="filters" role="search" aria-label="Filter verdicts">
+    <label class="sr-only" for="q">Search name, CVE or alias</label>
+    <input id="q" class="search" type="search" placeholder="Search name, CVE or alias" autocomplete="off" />
+    <fieldset class="seg">
+      <legend class="sr-only">Show verdicts with a tier of</legend>
+      {TIER_NUMBERS.map((tier) => (
+        <label class={`seg-item t${tier}`}><input type="checkbox" name="tier" value={tier} /><span>Tier {tier}</span></label>
+      ))}
+    </fieldset>
+    <label class="sr-only" for="kind">Type of attack</label>
+    <select id="kind" class="select">
+      <option value="">All attack types</option>
+      {Object.entries(ATTACKS).map(([key, a]) => <option value={key}>{a.name}</option>)}
+    </select>
+    <button type="reset" class="reset" id="reset" hidden>Clear</button>
+    <p class="count" id="count" role="status" aria-live="polite">{records.length} verdicts</p>
+  </form>
 
   <div id="all">
     {groups.filter((g) => g.records.length > 0).map(({ tier, records: group }) => (
       <section class={`band t${tier}`} aria-labelledby={`tier-${tier}`} data-band>
         <header>
-          <h2 id={`tier-${tier}`}>{TIERS[tier].name}</h2>
+          <h2 id={`tier-${tier}`}><span class="badge">Tier {tier}</span> {TIERS[tier].name}</h2>
           <p>{TIERS[tier].meaning}</p>
         </header>
         <div class="cards">
           {group.map((record) => {
-            const primary = headlinePlacement(record);
+            const fresh = freshness(record, today);
+            const changed = lastChanged(record);
             return (
               <article
                 class="card"
@@ -72,25 +91,30 @@ const asOf = records.map((r) => r.evidence_as_of).sort().at(-1);
                 data-kind={record.attack}
                 data-text={[record.name, ...record.cves, ...record.aliases].join(' ').toLowerCase()}
               >
-                <div class="badges">
-                  <span class="badge plain">{ATTACKS[record.attack].name}</span>
-                  {record.evidence.some((e) => e.confidence === 'reported') && <span class="badge plain">Some facts unconfirmed</span>}
-                  {isStale(record, today) && <span class="badge stale">Overdue for review</span>}
-                </div>
-                <div>
+                <div class="card-main">
                   <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
                   <p class="mono">{record.cves.join(' · ')}{record.aliases.length > 0 && ` · also ${record.aliases.join(', ')}`}</p>
+                  <p class="summary">{record.summary}</p>
+                  <p class="tags">
+                    <span>{ATTACKS[record.attack].name}</span>
+                    {exploited(record) && <span class="tag-hot">Exploited in attacks</span>}
+                    {record.evidence.some((e) => e.confidence === 'reported') && <span>Some facts unconfirmed</span>}
+                    {isStale(record, today) && <span class="tag-stale">Overdue for review</span>}
+                  </p>
                 </div>
-                <p class="summary">{record.summary}</p>
                 <ul class="rows" aria-label="Placements">
                   {sortedPlacements(record).map((placement) => (
                     <li>
-                      <span>{placement.name}</span>
                       <span class={`badge t${placement.tier}`}>Tier {placement.tier}</span>
+                      <span>{placement.name}</span>
                     </li>
                   ))}
                 </ul>
-                <p class="todo"><strong>{primary.name}:</strong> {primary.action}</p>
+                <p class="when">
+                  {fresh && <span class="fresh">{FRESH[fresh]}</span>}
+                  <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>
+                  {changed && <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>}
+                </p>
               </article>
             );
           })}
@@ -100,14 +124,7 @@ const asOf = records.map((r) => r.evidence_as_of).sort().at(-1);
   </div>
   <p id="none" class="note" hidden>No verdicts match these filters. Clear them to see every verdict.</p>
 
-  <aside class="panel">
-    <h2>Why every verdict is split by placement</h2>
-    <p class="prose">
-      A vulnerability is not urgent everywhere it exists. The same flaw can need an emergency response on an internet-facing server and
-      your normal patching inside the network. Each placement gets its own tier, so effort goes where it reduces real risk.
-    </p>
-    <p><a href="/rubric/">See how verdicts are decided</a></p>
-  </aside>
+  <p class="note home-foot">Each verdict gives a tier per placement: where the software sits in your setup. <a href="/rubric/">How verdicts are decided</a></p>
 
   <script>
     import '../scripts/filters';

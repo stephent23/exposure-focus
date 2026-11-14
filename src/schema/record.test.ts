@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { headlineTier, isStale, parseRecord, recordSchema, sortedPlacements } from './record';
+import { CAPS, headlineTier, isStale, parseRecord, recordSchema, sortedPlacements } from './record';
 
 function validRecord() {
   return {
@@ -11,9 +11,11 @@ function validRecord() {
     summary: 'A sample record.',
     attack: 'rce',
     status: 'published',
+    published: '2026-11-01',
     evidence_as_of: '2026-11-08',
     review_until: '2026-12-08',
     leadership_quote: 'A sentence a boss can read.',
+    affected: [{ product: 'Sample 1.x', vulnerable: 'below 1.2.3', fixed: '1.2.3' }],
     applies_check: [{ question: 'Is it exposed?', how_to_check: 'Check the listener.' }],
     placements: [
       {
@@ -296,5 +298,79 @@ describe('change log', () => {
     const older = { ...move, date: '2026-10-20', from_tier: 3, to_tier: 2 };
     expect(recordSchema.safeParse(withChanges([older, move])).success).toBe(true);
     expect(recordSchema.safeParse(withChanges([older])).success).toBe(false);
+  });
+});
+
+describe('affected and exposed_when', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a loose fixture the tests mutate
+  const base = () => validRecord() as Record<string, any>;
+  const ok = (r: unknown) => expect(recordSchema.safeParse(r).success).toBe(true);
+  const bad = (r: unknown) => expect(recordSchema.safeParse(r).success).toBe(false);
+
+  it('requires at least one affected row', () => {
+    const missing = base();
+    delete missing.affected;
+    bad(missing);
+    bad({ ...base(), affected: [] });
+  });
+
+  it('allows a row with no fix, and rejects unknown keys', () => {
+    ok({ ...base(), affected: [{ product: 'Sample', vulnerable: '[versions to confirm]' }] });
+    bad({ ...base(), affected: [{ product: 'Sample', vulnerable: 'all', extra: 'x' }] });
+  });
+
+  it('caps product, vulnerable and fixed', () => {
+    for (const [key, max] of [['product', CAPS.product], ['vulnerable', CAPS.vulnerable], ['fixed', CAPS.fixed]] as const) {
+      const row = (n: number) => ({ product: 'P', vulnerable: 'all', fixed: '1', [key]: 'a'.repeat(n) });
+      ok({ ...base(), affected: [row(max)] });
+      bad({ ...base(), affected: [row(max + 1)] });
+    }
+  });
+
+  it('limits exposed_when to 1 to 4 items of at most the cap', () => {
+    ok({ ...base(), exposed_when: ['a'.repeat(CAPS.exposedWhen), 'b', 'c', 'd'] });
+    bad({ ...base(), exposed_when: [] });
+    bad({ ...base(), exposed_when: ['a', 'b', 'c', 'd', 'e'] });
+    bad({ ...base(), exposed_when: ['a'.repeat(CAPS.exposedWhen + 1)] });
+  });
+});
+
+describe('length caps', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a loose fixture the tests mutate
+  type Rec = Record<string, any>;
+  const cases: [keyof typeof CAPS, (r: Rec, v: string) => void][] = [
+    ['summary', (r, v) => (r.summary = v)],
+    ['leadershipQuote', (r, v) => (r.leadership_quote = v)],
+    ['placementName', (r, v) => (r.placements[0].name = v)],
+    ['placementAction', (r, v) => (r.placements[0].action = v)],
+    ['question', (r, v) => (r.applies_check[0].question = v)],
+    ['howToCheck', (r, v) => (r.applies_check[0].how_to_check = v)],
+    ['mitigationTitle', (r, v) => (r.mitigations[0].title = v)],
+    ['mitigationTakes', (r, v) => (r.mitigations[0].takes = v)]
+  ];
+  for (const [name, apply] of cases) {
+    it(`${name}: passes at the cap, fails one over and names the cap`, () => {
+      const cap = CAPS[name];
+      const atCap = validRecord() as Rec;
+      apply(atCap, 'a'.repeat(cap));
+      expect(recordSchema.safeParse(atCap).success).toBe(true);
+      const over = validRecord() as Rec;
+      apply(over, 'a'.repeat(cap + 1));
+      const result = recordSchema.safeParse(over);
+      expect(result.success).toBe(false);
+      expect(JSON.stringify(result.error?.issues)).toContain(`${cap}`);
+    });
+  }
+});
+
+describe('published date', () => {
+  it('is required', () => {
+    const rest = { ...validRecord() } as Record<string, unknown>;
+    delete rest.published;
+    expect(recordSchema.safeParse(rest).success).toBe(false);
+  });
+  it('cannot be after evidence_as_of', () => {
+    expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-08' }).success).toBe(true);
+    expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-09' }).success).toBe(false);
   });
 });
