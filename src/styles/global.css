@@ -1,40 +1,41 @@
 /* Site-wide styles: colour tokens, base, type, header, footer and the badges and panels every page shares. */
 /* --bg, --fg, --edge and --wash default to neutral grey; .t1 to .t4 override them for each tier. */
 :root {
-  --ink: #101828;
-  --ink-2: #344054;
-  --muted: #475467;
-  --line: #eaecf0;
-  --line-strong: #d0d5dd;
-  --panel: #f9fafb;
-  --link: #175cd3;
-  --link-hover: #194185;
+  --ink: #16181d;
+  --ink-2: #33373f;
+  --muted: #5a6068;
+  --line: #dedbd2;
+  --line-strong: #b9b5aa;
+  --panel: #f3f1ea;
+  --paper: #fbfaf6;
+  --link: #123f8c;
+  --link-hover: #0a2550;
 
-  --tier1-bg: #fee4e2;
-  --tier1-fg: #912018;
-  --tier2-bg: #fdeaa8;
-  --tier2-fg: #5c3d00;
-  --tier3-bg: #d1e9ff;
-  --tier3-fg: #194185;
+  --tier1-bg: #f7dcd8;
+  --tier1-fg: #8a1c15;
+  --tier2-bg: #f8e6ad;
+  --tier2-fg: #5a4100;
+  --tier3-bg: #dae6f3;
+  --tier3-fg: #1c456f;
 
-  --bg: #eaecf0;
+  --bg: #e3e0d8;
   --fg: var(--ink-2);
-  --edge: #667085;
+  --edge: #6b7078;
   --wash: var(--panel);
 
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 }
-.t1 { --bg: var(--tier1-bg); --fg: var(--tier1-fg); --edge: #d92d20; --wash: #fef3f2; }
-.t2 { --bg: var(--tier2-bg); --fg: var(--tier2-fg); --edge: #eaa800; --wash: #fffcf0; }
-.t3 { --bg: var(--tier3-bg); --fg: var(--tier3-fg); --edge: #1570ef; --wash: #f5faff; }
-.t4 { --bg: #eaecf0; --fg: var(--ink-2); --edge: #667085; --wash: var(--panel); }
+.t1 { --bg: var(--tier1-bg); --fg: var(--tier1-fg); --edge: #c4554d; --wash: #fbeeed; }
+.t2 { --bg: var(--tier2-bg); --fg: var(--tier2-fg); --edge: #d1a32a; --wash: #fdf6de; }
+.t3 { --bg: var(--tier3-bg); --fg: var(--tier3-fg); --edge: #5b84b1; --wash: #eef3f9; }
+.t4 { --bg: #e3e0d8; --fg: var(--ink-2); --edge: #6b7078; --wash: var(--panel); }
 
 /* Base */
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
-body { margin: 0; background: #fff; color: var(--ink); font-family: var(--font-sans); font-size: 15px; line-height: 1.6; overflow-wrap: break-word; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: 14.5px; line-height: 1.55; overflow-wrap: break-word; }
 a { color: var(--link); overflow-wrap: anywhere; }
 a:hover { color: var(--link-hover); }
 :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
@@ -42,54 +43,54 @@ a:hover { color: var(--link-hover); }
 .skip { position: absolute; left: -999px; top: 0; background: var(--ink); color: #fff; padding: 12px 16px; }
 .skip:focus { left: 0; z-index: 10; }
 
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 24px; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
 
 /* Type */
 .eyebrow, .mono { font-family: var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
 .eyebrow { font-size: 13px; margin: 0 0 16px; }
 .mono { font-size: 13px; }
-h1 { font-size: clamp(26px, 4vw, 34px); line-height: 1.1; letter-spacing: -0.02em; margin: 0; max-width: 820px; text-wrap: balance; }
-h2 { font-size: 18px; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
-h3 { font-size: 15px; margin: 0; }
+h1 { font-size: clamp(22px, 3vw, 28px); line-height: 1.15; letter-spacing: -0.02em; margin: 0; max-width: 820px; text-wrap: balance; }
+h2 { font-size: 16px; letter-spacing: -0.01em; margin: 0; text-wrap: balance; }
+h3 { font-size: 14.5px; margin: 0; }
 p { margin: 0; }
-.hero { padding-top: 40px; }
-.lede { font-size: 16px; color: var(--muted); max-width: 640px; margin-top: 14px; }
+.hero { padding-top: 28px; }
+.lede { font-size: 14.5px; color: var(--muted); max-width: 640px; margin-top: 14px; }
 .sub { color: var(--muted); margin-top: 8px; }
 .note { margin-top: 10px; font-size: 14px; color: var(--muted); max-width: 760px; }
 .prose { max-width: 760px; }
-.placeholder { background: var(--tier2-bg); color: var(--tier2-fg); padding: 0 4px; border-radius: 4px; }
-.sec { margin-top: 48px; }
+.placeholder { background: #fdf0c2; color: #4a3500; padding: 0 4px; border-radius: 4px; }
+.sec { margin-top: 36px; }
 .list { margin: 12px 0 0; padding-left: 20px; }
 .list li { margin-top: 6px; }
 .meta-line { font-size: 14px; color: var(--muted); }
 
 /* Header, footer and the weekly brief */
 .site-header { border-bottom: 1px solid var(--line); }
-.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 12px; padding-bottom: 12px; }
-.brand { font-weight: 700; font-size: 17px; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
+.site-header .wrap { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; padding-top: 2px; padding-bottom: 2px; }
+.brand { font-weight: 700; font-size: 16px; letter-spacing: -0.01em; color: var(--ink); text-decoration: none; min-height: 44px; display: inline-flex; align-items: center; }
 .site-header nav { display: flex; flex-wrap: wrap; gap: 4px; }
-.site-header nav a { padding: 8px 12px; font-size: 14px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; }
+.site-header nav a { padding: 10px 10px; font-size: 13px; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; }
 .site-header nav a:hover { color: var(--ink); border-bottom-color: var(--line-strong); }
 .site-header nav a[aria-current='page'] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
-.site-footer { border-top: 1px solid var(--line); margin-top: 64px; background: var(--panel); }
-.site-footer .wrap { padding-top: 28px; padding-bottom: 36px; font-size: 14px; color: var(--ink-2); }
+.site-footer { border-top: 1px solid var(--line-strong); margin-top: 56px; background: var(--panel); }
+.site-footer .wrap { padding-top: 28px; padding-bottom: 36px; font-size: 13px; color: var(--ink-2); }
 .site-footer small { display: block; margin-top: 8px; color: var(--muted); font-size: 13px; max-width: 640px; }
 .brief { margin-top: 20px; max-width: 560px; }
 .brief h2 { font-size: 16px; }
 .brief p { margin-top: 6px; }
-.button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 8px; background: var(--ink); color: #fff; font-weight: 600; text-decoration: none; }
+.button { display: inline-flex; align-items: center; min-height: 44px; padding: 0 18px; border-radius: 4px; background: var(--ink); color: #fff; font-weight: 600; text-decoration: none; }
 .button:hover { background: var(--ink-2); color: #fff; }
 .foot-links { margin-top: 4px; }
 .foot-links a { display: inline-flex; align-items: center; min-height: 44px; }
 
 /* Badges: tier badges carry colour, everything else is neutral */
 .badges { display: flex; flex-wrap: wrap; gap: 8px; }
-.badge { display: inline-block; font-weight: 600; font-size: 13px; border-radius: 6px; padding: 3px 10px; background: var(--bg); color: var(--fg); max-width: 100%; overflow-wrap: anywhere; }
-.badge.plain, .badge.stale { font-weight: 500; background: #fff; color: var(--ink-2); border: 1px solid var(--line-strong); }
+.badge { display: inline-block; font-weight: 600; font-size: 12px; line-height: 1.5; border-radius: 4px; padding: 2px 8px; background: var(--bg); color: var(--fg); max-width: 100%; overflow-wrap: anywhere; }
+.badge.plain, .badge.stale { font-weight: 500; background: transparent; color: var(--ink-2); border: 1px solid var(--line-strong); }
 .badge.stale { border-style: dashed; border-color: var(--muted); }
 
 .badge:not(.plain, .stale) { white-space: nowrap; }
-.panel { margin-top: 48px; background: var(--panel); border-radius: 8px; padding: 24px; }
+.panel { margin-top: 36px; background: var(--panel); border-radius: 4px; padding: 24px; }
 .panel h2 { font-size: 20px; margin-bottom: 4px; }
 .panel p { margin-top: 8px; color: var(--ink-2); }
 .sec .note { margin-top: 16px; font-size: 15px; color: var(--ink-2); }
@@ -101,3 +102,8 @@ p { margin: 0; }
   .hero { padding-top: 28px; }
   .panel { padding: 20px 16px; }
 }
+
+/* Small mono tags under a title: attack type and status flags. Words carry the meaning; colour only backs it up. */
+.tags { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--muted); }
+.tag-hot { color: #a1221b; font-weight: 600; }
+.tag-stale { color: var(--ink); border-bottom: 1px dashed var(--ink); }

@@ -70,3 +70,71 @@ export const effectByWay = (vectors: string[], effects: { vector: string; status
     const effect = effects.find((e) => e.vector === vector);
     return effect ? [{ letter: letter(i), status: effect.status, label: EFFECT_LABELS[effect.status].text }] : [];
   });
+
+export type KeyFact = { label: string; value: string; tone: 'bad' | 'ok' | 'unknown'; source?: { url: string; as_of: string } };
+
+// Which evidence item backs each key fact, matched on its label. The first item with a real link wins.
+const FACT_EVIDENCE = {
+  exploited: /KEV|exploitation|attacker activity|exploit evidence/i,
+  publicExploit: /public exploit|proof of concept|exploit evidence/i,
+  vendor: /vendor (advisory|bulletin)|distribution advisory/i
+};
+
+/** Four facts for the strip under the summary, always in this order. Derived, never typed by hand; each definite answer carries the evidence behind it. */
+export function keyFacts(record: RecordEntry): KeyFact[] {
+  const any = (key: 'exploited' | 'public_exploit') => record.placements.some((p) => p.facts[key] === true);
+  const backing = (pattern: RegExp) => {
+    const e = (record.evidence ?? []).find((x) => pattern.test(x.label) && x.source_url.startsWith('http'));
+    return e && { url: e.source_url, as_of: e.as_of };
+  };
+  const yesOrUnknown = (label: string, yes: boolean, pattern: RegExp): KeyFact =>
+    yes ? { label, value: 'Yes', tone: 'bad', source: backing(pattern) } : { label, value: 'Not known', tone: 'unknown' };
+  const vendor = backing(FACT_EVIDENCE.vendor);
+
+  const headline = record.placements[0].facts;
+  const label = 'Attacker needs a login';
+  const login: KeyFact = headline.no_login
+    ? { label, value: 'No', tone: 'bad', source: vendor }
+    : headline.requires_login
+      ? { label, value: 'Yes', tone: 'ok', source: vendor }
+      : { label, value: 'Not stated', tone: 'unknown' };
+
+  const rows = record.affected;
+  const fixed = rows.filter((r) => r.fixed).length;
+  const fix: KeyFact = rows.some((r) => isPlaceholder(r.fixed ?? ''))
+    ? { label: 'Fix', value: 'To confirm', tone: 'unknown' }
+    : fixed === rows.length
+      ? { label: 'Fix', value: 'Available', tone: 'ok', source: vendor }
+      : fixed > 0
+        ? { label: 'Fix', value: 'For some versions', tone: 'bad', source: vendor }
+        : { label: 'Fix', value: 'None yet', tone: 'bad', source: vendor };
+
+  return [
+    yesOrUnknown('Exploited in the wild', any('exploited'), FACT_EVIDENCE.exploited),
+    yesOrUnknown('Public exploit code', any('public_exploit'), FACT_EVIDENCE.publicExploit),
+    login,
+    fix
+  ];
+}
+
+/** One line for a mitigation: "Closes all 3 ways in" / "Closes 2 of 3 ways in · 1 left open" / "Partial for 3 of 3 ways in". */
+export function coverageLine(vectors: string[], effects: { vector: string; status: Status }[]): string {
+  const n = vectors.length;
+  const statuses = vectors.map((v) => effects.find((e) => e.vector === v)?.status ?? 'open');
+  const closed = statuses.filter((s) => s === 'closed' || s === 'closed_for_that_app').length;
+  const partial = statuses.filter((s) => s === 'weaker').length;
+  const open = n - closed - partial;
+  const ways = n === 1 ? 'way in' : 'ways in';
+
+  if (closed === n) return n === 1 ? 'Closes the one way in' : `Closes all ${n} ways in`;
+  if (open === n) return n === 1 ? 'Leaves the one way in open' : `Leaves all ${n} ways in open`;
+  const parts = [
+    closed > 0 ? `Closes ${closed} of ${n} ${ways}` : '',
+    partial > 0 ? (closed > 0 ? `partial for ${partial}` : `Partial for ${partial} of ${n} ${ways}`) : '',
+    open > 0 ? `${open} left open` : ''
+  ];
+  return parts.filter(Boolean).join(' · ');
+}
+
+/** 2026-10-05 → "5 Oct", for dense lists where the year is obvious. */
+export const shortDate = (iso: string) => niceDate(iso).slice(0, -5);

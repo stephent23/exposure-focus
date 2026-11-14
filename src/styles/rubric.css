@@ -15,7 +15,7 @@ table.grid .rowhead { font-size: 14px; font-weight: 600; color: var(--ink); back
 table.grid td.cell { background: var(--wash); }
 table.grid .cell .badge { font-size: 14px; padding: 3px 12px; }
 table.grid tbody tr:last-child :is(td, .rowhead) { border-bottom: 0; }
-.cellname { display: block; margin-top: 4px; font-size: 12.5px; color: var(--fg); font-weight: 500; }
+.cellname { display: block; margin-top: 4px; font-size: 12.5px; color: var(--ink); font-weight: 500; }
 
 .keys h3 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); padding-bottom: 6px; border-bottom: 1px solid var(--line); }
 .keys { display: grid; grid-template-columns: 1fr; gap: 0 32px; margin-top: 24px; }

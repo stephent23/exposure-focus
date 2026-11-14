@@ -1,0 +1,48 @@
+---
+// "Are you affected?": affected versions, the configuration that must hold, and how to check.
+import '../../styles/verdict/affected.css';
+import Text from '../Text.astro';
+import { isPlaceholder } from '../../lib/verdict-view';
+import type { RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+}
+const { record } = Astro.props;
+---
+
+<section class="sec applies" aria-labelledby="applies-heading">
+  <h2 id="applies-heading">Are you affected?</h2>
+  <table class="affected">
+    <caption class="sr-only">Affected and fixed versions</caption>
+    <thead>
+      <tr><th scope="col">Product</th><th scope="col">Affected</th><th scope="col">Fixed in</th></tr>
+    </thead>
+    <tbody>
+      {record.affected.map((row) => (
+        <tr class="affected-row">
+          <th scope="row" data-label="Product">{row.product}</th>
+          <td data-label="Affected">{isPlaceholder(row.vulnerable) ? <span class="placeholder">{row.vulnerable}</span> : row.vulnerable}</td>
+          <td data-label="Fixed in">{row.fixed === undefined ? 'No fix yet' : isPlaceholder(row.fixed) ? <span class="placeholder">{row.fixed}</span> : row.fixed}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+
+  {record.exposed_when && record.exposed_when.length > 0 && (
+    <>
+      <p class="exposed-label">Only when</p>
+      <ul class="exposed">
+        {record.exposed_when.map((c) => <li>{isPlaceholder(c) ? <span class="placeholder">{c}</span> : c}</li>)}
+      </ul>
+    </>
+  )}
+
+  {record.applies_check.map((item) => (
+    <div class="applies-item">
+      <h3>{item.question}</h3>
+      <p class="applies-how">{isPlaceholder(item.how_to_check) ? <span class="placeholder">{item.how_to_check}</span> : <Text text={item.how_to_check} />}</p>
+    </div>
+  ))}
+  <p class="applies-default">If you cannot tell, answer Yes.</p>
+</section>

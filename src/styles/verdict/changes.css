@@ -1,5 +1,5 @@
 /* Change log: date on the left, what moved and why on the right; stacks on phones. */
-.changes { list-style: none; margin: 16px 0 0; padding: 0; border-top: 1px solid var(--line); }
+.changes { list-style: none; padding: 0; border-top: 1px solid var(--line); }
 .change { display: grid; gap: 4px 20px; padding: 14px 0; border-bottom: 1px solid var(--line); }
 .change time { font-size: 13px; font-weight: 600; color: var(--ink); line-height: 1.6; }
 .change-body > * + * { margin-top: 4px; }

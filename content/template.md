@@ -8,19 +8,34 @@ slug: template
 name: Name of the vulnerability
 aliases: []
 cves: ["[CVE to confirm]"]
-summary: One plain sentence.
+summary: One plain sentence. # at most 200 characters
 attack: rce # rce, privilege-escalation, auth-bypass, data-exposure, data-tampering or dos
 status: draft # draft is hidden from the home page; published is listed there
+published: 2026-11-08 # UTC date this verdict was first published; never changes afterwards
 evidence_as_of: 2026-11-08 # UTC date the evidence was last checked
 review_until: 2026-12-08 # UTC date to recheck by; after it the record shows a stale badge
 
-leadership_quote: Two or three sentences a boss can read.
+leadership_quote: Two or three sentences a boss can read. # at most 320 characters
+tier_reason: One sentence saying why this tier and not a higher or lower one. # max 220 characters; answer "it is a 9.8, why Tier 3?"
+would_change: # 1 to 3 items, max 140 characters each: what would move the call up or down
+  - Moves up if a working exploit is published
 
+# Affected versions, copied from a primary source (vendor advisory). Leave out fixed when no fix exists.
+# Caps: product 60, vulnerable 80, fixed 80 characters.
+affected:
+  - { product: "[product to add]", vulnerable: "[versions to confirm]", fixed: "[fix to confirm]" }
+
+# Optional. 1 to 4 configuration conditions that must hold, each at most 140 characters.
+exposed_when:
+  - "[configuration condition to add]"
+
+# Caps: question 100 characters, how_to_check 240 characters.
 applies_check:
   - question: Do you run the affected thing?
     how_to_check: "[steps to add]"
 
 # Placements: the FIRST one is the headline, so put the most common case first.
+# Caps: name 70 characters, action 140 characters.
 # You set the facts and the tier. The build fails if the tier disagrees with the rubric,
 # unless the placement has a public override_reason.
 # Facts: reachable (true, false or "unknown"), exploited, public_exploit, no_login, requires_login,
@@ -44,6 +59,7 @@ placements:
 
 vectors: ["[ways in to add]"] # shown as A, B, C... in the order listed
 
+# Caps: title 80 characters, takes 120 characters.
 mitigations:
   - title: "[mitigation to add]"
     summary: What it does.

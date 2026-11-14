@@ -1,44 +1,21 @@
-/* Patch and mitigate options, and what to do if you were already hit. */
-.ways { list-style: none; margin: 16px 0 0; padding: 14px 16px; display: grid; gap: 10px; background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
-.ways li { display: flex; align-items: flex-start; gap: 12px; font-size: 14px; line-height: 24px; color: var(--ink-2); }
-.way-letter, .v { flex: none; display: inline-grid; place-items: center; width: 24px; height: 24px; font-weight: 700; font-size: 12px; font-family: var(--font-mono); background: #fff; border: 1px solid var(--edge); border-radius: 50%; color: var(--ink); }
-.opts { list-style: none; margin: 20px 0 0; padding: 0; display: grid; gap: 20px; }
-.opt { background: #fff; border: 1px solid var(--line-strong); border-radius: 10px; padding: 20px 24px 6px; }
-.opt-head { display: flex; align-items: flex-start; gap: 12px; }
-.opt-num { flex: none; display: grid; place-items: center; width: 28px; height: 28px; border-radius: 8px; background: var(--ink); color: #fff; font-size: 14px; font-weight: 700; }
-.opt h3 { flex: 1; min-width: 0; font-size: 16px; line-height: 28px; overflow-wrap: anywhere; }
-.conf { flex: none; margin-top: 4px; font-size: 12px; line-height: 20px; font-weight: 600; color: var(--ink-2); background: var(--panel); border: 1px solid var(--line-strong); padding: 0 10px; border-radius: 999px; white-space: nowrap; }
-.opt-meta { margin: 14px 0 0; padding: 8px 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 24px; font-size: 13px; background: var(--panel); border-radius: 8px; }
-.eff { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 6px; }
-.eff b { font-weight: 600; color: var(--ink-2); }
-.eff-open b { color: var(--tier2-fg); }
+/* What to do: one numbered line per option, with the full detail behind a disclosure. */
+.opts { list-style: none; margin: 0; padding: 0; counter-reset: opt; }
+.opt { position: relative; counter-increment: opt; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 14px; padding: 9px 0 2px 30px; border-bottom: 1px solid var(--line); }
+.opt::before { content: counter(opt, decimal-leading-zero); position: absolute; left: 0; top: 11px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.opt h3 { flex: 1 1 100%; font-size: 14.5px; line-height: 1.35; overflow-wrap: anywhere; }
+.opt-cover { font-size: 13px; color: var(--ink-2); }
+.opt-more[open] { flex: 1 1 100%; padding-bottom: 12px; }
+.opt-sum { max-width: 68ch; font-size: 13.5px; color: var(--ink-2); }
+.opt-ways { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 5px; font-size: 13.5px; color: var(--ink-2); }
+.opt-ways li { display: flex; align-items: flex-start; gap: 10px; }
+.opt-ways b { font-weight: 600; }
+.v { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; border: 1px solid var(--ink-2); color: var(--ink); }
 .eff-open .v { border-style: dashed; }
-.opt-sum { margin: 14px 0 0; max-width: 66ch; font-size: 14px; color: var(--ink-2); }
-.facts { margin: 16px 0 0; display: grid; gap: 10px; font-size: 14px; }
-.facts > div { display: grid; grid-template-columns: 7.5em 1fr; gap: 12px; }
-.facts dt { font-size: 13px; font-weight: 600; color: var(--muted); }
+.facts { margin: 12px 0 0; display: grid; gap: 8px; font-size: 13.5px; }
+.facts > div { display: grid; grid-template-columns: 8em 1fr; gap: 12px; }
+.facts dt { padding-top: 3px; font-size: 12px; color: var(--muted); }
 .facts dd { margin: 0; min-width: 0; color: var(--ink-2); }
-.opt > .facts { padding-top: 14px; border-top: 1px solid var(--line); }
-.opt-more { margin-top: 10px; border-top: 1px solid var(--line); }
-.opt-more > summary { display: flex; align-items: center; gap: 8px; min-height: 44px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--link); list-style: none; border-radius: 6px; }
-.opt-more > summary::-webkit-details-marker { display: none; }
-.opt-more > summary::before { content: '+'; flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; border: 1px solid currentColor; border-radius: 50%; font-family: var(--font-mono); font-size: 14px; line-height: 1; }
-.opt-more[open] > summary::before { content: '−'; }
-.opt-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
-.opt-more .facts { margin-top: 4px; margin-bottom: 16px; }
-
-/* Were you already hit */
-.hit { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 24px; }
-.hit .hit-lead { margin-top: 10px; max-width: 66ch; font-size: 14px; color: var(--ink-2); }
-.hit-list { list-style: none; margin: 16px 0 0; padding: 0; display: grid; gap: 10px; font-size: 14px; }
-.hit-list li { display: grid; grid-template-columns: 5.5em 1fr; gap: 12px; padding-top: 10px; border-top: 1px solid var(--line-strong); color: var(--ink-2); }
-.hit-list b { font-size: 13px; color: var(--muted); }
 
 @media (max-width: 640px) {
-  .opt { padding: 16px 16px 4px; }
-  .opt-head { flex-wrap: wrap; }
-  .opt h3 { flex-basis: calc(100% - 40px); }
-  .conf { margin-left: 40px; }
-  .facts > div, .hit-list li { grid-template-columns: 1fr; gap: 2px; }
-  .hit { padding: 20px 16px; }
+  .facts > div { grid-template-columns: 1fr; gap: 1px; }
 }

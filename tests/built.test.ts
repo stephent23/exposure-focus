@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
+import { recentActivity } from '../src/lib/home';
+import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
+import { coverageLine, keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
 
 const dist = join(process.cwd(), 'dist-test');
@@ -13,6 +16,32 @@ const count = (s: string, needle: string) => s.split(needle).length - 1;
 const text = (html: string) =>
   html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->|<[^>]+>/gi, ' ').replace(/\s+/g, ' ');
 const external = (url: string) => /^(?:https?:)?\/\//i.test(url.trim());
+// Astro escapes & < > and quotes; decode them so text from the page can be compared with record data.
+const decode = (s: string) =>
+  s
+    .replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16)))
+    .replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(Number(d)))
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&');
+const plain = (html: string) => decode(text(html)).replace(/\s+/g, ' ');
+const words = (s: string) => s.split(/\s+/).filter(Boolean).length;
+// Details are never nested on a record page, so a lazy match removes each folded block whole.
+const withoutDetails = (html: string) => html.replace(/<details\b[\s\S]*?<\/details>/gi, ' ');
+// The record body: from the record wrapper to the end of main.
+const recordBody = (html: string) => {
+  const start = html.indexOf('class="record"');
+  const end = html.indexOf('</main>', start);
+  return html.slice(start, end === -1 ? undefined : end);
+};
+// The page is a dashboard, not a report: the main column, without opening a fold, must stay short.
+// 520 leaves room for the "why this tier" and "what would change it" lines (up to about 90 words together).
+// The key-dates list beside it is counted separately: at most eight dated events.
+const VISIBLE_WORD_BUDGET = 520;
+// A home card shows badges, a name, a summary and placement rows only.
+const CARD_WORD_BUDGET = 90;
 
 const records = await getAllRecords();
 const published = records.filter((r) => r.status === 'published');
@@ -41,12 +70,10 @@ describe('built site', () => {
   });
 
   it('renders the required sections on every record page', () => {
-    const ids = ['placement', 'evidence', 'protect', 'sources'];
+    const ids = ['placement', 'applies', 'leadership', 'protect', 'evidence', 'sources'];
     for (const r of published) {
       const html = recordPage(r.slug);
-      for (const id of ids) expect(html, `${r.slug} ${id}`).toContain(`id="${id}-heading"`);
-      expect(count(html, 'id="leadership-heading"'), `${r.slug} leadership`).toBe(1);
-      expect(count(html, 'id="applies-heading"'), `${r.slug} applies`).toBe(1);
+      for (const id of ids) expect(count(html, `id="${id}-heading"`), `${r.slug} ${id}`).toBe(1);
       expect(html.includes('id="analysis-heading"'), `${r.slug} analysis`).toBe(Boolean(r.analysis));
       expect(html.includes('id="hit-heading"'), `${r.slug} hit`).toBe(Boolean(r.were_you_hit));
     }
@@ -56,10 +83,84 @@ describe('built site', () => {
     const folded = (html: string, id: string) => new RegExp(`<details[^>]*>\\s*<summary[^>]*>\\s*<h2[^>]*id="${id}-heading"`).test(html);
     for (const r of published) {
       const html = recordPage(r.slug);
-      for (const id of ['placement', 'applies', 'protect']) expect(folded(html, id), `${r.slug} ${id} visible`).toBe(false);
-      for (const id of ['evidence', 'sources']) expect(folded(html, id), `${r.slug} ${id} folded`).toBe(true);
+      for (const id of ['leadership', 'applies', 'placement', 'protect']) expect(folded(html, id), `${r.slug} ${id} visible`).toBe(false);
+      const foldedIds = ['evidence', 'sources'];
+      if (r.timeline?.length) expect(folded(html, 'dates'), `${r.slug} key dates visible`).toBe(false);
+      if (r.changes?.length) foldedIds.push('changes');
+      if (r.were_you_hit) foldedIds.push('hit');
+      if (r.analysis) foldedIds.push('analysis');
+      for (const id of foldedIds) expect(folded(html, id), `${r.slug} ${id} folded`).toBe(true);
       expect(count(html, 'class="reasoning"'), `${r.slug} reasoning`).toBe(r.placements.length);
       expect(count(html, 'class="opt-more"'), `${r.slug} mitigation detail`).toBe(r.mitigations.length);
+    }
+  });
+
+  it('keeps the visible text of a record page within the word budget', () => {
+    for (const r of published) {
+      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))).replace(/<aside[\s\S]*?<\/aside>/g, ' '));
+      expect(r.timeline?.length ?? 0, `${r.slug} key dates`).toBeLessThanOrEqual(8);
+      expect(words(visible), `${r.slug} visible words`).toBeLessThanOrEqual(VISIBLE_WORD_BUDGET);
+    }
+  });
+
+  it('never nests <details> on a record page', () => {
+    for (const r of published) {
+      let depth = 0;
+      let max = 0;
+      for (const m of recordPage(r.slug).matchAll(/<(\/?)details\b/gi)) {
+        depth += m[1] ? -1 : 1;
+        max = Math.max(max, depth);
+      }
+      expect(depth, `${r.slug} balanced`).toBe(0);
+      expect(max, `${r.slug} nesting`).toBeLessThanOrEqual(1);
+    }
+  });
+
+  it('shows four key facts, derived from the record', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      expect(html.match(/class="keyfact[ "]/g)?.length ?? 0, `${r.slug} key fact blocks`).toBe(4);
+      const shown = plain(html);
+      for (const f of keyFacts(r)) {
+        expect(shown, `${r.slug} label ${f.label}`).toContain(f.label);
+        expect(shown, `${r.slug} value ${f.label}`).toContain(f.value);
+      }
+    }
+  });
+
+  it('lists every affected product in the affected table, and says when there is no fix', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      expect(count(html, 'class="affected-row"'), `${r.slug} affected rows`).toBe(r.affected.length);
+      const shown = plain(html);
+      for (const a of r.affected) expect(shown, `${r.slug} ${a.product}`).toContain(a.product);
+      const noFix = r.affected.filter((a) => !a.fixed).length;
+      expect(count(shown, 'No fix yet'), `${r.slug} no-fix rows`).toBeGreaterThanOrEqual(noFix);
+    }
+  });
+
+  it('shows one coverage line per mitigation outside the folds', () => {
+    for (const r of published) {
+      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))));
+      for (const m of r.mitigations) expect(visible, `${r.slug} ${m.title}`).toContain(coverageLine(r.vectors, m.effect));
+    }
+  });
+
+  it('has no sidebar and no "On this page" list', () => {
+    for (const f of pages) {
+      const html = readFileSync(f, 'utf-8');
+      expect(html, f).not.toContain('class="sidebar"');
+      expect(text(html), f).not.toContain('On this page');
+    }
+  });
+
+  it('keeps home cards short and free of action lines', () => {
+    expect(home).not.toContain('class="todo"');
+    const cards = [...home.matchAll(/<article\b[^>]*\bclass="[^"]*\bcard\b[^"]*"[^>]*>[\s\S]*?<\/article>/g)].map((m) => m[0]);
+    expect(cards.length).toBe(listed.length);
+    for (const card of cards) {
+      expect(card).not.toContain('class="todo"');
+      expect(words(plain(card)), card.slice(0, 80)).toBeLessThanOrEqual(CARD_WORD_BUDGET);
     }
   });
 
@@ -142,5 +243,56 @@ describe('built site', () => {
     const xml = read('feed.xml');
     expect(count(xml, '<entry>')).toBe(published.reduce((n, r) => n + 1 + (r.changes?.length ?? 0), 0));
     for (const r of records.filter((x) => x.status !== 'published')) expect(xml).not.toContain(`/verdicts/${r.slug}/`);
+  });
+
+  it('leads the home page with the latest changes and dates every card', () => {
+    const activity = recentActivity(listed);
+    expect(count(home, 'class="activity-row"')).toBe(activity.length);
+    expect(home.indexOf('id="activity-heading"')).toBeLessThan(home.indexOf('data-record="'));
+    for (const a of activity) expect(home, a.slug).toContain(`<time datetime="${a.date}">`);
+    for (const r of listed) {
+      const start = home.indexOf(`data-record="${r.slug}"`);
+      expect(home.slice(start, home.indexOf('</article>', start)), `${r.slug} added date`).toContain(`<time datetime="${r.published}">`);
+    }
+  });
+
+  it('says why each tier moved, right on the home page', () => {
+    for (const a of recentActivity(listed)) if (a.reason) expect(plain(home), a.slug).toContain(a.reason);
+  });
+
+  it('lists what is being watched but not yet rated, without repeating a published verdict', async () => {
+    const rated = new Set(published.flatMap((r) => r.cves));
+    const watching = (await getWatching()).filter((w) => !w.cves.some((id) => rated.has(id)));
+    expect(count(home, 'class="watch-row"')).toBe(watching.length);
+    for (const w of watching) expect(home, w.name).toContain(`${w.cves[0]}</a>`);
+  });
+
+  it('shows why the tier was chosen and what would change it, without opening a fold', () => {
+    for (const r of published) {
+      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))));
+      expect(visible, `${r.slug} tier reason`).toContain(r.tier_reason);
+      for (const w of r.would_change) expect(visible, `${r.slug} trigger`).toContain(w);
+    }
+  });
+
+  it('backs every definite key fact with a source and date', () => {
+    for (const r of published) {
+      for (const f of keyFacts(r)) {
+        if (f.tone === 'unknown') continue;
+        expect(f.source, `${r.slug}: ${f.label} needs an evidence item it can cite`).toBeDefined();
+        expect(recordPage(r.slug), `${r.slug}: ${f.label}`).toContain(`href="${f.source!.url.replace(/&/g, '&amp;')}"`);
+      }
+    }
+  });
+
+  it('never publishes a placeholder in an affected table', () => {
+    for (const r of published) for (const a of r.affected) expect(`${a.product} ${a.vulnerable} ${a.fixed ?? ''}`, r.slug).not.toContain('[');
+  });
+
+  it('shows when each verdict was published and last checked', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      for (const d of [r.published, r.evidence_as_of, r.review_until]) expect(html, `${r.slug} ${d}`).toContain(`<time datetime="${d}">`);
+    }
   });
 });

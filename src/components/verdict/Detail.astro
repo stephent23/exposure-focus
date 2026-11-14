@@ -2,6 +2,7 @@
 // The detail behind the call, folded away: evidence, analysis and sources.
 import '../../styles/verdict/detail.css';
 import Text from '../Text.astro';
+import Changes from './Changes.astro';
 import { renderMarkdown } from '../../lib/markdown';
 import { CONFIDENCE_LABELS } from '../../lib/tiers';
 import type { RecordEntry } from '../../schema/record';
@@ -13,7 +14,22 @@ const { record } = Astro.props;
 ---
 
 <div class="folds">
-  <p class="folds-intro">The detail behind this call</p>
+  <p class="folds-intro">More detail</p>
+
+  <Changes record={record} />
+
+  {record.were_you_hit && (
+    <section aria-labelledby="hit-heading">
+      <details class="fold">
+        <summary><h2 id="hit-heading">Were you already hit?</h2></summary>
+        <p class="hit-lead"><strong>Assume compromise when:</strong> {record.were_you_hit.assume_compromise_when}</p>
+        <ul class="hit-list">
+          {record.were_you_hit.check.map((c) => <li><b>Check</b><span>{c}</span></li>)}
+          {record.were_you_hit.rotate.map((c) => <li><b>Rotate</b><span>{c}</span></li>)}
+        </ul>
+      </details>
+    </section>
+  )}
 
   <section aria-labelledby="evidence-heading">
     <details class="fold">

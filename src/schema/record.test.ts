@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { headlineTier, isStale, parseRecord, recordSchema, sortedPlacements } from './record';
+import { CAPS, headlineTier, isStale, parseRecord, recordSchema, sortedPlacements } from './record';
 
 function validRecord() {
   return {
@@ -11,9 +11,13 @@ function validRecord() {
     summary: 'A sample record.',
     attack: 'rce',
     status: 'published',
+    published: '2026-11-01',
     evidence_as_of: '2026-11-08',
     review_until: '2026-12-08',
     leadership_quote: 'A sentence a boss can read.',
+    tier_reason: 'Exploited and reachable, so it is at the top of the rubric.',
+    would_change: ['Moves down once patched'],
+    affected: [{ product: 'Sample 1.x', vulnerable: 'below 1.2.3', fixed: '1.2.3' }],
     applies_check: [{ question: 'Is it exposed?', how_to_check: 'Check the listener.' }],
     placements: [
       {
@@ -296,5 +300,115 @@ describe('change log', () => {
     const older = { ...move, date: '2026-10-20', from_tier: 3, to_tier: 2 };
     expect(recordSchema.safeParse(withChanges([older, move])).success).toBe(true);
     expect(recordSchema.safeParse(withChanges([older])).success).toBe(false);
+  });
+});
+
+describe('affected and exposed_when', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a loose fixture the tests mutate
+  const base = () => validRecord() as Record<string, any>;
+  const ok = (r: unknown) => expect(recordSchema.safeParse(r).success).toBe(true);
+  const bad = (r: unknown) => expect(recordSchema.safeParse(r).success).toBe(false);
+
+  it('requires at least one affected row', () => {
+    const missing = base();
+    delete missing.affected;
+    bad(missing);
+    bad({ ...base(), affected: [] });
+  });
+
+  it('allows a row with no fix, and rejects unknown keys', () => {
+    ok({ ...base(), affected: [{ product: 'Sample', vulnerable: 'all releases' }] });
+    bad({ ...base(), affected: [{ product: 'Sample', vulnerable: 'all', extra: 'x' }] });
+  });
+
+  it('caps product, vulnerable and fixed', () => {
+    for (const [key, max] of [['product', CAPS.product], ['vulnerable', CAPS.vulnerable], ['fixed', CAPS.fixed]] as const) {
+      const row = (n: number) => ({ product: 'P', vulnerable: 'all', fixed: '1', [key]: 'a'.repeat(n) });
+      ok({ ...base(), affected: [row(max)] });
+      bad({ ...base(), affected: [row(max + 1)] });
+    }
+  });
+
+  it('limits exposed_when to 1 to 4 items of at most the cap', () => {
+    ok({ ...base(), exposed_when: ['a'.repeat(CAPS.exposedWhen), 'b', 'c', 'd'] });
+    bad({ ...base(), exposed_when: [] });
+    bad({ ...base(), exposed_when: ['a', 'b', 'c', 'd', 'e'] });
+    bad({ ...base(), exposed_when: ['a'.repeat(CAPS.exposedWhen + 1)] });
+  });
+});
+
+describe('length caps', () => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any -- a loose fixture the tests mutate
+  type Rec = Record<string, any>;
+  const cases: [keyof typeof CAPS, (r: Rec, v: string) => void][] = [
+    ['summary', (r, v) => (r.summary = v)],
+    ['leadershipQuote', (r, v) => (r.leadership_quote = v)],
+    ['placementName', (r, v) => (r.placements[0].name = v)],
+    ['placementAction', (r, v) => (r.placements[0].action = v)],
+    ['question', (r, v) => (r.applies_check[0].question = v)],
+    ['howToCheck', (r, v) => (r.applies_check[0].how_to_check = v)],
+    ['mitigationTitle', (r, v) => (r.mitigations[0].title = v)],
+    ['mitigationTakes', (r, v) => (r.mitigations[0].takes = v)]
+  ];
+  for (const [name, apply] of cases) {
+    it(`${name}: passes at the cap, fails one over and names the cap`, () => {
+      const cap = CAPS[name];
+      const atCap = validRecord() as Rec;
+      apply(atCap, 'a'.repeat(cap));
+      expect(recordSchema.safeParse(atCap).success).toBe(true);
+      const over = validRecord() as Rec;
+      apply(over, 'a'.repeat(cap + 1));
+      const result = recordSchema.safeParse(over);
+      expect(result.success).toBe(false);
+      expect(JSON.stringify(result.error?.issues)).toContain(`${cap}`);
+    });
+  }
+});
+
+describe('published date', () => {
+  it('is required', () => {
+    const rest = { ...validRecord() } as Record<string, unknown>;
+    delete rest.published;
+    expect(recordSchema.safeParse(rest).success).toBe(false);
+  });
+  it('cannot be after evidence_as_of', () => {
+    expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-08' }).success).toBe(true);
+    expect(recordSchema.safeParse({ ...validRecord(), published: '2026-11-09' }).success).toBe(false);
+  });
+});
+
+describe('tier reason and what would change the call', () => {
+  const without = (key: string) => {
+    const rest = { ...validRecord() } as Record<string, unknown>;
+    delete rest[key];
+    return rest;
+  };
+  it('requires both', () => {
+    expect(recordSchema.safeParse(without('tier_reason')).success).toBe(false);
+    expect(recordSchema.safeParse(without('would_change')).success).toBe(false);
+  });
+  it('takes one to three short triggers', () => {
+    const ok = (would_change: string[]) => recordSchema.safeParse({ ...validRecord(), would_change }).success;
+    expect(ok([])).toBe(false);
+    expect(ok(['a', 'b', 'c'])).toBe(true);
+    expect(ok(['a', 'b', 'c', 'd'])).toBe(false);
+    expect(ok(['a'.repeat(CAPS.wouldChange + 1)])).toBe(false);
+    expect(recordSchema.safeParse({ ...validRecord(), tier_reason: 'a'.repeat(CAPS.tierReason + 1) }).success).toBe(false);
+  });
+});
+
+describe('placeholders in the affected table', () => {
+  const withRow = (over: Record<string, unknown>) => ({
+    ...validRecord(),
+    affected: [{ product: 'Sample 1.x', vulnerable: '[versions to confirm]', fixed: '1.2.3' }],
+    ...over
+  });
+  it('are refused on a published verdict with a Tier 1 or 2 placement', () => {
+    const tiers = validRecord().placements.map((p) => p.tier);
+    expect(Math.min(...tiers)).toBeLessThanOrEqual(2);
+    expect(recordSchema.safeParse(withRow({})).success).toBe(false);
+  });
+  it('are allowed on a draft', () => {
+    expect(recordSchema.safeParse(withRow({ status: 'draft' })).success).toBe(true);
   });
 });
