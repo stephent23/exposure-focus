@@ -79,12 +79,12 @@ const fact = (r: RecordEntry, label: string) => keyFacts(r).find((f) => f.label 
 
 describe('keyFacts', () => {
   it('always returns the four facts in order', () => {
-    expect(keyFacts(rec([{}], [{}])).map((f) => f.label)).toEqual(['Exploited in attacks', 'Public exploit code', 'Attacker needs a login', 'Fix']);
+    expect(keyFacts(rec([{}], [{}])).map((f) => f.label)).toEqual(['Exploited in the wild', 'Public exploit code', 'Attacker needs a login', 'Fix']);
   });
 
   it('reads exploited and public exploit from any placement', () => {
-    expect(fact(rec([{}, { exploited: true }], [{}]), 'Exploited in attacks')).toMatchObject({ value: 'Yes', tone: 'bad' });
-    expect(fact(rec([{ exploited: false }], [{}]), 'Exploited in attacks')).toMatchObject({ value: 'Not known', tone: 'unknown' });
+    expect(fact(rec([{}, { exploited: true }], [{}]), 'Exploited in the wild')).toMatchObject({ value: 'Yes', tone: 'bad' });
+    expect(fact(rec([{ exploited: false }], [{}]), 'Exploited in the wild')).toMatchObject({ value: 'Not known', tone: 'unknown' });
     expect(fact(rec([{}, { public_exploit: true }], [{}]), 'Public exploit code')).toMatchObject({ value: 'Yes', tone: 'bad' });
     expect(fact(rec([{}], [{}]), 'Public exploit code')).toMatchObject({ value: 'Not known', tone: 'unknown' });
   });
@@ -109,7 +109,7 @@ describe('keyFacts', () => {
       { label: 'CISA KEV', source_url: '[link to add]', as_of: '2026-11-01' },
       { label: 'Exploitation status', source_url: 'https://news.test/b', as_of: '2026-11-03' }
     ] } as unknown as RecordEntry;
-    expect(fact(r, 'Exploited in attacks').source).toEqual({ url: 'https://news.test/b', as_of: '2026-11-03' });
+    expect(fact(r, 'Exploited in the wild').source).toEqual({ url: 'https://news.test/b', as_of: '2026-11-03' });
     expect(fact(r, 'Fix').source).toEqual({ url: 'https://vendor.test/a', as_of: '2026-11-02' });
     expect(fact(r, 'Attacker needs a login').source?.url).toBe('https://vendor.test/a');
     expect(fact(r, 'Public exploit code').source).toBeUndefined();

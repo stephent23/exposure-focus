@@ -39,7 +39,7 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
             )}
           </li>
         ))}
-        <li class="tally-hot"><span><b>{records.filter(exploited).length}</b> <span>Exploited in attacks</span></span></li>
+        <li class="tally-hot"><span><b>{records.filter(exploited).length}</b> <span>Exploited in the wild</span></span></li>
       </ul>
     </div>
 
@@ -105,7 +105,7 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
                   <p class="summary">{record.summary}</p>
                   <p class="tags">
                     <span>{ATTACKS[record.attack].name}</span>
-                    {exploited(record) && <span class="tag-hot">Exploited in attacks</span>}
+                    {exploited(record) && <span class="tag-hot">Exploited in the wild</span>}
                     {record.evidence.some((e) => e.confidence === 'reported') && <span>Some facts unconfirmed</span>}
                     {isStale(record, today) && <span class="tag-stale">Overdue for review</span>}
                   </p>

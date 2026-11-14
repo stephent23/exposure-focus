@@ -110,7 +110,7 @@ export function keyFacts(record: RecordEntry): KeyFact[] {
         : { label: 'Fix', value: 'None yet', tone: 'bad', source: vendor };
 
   return [
-    yesOrUnknown('Exploited in attacks', any('exploited'), FACT_EVIDENCE.exploited),
+    yesOrUnknown('Exploited in the wild', any('exploited'), FACT_EVIDENCE.exploited),
     yesOrUnknown('Public exploit code', any('public_exploit'), FACT_EVIDENCE.publicExploit),
     login,
     fix
