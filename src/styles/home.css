@@ -1,5 +1,5 @@
 /* Home page: a briefing. Tally, latest changes, filters, then one dense ruled row per verdict. */
-.hero { display: grid; gap: 24px 48px; }
+.hero { display: grid; gap: 20px; }
 .lede { margin-top: 8px; max-width: 56ch; }
 .activity h2 { font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
 
@@ -14,7 +14,7 @@
 .tally b + span { font-size: 12.5px; color: var(--muted); }
 
 /* Latest changes */
-.activity ol { list-style: none; margin: 6px 0 0; padding: 0; border-top: 1px solid var(--line-strong); }
+.activity ol { list-style: none; margin: 6px 0 0; padding: 0; border-top: 1px solid var(--line-strong); display: grid; column-gap: 32px; }
 .activity-row { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); font-size: 13.5px; line-height: 1.4; }
 .activity-row time { padding-top: 2px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
 .activity-row a { font-weight: 600; color: var(--ink); }
@@ -61,7 +61,10 @@
 .home-foot { margin-top: 20px; font-size: 13px; }
 
 @media (min-width: 900px) {
-  .hero { grid-template-columns: minmax(0, 1fr) 340px; align-items: start; }
+  .brief-head { display: grid; grid-template-columns: minmax(0, 1fr) 460px; column-gap: 48px; }
+  .brief-head > * { grid-column: 1; }
+  .brief-head .tally { grid-column: 2; grid-row: 1 / span 3; align-self: end; margin-top: 0; }
+  .activity ol { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .card { grid-template-columns: minmax(0, 1fr) 280px 118px; padding: 14px 8px; }
   .when { flex-direction: column; flex-wrap: nowrap; align-items: flex-start; }
 }
@@ -71,4 +74,7 @@
 @media (max-width: 640px) {
   .seg, .count { flex: 1 1 100%; margin-left: 0; }
   .search { max-width: none; }
+}
+@media (min-width: 560px) and (max-width: 899px) {
+  .activity ol { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
