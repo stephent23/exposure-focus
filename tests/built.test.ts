@@ -289,6 +289,16 @@ describe('built site', () => {
     for (const r of published) for (const a of r.affected) expect(`${a.product} ${a.vulnerable} ${a.fixed ?? ''}`, r.slug).not.toContain('[');
   });
 
+  it('links the feed and the leadership summaries to the real site, never a placeholder host', () => {
+    const origin = 'https://exposure.infosecuriosity.co.uk';
+    expect(read('feed.xml')).not.toContain('example.com');
+    for (const r of published) {
+      expect(read('feed.xml'), r.slug).toContain(`${origin}/verdicts/${r.slug}/`);
+      expect(recordPage(r.slug), r.slug).toContain(`${origin}/verdicts/${r.slug}/`);
+      expect(recordPage(r.slug), r.slug).not.toContain('example.com');
+    }
+  });
+
   it('shows when each verdict was published and last checked', () => {
     for (const r of published) {
       const html = recordPage(r.slug);

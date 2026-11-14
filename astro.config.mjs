@@ -14,7 +14,7 @@ const watchContent = () => ({
 
 export default defineConfig({
   output: 'static',
-  site: 'https://example.com', // Placeholder until the owner chooses the domain (see README).
+  site: 'https://exposure.infosecuriosity.co.uk',
   // The Content-Security-Policy forbids inline styles, so never inline CSS into the HTML.
   build: { inlineStylesheets: 'never' },
   vite: {
