@@ -1,15 +1,7 @@
 # Watching, not yet rated: publicised items with no verdict yet. Shown on the home page.
 # Only a name (max 80 characters), confirmed CVE IDs and the UTC date last noted. No tier and no claims:
 # those belong in a verdict with sources. Remove an item when its verdict is published or it is dropped.
-- { name: Check Point Gaia DynamicCLI root escalation, cves: [CVE-2026-123039], noted: 2026-11-14 }
-- { name: Microsoft Outlook warning bypass, cves: [CVE-2026-124194], noted: 2026-11-11 }
-- { name: Chrome XML use-after-free, cves: [CVE-2026-125350], noted: 2026-11-11 }
-- { name: OpenSSH "SSHole", cves: [CVE-2026-123158], noted: 2026-11-11 }
-- { name: Barracuda Email Security Gateway chain, cves: [CVE-2026-116606, CVE-2026-111560], noted: 2026-11-11 }
-- { name: IBM Aspera Faspex 5 authorisation bypass, cves: [CVE-2026-123218], noted: 2026-11-11 }
-- { name: Ivanti Connect Secure chain, cves: [CVE-2026-104935, CVE-2026-111357, CVE-2026-118527], noted: 2026-11-10 }
-- { name: GitLab, cves: [CVE-2026-97229], noted: 2026-11-10 }
-- { name: WordPress core updater race, cves: [CVE-2026-119977], noted: 2026-11-10 }
-- { name: SonicWall SonicOS SSLVPN SAML MFA bypass, cves: [CVE-2026-19868], noted: 2026-11-10 }
-- { name: BeyondTrust Remote Support and PRA authentication bypass, cves: [CVE-2026-102764], noted: 2026-11-09 }
-- { name: Cisco ISE API authentication bypass, cves: [CVE-2026-76460], noted: 2026-11-09 }
+#
+# Empty on purpose. Add an item only if it is publicised widely enough to meet the site's criteria
+# and a verdict is likely soon. While this list is empty the section does not appear on the home page.
+[]
