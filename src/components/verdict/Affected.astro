@@ -33,7 +33,7 @@ const { record } = Astro.props;
     <>
       <p class="exposed-label">Only when</p>
       <ul class="exposed">
-        {record.exposed_when.map((c) => <li>{isPlaceholder(c) ? <span class="placeholder">{c}</span> : c}</li>)}
+        {record.exposed_when.map((c) => <li>{isPlaceholder(c) ? <span class="placeholder">{c}</span> : <Text text={c} />}</li>)}
       </ul>
     </>
   )}

@@ -1,38 +1,36 @@
 /* The folded detail: change log, evidence, analysis and sources as a flat ruled list. */
-.folds { margin-top: 32px; }
+.folds { margin-top: 28px; }
 .fold { border-bottom: 1px solid var(--line); }
 .fold > summary { display: flex; align-items: center; gap: 10px; padding: 0 4px; min-height: 40px; cursor: pointer; list-style: none; }
 .fold > summary::-webkit-details-marker { display: none; }
-.fold > summary::before { content: '+'; flex: none; width: 14px; font-family: var(--font-mono); font-size: 14px; line-height: 1; color: var(--muted); }
+.fold > summary::before { content: '+'; flex: none; width: 14px; font-family: var(--font-mono); font-size: var(--fs-m); line-height: 1; color: var(--muted); }
 .fold[open] > summary::before { content: '−'; }
-.fold > summary h2 { font-size: 14px; }
+.fold > summary h2 { font-size: var(--fs-m); font-weight: 600; }
 .fold > summary:hover { background: var(--panel); }
 .fold > summary:hover h2 { color: var(--link); }
-.fold-hint { margin-left: auto; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); text-align: right; }
-.fold > :not(summary) { margin-left: 28px; margin-right: 4px; max-width: 70ch; font-size: 13.5px; }
-.fold > summary + * { margin-top: 6px; }
-.fold > :last-child { margin-bottom: 18px; }
-.fold .list { margin-top: 6px; }
+.fold-hint { margin-left: auto; font-size: var(--fs-s); color: var(--muted); text-align: right; }
+.fold > :not(summary) { margin-left: 28px; margin-right: 4px; max-width: 70ch; font-size: var(--fs-m); }
+.fold > summary + * { margin-top: 8px; }
+.fold > :last-child { margin-bottom: 16px; }
+.fold .list { margin-top: 8px; }
 .fold .list li { margin-top: 6px; }
-.fold .note { margin-top: 14px; font-size: 12.5px; color: var(--muted); }
+.fold .note { margin-top: 12px; font-size: var(--fs-s); color: var(--muted); }
 .ev { margin: 0; display: grid; gap: 12px; }
 .ev > div + div { padding-top: 12px; border-top: 1px solid var(--line); }
-.ev dt { font-size: 12.5px; font-weight: 600; color: var(--muted); }
+.ev dt { font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
 .ev dd { margin: 3px 0 0; }
-.fold .meta-line { font-size: 12.5px; }
+.fold .meta-line { font-size: var(--fs-s); }
 
 /* Were you already hit */
 .hit-lead { color: var(--ink-2); }
 .hit-list { list-style: none; padding: 0; display: grid; gap: 8px; }
 .hit-list li { display: grid; grid-template-columns: 5.5em 1fr; gap: 12px; padding-top: 8px; border-top: 1px solid var(--line); color: var(--ink-2); }
-.hit-list b { font-size: 12.5px; color: var(--muted); }
+.hit-list b { font-size: var(--fs-s); color: var(--muted); }
 
 /* Markdown analysis body */
-.md > * + * { margin-top: 10px; }
-.md h2, .md h3 { margin-top: 20px; }
-.md h2 { font-size: 15px; }
-.md h3 { font-size: 14px; }
-.md li + li { margin-top: 5px; }
+.md > * + * { margin-top: 8px; }
+.md h2, .md h3 { margin-top: 20px; font-size: var(--fs-m); }
+.md li + li { margin-top: 4px; }
 .md ul, .md ol { padding-left: 20px; }
 .md pre { background: var(--panel); padding: 10px 14px; border-radius: 4px; overflow-x: auto; }
 .md pre code { background: none; padding: 0; }

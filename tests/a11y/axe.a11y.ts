@@ -65,6 +65,23 @@ test.describe('axe at phone width', () => {
   }
 });
 
+test.describe('section nav at phone width', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+  test('the section nav sticks while scrolling and the page does not scroll sideways', async ({ page }) => {
+    await page.goto(recordRoute);
+    const nav = page.locator('nav.section-nav');
+    await expect(nav).toHaveCount(1);
+    await page.evaluate(() => window.scrollTo(0, 1500));
+    await expect(nav).toBeVisible();
+    const box = await nav.boundingBox();
+    expect(box, 'nav has a box').not.toBeNull();
+    expect(box!.y, 'nav is stuck inside the viewport').toBeGreaterThanOrEqual(-1);
+    expect(box!.y, 'nav is stuck near the top').toBeLessThan(200);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
+    expect(overflow, 'horizontal page scroll at phone width').toBe(false);
+  });
+});
+
 test('keyboard: a record page fold summary is focusable and shows visible focus', async ({ page }) => {
   await page.goto(recordRoute);
   const summary = page.locator('summary:visible').first(); // the plain-text fallback's summary is hidden once the copy button works

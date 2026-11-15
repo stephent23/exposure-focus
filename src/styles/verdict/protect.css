@@ -1,19 +1,20 @@
 /* What to do: one numbered line per option, with the full detail behind a disclosure. */
 .opts { list-style: none; margin: 0; padding: 0; counter-reset: opt; }
-.opt { position: relative; counter-increment: opt; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 14px; padding: 9px 0 2px 30px; border-bottom: 1px solid var(--line); }
-.opt::before { content: counter(opt, decimal-leading-zero); position: absolute; left: 0; top: 11px; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
-.opt h3 { flex: 1 1 100%; font-size: 14.5px; line-height: 1.35; overflow-wrap: anywhere; }
-.opt-cover { font-size: 13px; color: var(--ink-2); }
+.opt { position: relative; counter-increment: opt; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 14px; padding: 8px 0 2px 30px; }
+.opt + .opt { border-top: 1px solid var(--line); }
+.opt::before { content: counter(opt, decimal-leading-zero); position: absolute; left: 0; top: 10px; font-family: var(--font-mono); font-size: var(--fs-s); color: var(--muted); }
+.opt h3 { flex: 1 1 100%; font-size: var(--fs-m); line-height: 1.35; overflow-wrap: anywhere; }
+.opt-cover { font-size: var(--fs-m); color: var(--ink-2); }
 .opt-more[open] { flex: 1 1 100%; padding-bottom: 12px; }
-.opt-sum { max-width: 68ch; font-size: 13.5px; color: var(--ink-2); }
-.opt-ways { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 5px; font-size: 13.5px; color: var(--ink-2); }
+.opt-sum { max-width: 68ch; font-size: var(--fs-m); color: var(--ink-2); }
+.opt-ways { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-m); color: var(--ink-2); }
 .opt-ways li { display: flex; align-items: flex-start; gap: 10px; }
 .opt-ways b { font-weight: 600; }
-.v { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; font-family: var(--font-mono); font-size: 11.5px; font-weight: 600; border: 1px solid var(--ink-2); color: var(--ink); }
+.v { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; font-family: var(--font-mono); font-size: var(--fs-s); font-weight: 600; border: 1px solid var(--ink-2); color: var(--ink); }
 .eff-open .v { border-style: dashed; }
-.facts { margin: 12px 0 0; display: grid; gap: 8px; font-size: 13.5px; }
+.facts { margin: 8px 0 0; display: grid; gap: 8px; font-size: var(--fs-m); }
 .facts > div { display: grid; grid-template-columns: 8em 1fr; gap: 12px; }
-.facts dt { padding-top: 3px; font-size: 12px; color: var(--muted); }
+.facts dt { padding-top: 3px; font-size: var(--fs-s); color: var(--muted); }
 .facts dd { margin: 0; min-width: 0; color: var(--ink-2); }
 
 @media (max-width: 640px) {

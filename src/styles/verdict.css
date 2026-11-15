@@ -1,12 +1,19 @@
-/* Verdict page: the decision in one column, key dates beside it on wide screens. Each part has its own stylesheet in styles/verdict/. */
+/* Verdict page: the decision in one column, section nav and key dates beside it on wide screens. Each part has its own stylesheet in styles/verdict/. */
+/* One rhythm: 28px between sections, 8px inside them. */
 .record { display: grid; grid-template-columns: minmax(0, 1fr); }
 .record > * { min-width: 0; }
 .record code { font-family: var(--font-mono); font-size: 0.9em; background: var(--panel); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
 .record .sec { margin-top: 28px; }
-.record .sec > h2, .timeline h2, .folds-intro { padding-bottom: 6px; border-bottom: 1px solid var(--line-strong); font-size: 13.5px; font-weight: 600; color: var(--ink-2); }
+.record .sec > h2, .timeline h2, .folds-intro { padding-bottom: 6px; border-bottom: 1px solid var(--line); font-size: var(--fs-m); font-weight: 600; color: var(--ink); }
+.record .sec > h2 + * { margin-top: 8px; }
+.record [id$='-heading'] { scroll-margin-top: 64px; }
+
+/* Wrapper for the nav and key dates: on phones its children join the page grid so the nav can stick to the top of the whole page. */
+.side { display: contents; }
 
 @media (min-width: 960px) {
-  .record { grid-template-columns: minmax(0, 1fr) 290px; column-gap: 48px; }
+  .record { grid-template-columns: minmax(0, 1fr) 270px; column-gap: 48px; }
   .record > * { grid-column: 1; }
-  .record > .timeline { grid-column: 2; grid-row: 1 / span 6; align-self: start; position: sticky; top: 16px; }
+  .record > .side { display: block; grid-column: 2; grid-row: 1 / span 20; align-self: start; position: sticky; top: 16px; max-height: calc(100vh - 32px); overflow-y: auto; margin-top: 44px; }
+  .record [id$='-heading'] { scroll-margin-top: 16px; }
 }

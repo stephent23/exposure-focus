@@ -1,19 +1,22 @@
-/* Tier by placement: one ruled row each. Also the small "+" disclosure links shared with the options list. */
+/* Tier by placement: one row each for Tier 1 to 3, then one line for the routine rest. Also the "+" disclosure links shared with the options list. */
 .places { list-style: none; margin: 0; padding: 0; }
-.place { padding: 10px 0 2px; border-bottom: 1px solid var(--line); }
+.place { padding: 8px 0 2px; }
+.place + .place { border-top: 1px solid var(--line); }
 .place-main { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: start; }
 .place-main .badge { padding: 3px 0; text-align: center; }
-.place-body h3 { font-size: 14.5px; line-height: 1.35; }
-.place-action { margin-top: 2px; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); }
+.place-body h3 { font-size: var(--fs-m); line-height: 1.35; }
+.place-action { margin-top: 2px; font-size: var(--fs-m); line-height: 1.5; color: var(--ink-2); }
 .reasoning { margin-left: 162px; }
-.reasoning > summary, .opt-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; font-size: 12.5px; font-weight: 600; color: var(--link); list-style: none; }
+.reasoning > summary, .opt-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; font-size: var(--fs-s); font-weight: 600; color: var(--link); list-style: none; }
 .reasoning > summary::-webkit-details-marker, .opt-more > summary::-webkit-details-marker { display: none; }
 .reasoning > summary::before, .opt-more > summary::before { content: '+'; font-family: var(--font-mono); font-weight: 400; }
 .reasoning[open] > summary::before, .opt-more[open] > summary::before { content: '−'; }
 .reasoning > summary:hover, .opt-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
-.reasoning .list { margin-top: 0; font-size: 13.5px; max-width: 66ch; }
+.reasoning .list { margin-top: 0; font-size: var(--fs-m); max-width: 66ch; }
 .reasoning .list li { margin-top: 4px; }
-.reasoning .meta-line { margin: 6px 0 12px; font-size: 12.5px; }
+.reasoning .meta-line { margin: 6px 0 12px; font-size: var(--fs-s); }
+.routine-rest { margin-top: 8px; font-size: var(--fs-m); color: var(--ink-2); }
+.places + .routine-rest { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
 
 @media (max-width: 640px) {
   .place-main { grid-template-columns: 1fr; gap: 6px; }

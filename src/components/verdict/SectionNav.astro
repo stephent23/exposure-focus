@@ -1,0 +1,18 @@
+---
+// Jump links to the main parts of a verdict. Sticky: beside the key dates on wide screens, a row under the top edge on phones.
+import '../../styles/verdict/nav.css';
+
+const links = [
+  ['Briefing', '#leadership-heading'],
+  ['Are you affected?', '#applies-heading'],
+  ['Tiers', '#placement-heading'],
+  ['What to do', '#protect-heading'],
+  ['Detail', '#evidence-heading']
+];
+---
+
+<nav class="section-nav" aria-label="Sections">
+  <ul role="list">
+    {links.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
+  </ul>
+</nav>

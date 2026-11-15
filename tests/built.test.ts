@@ -90,7 +90,15 @@ describe('built site', () => {
       if (r.were_you_hit) foldedIds.push('hit');
       if (r.analysis) foldedIds.push('analysis');
       for (const id of foldedIds) expect(folded(html, id), `${r.slug} ${id} folded`).toBe(true);
-      expect(count(html, 'class="reasoning"'), `${r.slug} reasoning`).toBe(r.placements.length);
+      const rated = r.placements.filter((p) => p.tier <= 3);
+      const routine = r.placements.filter((p) => p.tier === 4);
+      expect(count(html, 'class="reasoning"'), `${r.slug} reasoning`).toBe(rated.length);
+      expect(count(html, 'class="routine-rest"'), `${r.slug} routine line`).toBe(routine.length ? 1 : 0);
+      if (routine.length) {
+        const line = html.slice(html.indexOf('class="routine-rest"'));
+        const shown = plain(line.slice(0, line.indexOf('</p>')));
+        for (const p of routine) expect(shown, `${r.slug} routine ${p.name}`).toContain(p.name);
+      }
       expect(count(html, 'class="opt-more"'), `${r.slug} mitigation detail`).toBe(r.mitigations.length);
     }
   });
@@ -164,12 +172,124 @@ describe('built site', () => {
     }
   });
 
+  // The test build date is 2099, so every record is past review (stale visible) and nothing is fresh (fresh hidden).
+  const spans = (html: string, cls: string) =>
+    [...html.matchAll(new RegExp(`<span\\b[^>]*\\bclass="[^"]*\\b${cls}\\b[^"]*"[^>]*>`, 'g'))].map((m) => m[0]);
+  const attr = (tag: string, name: string) => new RegExp(`\\b${name}="([^"]*)"`).exec(tag)?.[1];
+  const hidden = (tag: string) => /\shidden(?:[\s=>]|$)/.test(tag);
+  const card = (slug: string) => {
+    const start = home.indexOf(`data-record="${slug}"`);
+    return home.slice(start, home.indexOf('</article>', start));
+  };
+
   it('shows "Overdue for review" on the home card and record page of every listed record', () => {
     for (const r of listed) {
-      const start = home.indexOf(`data-record="${r.slug}"`);
-      expect(home.slice(start, home.indexOf('</article>', start)), `${r.slug} card`).toContain('Overdue for review');
-      expect(text(recordPage(r.slug)), `${r.slug} page`).toContain('Overdue for review');
+      for (const [where, html] of [['card', card(r.slug)], ['page', recordBody(recordPage(r.slug))]] as const) {
+        const stale = spans(html, 'tag-stale');
+        expect(stale.length, `${r.slug} ${where} stale span`).toBe(1);
+        expect(hidden(stale[0]), `${r.slug} ${where} stale visible`).toBe(false);
+        expect(attr(stale[0], 'data-review-until'), `${r.slug} ${where} review date`).toBe(r.review_until);
+        expect(text(html), `${r.slug} ${where}`).toContain('Overdue for review');
+      }
     }
+  });
+
+  // The New and Changed flag lives on home cards only. A change on the publication day is part of the new verdict.
+  it('renders the freshness markup on every home card, hidden when nothing is fresh', () => {
+    for (const r of listed) {
+      const latest = (r.changes ?? []).map((c) => c.date).sort().at(-1);
+      const last = latest && latest > r.published ? latest : undefined;
+      for (const [where, html] of [['card', card(r.slug)]] as const) {
+        const fresh = spans(html, 'fresh');
+        expect(fresh.length, `${r.slug} ${where} fresh span`).toBe(1);
+        expect(hidden(fresh[0]), `${r.slug} ${where} fresh hidden`).toBe(true);
+        expect(attr(fresh[0], 'data-published'), `${r.slug} ${where} published`).toBe(r.published);
+        expect(attr(fresh[0], 'data-changed'), `${r.slug} ${where} changed`).toBe(last);
+      }
+    }
+  });
+
+  it('puts the tier reason, triggers and leadership quote in the briefing, not the summary header', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const start = html.indexOf('id="leadership-heading"');
+      const briefing = plain(html.slice(start, html.indexOf('id="applies-heading"', start)));
+      expect(briefing, `${r.slug} tier reason`).toContain(r.tier_reason);
+      for (const w of r.would_change) expect(briefing, `${r.slug} trigger`).toContain(w);
+      expect(briefing, `${r.slug} quote`).toContain(r.leadership_quote);
+      const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(html)?.[0] ?? '';
+      expect(header, `${r.slug} summary header`).not.toBe('');
+      expect(plain(header), `${r.slug} header repeats the reason`).not.toContain(r.tier_reason);
+    }
+  });
+
+  it('has one section nav on each verdict page, linking five sections that exist', () => {
+    const expected = ['leadership', 'applies', 'placement', 'protect', 'evidence'].map((id) => `#${id}-heading`);
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      expect(count(html, 'class="section-nav"'), `${r.slug} nav count`).toBe(1);
+      const nav = /<nav\b[^>]*class="section-nav"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
+      expect(nav).toContain('aria-label="Sections"');
+      const hrefs = [...nav.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)].map((m) => m[1]);
+      expect(hrefs, `${r.slug} nav links`).toEqual(expected);
+      for (const h of hrefs) expect(count(html, `id="${h.slice(1)}"`), `${r.slug} ${h}`).toBe(1);
+    }
+  });
+
+  it('collapses Tier 4 placements into one routine line and lists no other Tier 4 rows', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const rows = [...html.matchAll(/<li\b[^>]*class="place (t\d)"/g)].map((m) => m[1]);
+      expect(rows.length, `${r.slug} placement rows`).toBe(r.placements.filter((p) => p.tier <= 3).length);
+      expect(rows, `${r.slug} no t4 rows`).not.toContain('t4');
+    }
+  });
+
+  it('keeps the home latest-changes list short, and keeps every reason on the page', () => {
+    expect(count(home, 'class="activity-row"')).toBeLessThanOrEqual(5);
+    expect(count(home, 'class="activity-row"')).toBe(Math.min(5, recentActivity(listed).length));
+    for (const a of recentActivity(listed).slice(0, 5)) if (a.reason) expect(plain(home), a.slug).toContain(a.reason);
+  });
+
+  it('shows no tier or attack filters on the home page while there are 15 or fewer verdicts', () => {
+    if (listed.length > 15) return;
+    expect(home).not.toMatch(/<input\b[^>]*type="checkbox"/);
+    expect(home).not.toMatch(/<select\b/);
+  });
+
+  it('puts no tier badge in a home band header', () => {
+    const bands = [...home.matchAll(/<header\b[^>]*class="[^"]*\bband[^"]*"[\s\S]*?<\/header>/g)].map((m) => m[0]);
+    for (const b of bands) expect(b).not.toContain('class="badge');
+  });
+
+  it('names each card\'s Tier 1-3 placements, highest first, and no Tier 4', () => {
+    for (const r of listed) {
+      const act = /<p\b[^>]*class="act"[^>]*>([\s\S]*?)<\/p>/.exec(card(r.slug))?.[1] ?? '';
+      const shown = plain(act);
+      const rated = [...r.placements].filter((p) => p.tier <= 3).sort((a, b) => a.tier - b.tier);
+      let at = -1;
+      for (const p of rated) {
+        const i = shown.indexOf(`Tier ${p.tier}: ${p.name}`);
+        expect(i, `${r.slug} ${p.name}`).toBeGreaterThan(-1);
+        expect(i, `${r.slug} order`).toBeGreaterThan(at);
+        at = i;
+      }
+      for (const p of r.placements.filter((p) => p.tier === 4)) expect(shown, `${r.slug} ${p.name}`).not.toContain(p.name);
+    }
+  });
+
+  it('uses only the three type sizes in the built stylesheets', () => {
+    const css = files(join(dist, '_astro')).filter((f) => f.endsWith('.css'));
+    expect(css.length).toBeGreaterThan(0);
+    const bad: string[] = [];
+    for (const f of css) {
+      for (const m of readFileSync(f, 'utf-8').matchAll(/(?<![-\w])font-size\s*:\s*([^;}]+)/g)) {
+        const v = m[1].trim().replace(/\s*!important$/, '');
+        const ok = /^var\(--fs-(?:s|m|l)\)$/.test(v) || /em$/.test(v) || v === 'inherit' || /^clamp\(/.test(v);
+        if (!ok) bad.push(`${f}: ${v}`);
+      }
+    }
+    expect(bad).toEqual([]);
   });
 
   it('has no hour or day counts in visible text', () => {
@@ -246,18 +366,20 @@ describe('built site', () => {
   });
 
   it('leads the home page with the latest changes and dates every card', () => {
-    const activity = recentActivity(listed);
-    expect(count(home, 'class="activity-row"')).toBe(activity.length);
+    const activity = recentActivity(listed).slice(0, 5);
     expect(home.indexOf('id="activity-heading"')).toBeLessThan(home.indexOf('data-record="'));
     for (const a of activity) expect(home, a.slug).toContain(`<time datetime="${a.date}">`);
     for (const r of listed) {
       const start = home.indexOf(`data-record="${r.slug}"`);
-      expect(home.slice(start, home.indexOf('</article>', start)), `${r.slug} added date`).toContain(`<time datetime="${r.published}">`);
+      // One date per card: the latest change if it came after publication, otherwise the publication date.
+      const latest = (r.changes ?? []).map((c) => c.date).sort().at(-1);
+      const shown = latest && latest > r.published ? latest : r.published;
+      expect(home.slice(start, home.indexOf('</article>', start)), `${r.slug} date`).toContain(`<time datetime="${shown}">`);
     }
   });
 
   it('says why each tier moved, right on the home page', () => {
-    for (const a of recentActivity(listed)) if (a.reason) expect(plain(home), a.slug).toContain(a.reason);
+    for (const a of recentActivity(listed).slice(0, 5)) if (a.reason) expect(plain(home), a.slug).toContain(a.reason);
   });
 
   it('lists what is being watched but not yet rated, without repeating a published verdict', async () => {
