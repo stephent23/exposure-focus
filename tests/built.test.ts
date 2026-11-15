@@ -159,8 +159,10 @@ describe('built site', () => {
       expect(items.length, `${r.slug} options`).toBe(r.mitigations.length);
       r.mitigations.forEach((m, i) => {
         const text = plain(items[i]);
-        expect(text, `${r.slug} ${m.title} summary`).toContain(m.summary.replace(/`/g, '')); // backticks render as code, so they are not in the text
-        expect(text, `${r.slug} ${m.title} limit`).toContain(m.limitation.replace(/`/g, ''));
+        // Inline code adds spacing and drops its backticks, so compare with spaces and backticks removed.
+        const squash = (x: string) => x.replace(/[\s`]/g, '');
+        expect(squash(text), `${r.slug} ${m.title} summary`).toContain(squash(m.summary));
+        expect(squash(text), `${r.slug} ${m.title} limit`).toContain(squash(m.limitation));
         expect(text, `${r.slug} ${m.title} confidence`).toContain(CONFIDENCE_LABELS[m.confidence]);
         // One implementation link per option: the first guide.
         const guide = m.official_guides[0];
