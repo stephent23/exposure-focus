@@ -1,15 +1,15 @@
 /* Are you affected: versions table, conditions and checks. Rows stack on phones so nothing scrolls sideways. */
 .affected { width: 100%; border-collapse: collapse; font-size: var(--fs-m); }
-.affected th, .affected td { padding: 6px 12px 6px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
+.affected th, .affected td { padding: 8px 12px 8px 0; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); overflow-wrap: anywhere; }
 .affected thead th, .exposed-label { font-size: var(--fs-s); font-weight: 500; color: var(--muted); }
 .affected tbody th { font-weight: 600; }
 .affected td { color: var(--ink-2); }
-.exposed-label { margin-top: 12px; }
-.exposed { margin: 2px 0 0; padding-left: 18px; font-size: var(--fs-m); color: var(--ink-2); }
-.applies-item { margin-top: 12px; max-width: 72ch; }
+.exposed-label { margin-top: 24px; }
+.exposed { margin: 4px 0 0; padding-left: 18px; font-size: var(--fs-m); color: var(--ink-2); }
+.applies-item { margin-top: 24px; max-width: 64ch; }
 .applies-item h3 { font-size: var(--fs-m); line-height: 1.4; }
-.applies-how { margin-top: 2px; font-size: var(--fs-m); color: var(--ink-2); }
-.applies-default { margin-top: 12px; font-size: var(--fs-m); font-weight: 600; }
+.applies-how { margin-top: 4px; font-size: var(--fs-m); color: var(--ink-2); }
+.applies-default { margin-top: 16px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
 
 @media (max-width: 640px) {
   .affected thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); }

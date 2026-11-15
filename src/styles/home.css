@@ -17,7 +17,7 @@
 
 /* Latest changes: a compact table, one line per change on wide screens */
 .activity ol { list-style: none; margin: 8px 0 0; padding: 0; }
-.activity-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 2px 16px; padding: 8px 0; border-top: 1px solid var(--line); font-size: var(--fs-m); line-height: 1.45; }
+.activity-row { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 2px 16px; padding: 10px 0; border-top: 1px solid var(--line); font-size: var(--fs-m); line-height: 1.45; }
 .activity-row time { font-size: var(--fs-s); color: var(--muted); padding-top: 2px; }
 .activity-row > div { display: grid; gap: 2px 16px; }
 .activity-row a { font-weight: 600; color: var(--ink); }
@@ -27,7 +27,7 @@
 .why-moved p { margin-top: 2px; max-width: 70ch; }
 
 /* Filters: search and count (controls only for long lists) */
-.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 32px; }
+.filters { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-top: 40px; }
 .search, .select { height: 36px; border: 1px solid var(--line-strong); border-radius: 4px; padding: 0 10px; font: inherit; font-size: var(--fs-m); background: #fff; color: var(--ink); max-width: 100%; }
 .search { flex: 1 1 200px; min-width: 0; max-width: 320px; }
 .select { flex: 0 1 auto; min-width: 0; }
@@ -43,15 +43,15 @@
 .reset { font: inherit; font-size: var(--fs-m); font-weight: 600; min-height: 36px; padding: 0 8px; border: 0; background: none; color: var(--link); text-decoration: underline; cursor: pointer; }
 
 /* Tier bands: header carries name and meaning; the colour rule carries the tier */
-.band { margin-top: 32px; }
+.band { margin-top: 48px; }
 .band > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding-bottom: 6px; border-bottom: 2px solid var(--edge); }
 .band > header p { font-size: var(--fs-s); color: var(--muted); }
 
 /* Verdict row: name, flags and summary on the left; placements to act on and the date on the right */
-.card { position: relative; min-width: 0; display: grid; gap: 8px 32px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.card { position: relative; min-width: 0; display: grid; gap: 10px 32px; padding: 20px 0; border-bottom: 1px solid var(--line); }
 .card:hover { background: var(--panel); }
 .card:focus-within { outline: 3px solid var(--link); outline-offset: 2px; }
-.card-main { display: grid; gap: 4px; align-content: start; }
+.card-main { display: grid; gap: 6px; align-content: start; }
 .card h3 { font-size: var(--fs-m); font-weight: 700; line-height: 1.35; }
 .card h3 a { color: var(--ink); text-decoration: none; }
 .card h3 a:focus-visible { outline: none; }
@@ -60,7 +60,7 @@
 .flags { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: var(--fs-s); }
 .flags:has(> :not([hidden])) { margin-top: -2px; }
 .flags:not(:has(> :not([hidden]))) { display: none; }
-.card .summary { max-width: 68ch; font-size: var(--fs-m); line-height: 1.5; color: var(--ink-2); }
+.card .summary { max-width: 64ch; font-size: var(--fs-m); line-height: 1.5; color: var(--ink-2); }
 .card-side { display: grid; gap: 6px; align-content: start; }
 .card .act { display: grid; gap: 2px; font-size: var(--fs-s); line-height: 1.45; color: var(--ink); }
 .when { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: var(--fs-s); color: var(--muted); }
@@ -71,7 +71,7 @@
   .tally { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (min-width: 760px) {
-  .card { grid-template-columns: minmax(0, 1fr) 280px; padding: 14px 8px; }
+  .card { grid-template-columns: minmax(0, 1fr) 280px; padding: 20px 8px; }
   .activity-row > div { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
   .why-moved { grid-column: 2; }
 }

@@ -1,22 +1,18 @@
-/* What to do: one numbered line per option, with the full detail behind a disclosure. */
+/* What to do: a numbered list, each option a title and one quiet line. Detail is behind a disclosure. */
 .opts { list-style: none; margin: 0; padding: 0; counter-reset: opt; }
-.opt { position: relative; counter-increment: opt; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 14px; padding: 8px 0 2px 30px; }
+.opt { position: relative; counter-increment: opt; padding: 14px 0 6px 36px; }
 .opt + .opt { border-top: 1px solid var(--line); }
-.opt::before { content: counter(opt, decimal-leading-zero); position: absolute; left: 0; top: 10px; font-family: var(--font-mono); font-size: var(--fs-s); color: var(--muted); }
-.opt h3 { flex: 1 1 100%; font-size: var(--fs-m); line-height: 1.35; overflow-wrap: anywhere; }
-.opt-cover { font-size: var(--fs-m); color: var(--ink-2); }
-.opt-more[open] { flex: 1 1 100%; padding-bottom: 12px; }
-.opt-sum { max-width: 68ch; font-size: var(--fs-m); color: var(--ink-2); }
-.opt-ways { list-style: none; margin: 8px 0 0; padding: 0; display: grid; gap: 6px; font-size: var(--fs-m); color: var(--ink-2); }
-.opt-ways li { display: flex; align-items: flex-start; gap: 10px; }
-.opt-ways b { font-weight: 600; }
-.v { flex: none; display: inline-grid; place-items: center; width: 20px; height: 20px; font-family: var(--font-mono); font-size: var(--fs-s); font-weight: 600; border: 1px solid var(--ink-2); color: var(--ink); }
-.eff-open .v { border-style: dashed; }
-.facts { margin: 8px 0 0; display: grid; gap: 8px; font-size: var(--fs-m); }
-.facts > div { display: grid; grid-template-columns: 8em 1fr; gap: 12px; }
-.facts dt { padding-top: 3px; font-size: var(--fs-s); color: var(--muted); }
-.facts dd { margin: 0; min-width: 0; color: var(--ink-2); }
+.opt::before { content: counter(opt); position: absolute; left: 0; top: 14px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel); font-size: var(--fs-s); font-weight: 600; color: var(--ink-2); }
+.opt h3 { font-size: var(--fs-m); line-height: 1.4; overflow-wrap: anywhere; }
+.opt-line { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 2px; font-size: var(--fs-s); color: var(--muted); }
+.opt-guide a { color: var(--link); }
+.opt-more { margin-top: 2px; }
+.opt-more[open] { padding-bottom: 12px; }
+.facts { margin: 8px 0 0; display: grid; gap: 12px; font-size: var(--fs-m); line-height: 1.55; }
+.facts > div { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 12px; }
+.facts dt { padding-top: 2px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
+.facts dd { margin: 0; min-width: 0; max-width: 62ch; color: var(--ink-2); }
 
 @media (max-width: 640px) {
-  .facts > div { grid-template-columns: 1fr; gap: 1px; }
+  .facts > div { grid-template-columns: 1fr; gap: 2px; }
 }

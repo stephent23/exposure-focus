@@ -1,0 +1,12 @@
+---
+// One guide link, labelled by who published it. A placeholder stays visible and marked.
+import { guideLabel } from '../../lib/verdict-view';
+
+interface Props {
+  href: string;
+  title: string;
+}
+const { href, title } = Astro.props;
+---
+
+{href.startsWith('http') ? <a href={href}>{guideLabel(href)}<span class="sr-only"> for {title}</span></a> : <span class="placeholder">{href}</span>}

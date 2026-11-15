@@ -37,9 +37,10 @@ const recordBody = (html: string) => {
   return html.slice(start, end === -1 ? undefined : end);
 };
 // The page is a dashboard, not a report: the main column, without opening a fold, must stay short.
-// 520 leaves room for the "why this tier" and "what would change it" lines (up to about 90 words together).
+// 560 leaves room for the "why this tier" and "what would change it" lines (about 90 words together) and one guide link per option.
+// Linux has seven options and is the longest page at about 553 words; do not raise this again, trim the record instead.
 // The key-dates list beside it is counted separately: at most eight dated events.
-const VISIBLE_WORD_BUDGET = 520;
+const VISIBLE_WORD_BUDGET = 560;
 // A home card shows badges, a name, a summary and placement rows only.
 const CARD_WORD_BUDGET = 90;
 

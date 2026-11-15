@@ -12,6 +12,7 @@ const { record, bossText } = Astro.props;
 
 <section class="sec briefing leadership" aria-labelledby="leadership-heading">
   <h2 id="leadership-heading">Briefing</h2>
+  <div class="briefing-panel">
   <dl class="why">
     <div><dt>Why Tier {headlineTier(record)}</dt><dd>{record.tier_reason}</dd></div>
     <div>
@@ -31,5 +32,6 @@ const { record, bossText } = Astro.props;
         <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
       </details>
     </div>
+  </div>
   </div>
 </section>

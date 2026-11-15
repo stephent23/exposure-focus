@@ -4,9 +4,11 @@
 .record > * { min-width: 0; }
 .record code { font-family: var(--font-mono); font-size: 0.9em; background: var(--panel); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
 /* Three levels only: section headings (large, bold), item titles (normal size, semibold), labels and meta (small, muted). */
-.record .sec { margin-top: 36px; }
+.record .sec { margin-top: 48px; }
+.record p { max-width: 64ch; }
+.record table p, .record dd p, .record .quote-label, .record .routine-rest { max-width: none; }
 .record .sec > h2, .folds-intro { font-size: var(--fs-l); font-weight: 700; color: var(--ink); }
-.record .sec > h2 + * { margin-top: 10px; }
+.record .sec > h2 + * { margin-top: 14px; }
 .timeline h2 { font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
 .record [id$='-heading'] { scroll-margin-top: 64px; }
 

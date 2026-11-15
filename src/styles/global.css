@@ -26,9 +26,9 @@
   --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
 
-  --fs-s: 12.5px;
-  --fs-m: 14.5px;
-  --fs-l: 17px;
+  --fs-s: 13px;
+  --fs-m: 15px;
+  --fs-l: 18px;
 }
 .t1 { --bg: var(--tier1-bg); --fg: var(--tier1-fg); --edge: #c4554d; --wash: #fbeeed; }
 .t2 { --bg: var(--tier2-bg); --fg: var(--tier2-fg); --edge: #d1a32a; --wash: #fdf6de; }
@@ -39,7 +39,7 @@
 * { box-sizing: border-box; }
 [hidden] { display: none !important; }
 
-body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: var(--fs-m); line-height: 1.55; overflow-wrap: break-word; }
+body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font-sans); font-size: var(--fs-m); line-height: 1.6; overflow-wrap: break-word; }
 a { color: var(--link); overflow-wrap: anywhere; }
 a:hover { color: var(--link-hover); }
 :focus-visible { outline: 3px solid var(--link); outline-offset: 2px; }
