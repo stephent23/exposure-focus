@@ -65,38 +65,29 @@ vectors:
 
 mitigations:
   - title: Install a fixed kernel and reboot
-    summary: "Red Hat calls kernel updates the only complete solution. Upstream fixes are in 5.10.272, 5.15.223, 6.1.190, 6.6.159, 6.12.113, 6.18.56, 7.2.10 and 7.3. Check your distribution's tracker for its fixed kernel."
+    summary: Install a kernel that contains the upstream fix and reboot; Red Hat calls this the only complete solution.
+    limitation: Needs a reboot of each server unless live patching is offered, and a new kernel can change drivers.
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: closed }
       - { vector: "Request-socket migration, if enabled (a similar flaw)", status: closed }
-    takes: A kernel update and a reboot of each server. Live patching can avoid the reboot where offered.
-    might_break: A new kernel can change drivers and behaviour. Test first on a representative host.
     official_guides:
       - https://access.redhat.com/security/vulnerabilities/RHSB-2026-016
       - https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack
-    check_it_worked: "Run `uname -r` after the reboot and confirm it matches your distribution's fixed kernel for CVE-2026-98432."
-    undo: Boot the previous kernel. This reopens the flaw.
     confidence: vendor-stated
   - title: Drop IPv4 TCP packets that carry IP options
-    summary: "Red Hat's temporary nftables rule drops incoming IPv4 TCP packets with IP options (`ip protocol tcp ip hdrlength > 5 counter drop`, in a table named cve_2026_98432). It takes effect at once for new and existing connections and needs no service restart. Red Hat says it reduces exposure but cannot fully prevent the flaw, and is not a substitute for patching. It is not kept across a reboot."
+    summary: Temporary nftables rule that drops incoming IPv4 TCP packets with IP options, lost on reboot.
+    limitation: Red Hat says it cannot fully prevent the flaw; may break CIPSO labelling; misses OpenShift pod traffic.
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: weaker }
-    takes: Loading one nftables table on each server.
-    might_break: Red Hat warns it may disrupt workloads that need IP options, such as CIPSO labelling. It does not cover pod-to-pod traffic in OpenShift.
     official_guides: [https://access.redhat.com/security/vulnerabilities/RHSB-2026-016]
-    check_it_worked: "List the table with `nft list table inet cve_2026_98432` and watch its drop counter."
-    undo: Delete the table, as the bulletin describes, once a fixed kernel is running.
     confidence: vendor-stated
   - title: Turn off MPTCP and request-socket migration
-    summary: "Akamai suggests setting `net.mptcp.enabled=0` and `net.ipv4.tcp_migrate_req=0`. Akamai and Red Hat both say this does not stop exploitation, because the bug is not specific to MPTCP. It only blocks the route used in the researchers' exploit."
+    summary: "Sets `net.mptcp.enabled=0` and `net.ipv4.tcp_migrate_req=0` to block the researchers' exploit route."
+    limitation: Akamai and Red Hat say it does not stop exploitation, and services that rely on MPTCP stop using it.
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: open }
       - { vector: "Request-socket migration, if enabled (a similar flaw)", status: weaker }
-    takes: Two sysctl changes, which can be applied at runtime.
-    might_break: Services that rely on MPTCP stop using it.
     official_guides: [https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack]
-    check_it_worked: Read the two sysctl values back and confirm they are 0.
-    undo: Set the values back and reload sysctl.
     confidence: reported
 
 evidence:
@@ -161,3 +152,5 @@ Some write-ups describe this as an MPTCP-only problem. Red Hat and Akamai both s
 As of 2026-11-13 no source reviewed reports the flaw in the CISA KEV catalogue; the catalogue itself was not checked.
 
 Both internet-facing rows are Tier 3. The researchers' exploit is described in Anthropic's own write-up, but without the code, kernel version or configuration, so it counts as a lab result rather than a published demonstration.
+
+Red Hat's temporary nftables rule is `ip protocol tcp ip hdrlength > 5 counter drop`, in a table named cve_2026_98432. It takes effect at once for new and existing connections and needs no service restart. Red Hat says it is not a substitute for patching.

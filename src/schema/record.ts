@@ -14,7 +14,8 @@ export const CAPS = {
   question: 100,
   howToCheck: 240,
   mitigationTitle: 80,
-  mitigationTakes: 120,
+  mitigationSummary: 110,
+  mitigationLimitation: 110,
   product: 60,
   vulnerable: 80,
   fixed: 80,
@@ -87,7 +88,9 @@ const placementSchema = z.object({
 const mitigationSchema = z
   .object({
     title: capped(CAPS.mitigationTitle),
-    summary: text,
+    summary: capped(CAPS.mitigationSummary),
+    /** What the option leaves open, only partly covers, or costs. Required: every mitigation states its limit. */
+    limitation: capped(CAPS.mitigationLimitation),
     effect: z
       .array(
         z.object({
@@ -96,17 +99,10 @@ const mitigationSchema = z
         })
       )
       .min(1),
-    takes: capped(CAPS.mitigationTakes),
-    might_break: text.optional(),
-    cost: text.optional(),
     official_guides: z.array(link),
-    check_it_worked: text,
-    undo: text,
     confidence
   })
-  .refine((m) => Boolean(m.might_break || m.cost), {
-    message: 'A mitigation must say what it might break or what it costs.'
-  });
+  .strict();
 
 const evidenceSchema = z.object({
   label: text,

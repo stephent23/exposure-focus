@@ -33,12 +33,9 @@ function validRecord() {
       {
         title: 'Block access',
         summary: 'Restrict the listener.',
+        limitation: 'Remote users lose access.',
         effect: [{ vector: 'Remote request', status: 'closed' }],
-        takes: 'A firewall change.',
-        might_break: 'Remote users lose access.',
         official_guides: ['[link to add]'],
-        check_it_worked: 'Probe from outside.',
-        undo: 'Remove the rule.',
         confidence: 'reported'
       }
     ],
@@ -81,18 +78,15 @@ describe('record schema', () => {
     reject((r) => (r.evidence[0].source_url = 'https://www.example.com/x'));
   });
 
-  it('requires confidence, check_it_worked and undo on every mitigation', () => {
+  it('requires confidence and a stated limitation on every mitigation', () => {
     reject((r) => delete (r.mitigations[0] as Record<string, unknown>).confidence);
-    reject((r) => delete (r.mitigations[0] as Record<string, unknown>).check_it_worked);
-    reject((r) => delete (r.mitigations[0] as Record<string, unknown>).undo);
+    reject((r) => delete (r.mitigations[0] as Record<string, unknown>).limitation);
   });
 
-  it('requires might_break or a stated cost on every mitigation', () => {
-    reject((r) => delete (r.mitigations[0] as Record<string, unknown>).might_break);
-    const r = validRecord() as Mutable;
-    delete (r.mitigations[0] as Record<string, unknown>).might_break;
-    (r.mitigations[0] as Record<string, unknown>).cost = 'Needs a maintenance window.';
-    expect(recordSchema.safeParse(r).success).toBe(true);
+  it('refuses the old long-form mitigation fields, so no dead detail is kept', () => {
+    for (const key of ['takes', 'might_break', 'cost', 'check_it_worked', 'undo']) {
+      reject((r) => ((r.mitigations[0] as Record<string, unknown>)[key] = 'x'));
+    }
   });
 
   it('fails when the declared tier disagrees with the rubric', () => {
@@ -348,7 +342,8 @@ describe('length caps', () => {
     ['question', (r, v) => (r.applies_check[0].question = v)],
     ['howToCheck', (r, v) => (r.applies_check[0].how_to_check = v)],
     ['mitigationTitle', (r, v) => (r.mitigations[0].title = v)],
-    ['mitigationTakes', (r, v) => (r.mitigations[0].takes = v)]
+    ['mitigationSummary', (r, v) => (r.mitigations[0].summary = v)],
+    ['mitigationLimitation', (r, v) => (r.mitigations[0].limitation = v)]
   ];
   for (const [name, apply] of cases) {
     it(`${name}: passes at the cap, fails one over and names the cap`, () => {

@@ -1,18 +1,11 @@
-/* What to do: a numbered list, each option a title and one quiet line. Detail is behind a disclosure. */
+/* What to do: a numbered list. Each option is a title, a one-line description, its limit, and a quiet line with coverage, confidence and the guide. */
 .opts { list-style: none; margin: 0; padding: 0; counter-reset: opt; }
-.opt { position: relative; counter-increment: opt; padding: 14px 0 6px 36px; }
+.opt { position: relative; counter-increment: opt; padding: 16px 0 16px 36px; }
 .opt + .opt { border-top: 1px solid var(--line); }
-.opt::before { content: counter(opt); position: absolute; left: 0; top: 14px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel); font-size: var(--fs-s); font-weight: 600; color: var(--ink-2); }
+.opt::before { content: counter(opt); position: absolute; left: 0; top: 16px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel); font-size: var(--fs-s); font-weight: 600; color: var(--ink-2); }
 .opt h3 { font-size: var(--fs-m); line-height: 1.4; overflow-wrap: anywhere; }
-.opt-line { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 2px; font-size: var(--fs-s); color: var(--muted); }
+.opt-sum { margin-top: 2px; color: var(--ink-2); }
+.opt-limit { margin-top: 4px; color: var(--ink-2); }
+.opt-label { margin-right: 4px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
+.opt-line { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 6px; font-size: var(--fs-s); color: var(--muted); }
 .opt-guide a { color: var(--link); }
-.opt-more { margin-top: 2px; }
-.opt-more[open] { padding-bottom: 12px; }
-.facts { margin: 8px 0 0; display: grid; gap: 12px; font-size: var(--fs-m); line-height: 1.55; }
-.facts > div { display: grid; grid-template-columns: 8.5em minmax(0, 1fr); gap: 12px; }
-.facts dt { padding-top: 2px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
-.facts dd { margin: 0; min-width: 0; max-width: 62ch; color: var(--ink-2); }
-
-@media (max-width: 640px) {
-  .facts > div { grid-template-columns: 1fr; gap: 2px; }
-}

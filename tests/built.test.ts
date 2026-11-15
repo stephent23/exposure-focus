@@ -5,6 +5,7 @@ import { join, sep } from 'node:path';
 import { recentActivity } from '../src/lib/home';
 import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
+import { CONFIDENCE_LABELS } from '../src/lib/tiers';
 import { coverageLine, keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
 
@@ -36,11 +37,10 @@ const recordBody = (html: string) => {
   const end = html.indexOf('</main>', start);
   return html.slice(start, end === -1 ? undefined : end);
 };
-// The page is a dashboard, not a report: the main column, without opening a fold, must stay short.
-// 560 leaves room for the "why this tier" and "what would change it" lines (about 90 words together) and one guide link per option.
-// Linux has seven options and is the longest page at about 553 words; do not raise this again, trim the record instead.
+// The page is a dashboard, not a report. Everything above "What to do" (summary, key facts, briefing, affected table,
+// checks, placements) must stay short; "What to do" is capped per option instead, so a longer list does not break it.
 // The key-dates list beside it is counted separately: at most eight dated events.
-const VISIBLE_WORD_BUDGET = 560;
+const VISIBLE_WORD_BUDGET = 480;
 // A home card shows badges, a name, a summary and placement rows only.
 const CARD_WORD_BUDGET = 90;
 
@@ -100,13 +100,14 @@ describe('built site', () => {
         const shown = plain(line.slice(0, line.indexOf('</p>')));
         for (const p of routine) expect(shown, `${r.slug} routine ${p.name}`).toContain(p.name);
       }
-      expect(count(html, 'class="opt-more"'), `${r.slug} mitigation detail`).toBe(r.mitigations.length);
+      expect(html, `${r.slug} has no folded mitigation detail`).not.toContain('class="opt-more"');
     }
   });
 
   it('keeps the visible text of a record page within the word budget', () => {
     for (const r of published) {
-      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))).replace(/<aside[\s\S]*?<\/aside>/g, ' '));
+      const body = withoutDetails(recordBody(recordPage(r.slug))).replace(/<aside[\s\S]*?<\/aside>/g, ' ');
+      const visible = plain(body.slice(0, body.indexOf('id="protect-heading"')));
       expect(r.timeline?.length ?? 0, `${r.slug} key dates`).toBeLessThanOrEqual(8);
       expect(words(visible), `${r.slug} visible words`).toBeLessThanOrEqual(VISIBLE_WORD_BUDGET);
     }
@@ -145,6 +146,28 @@ describe('built site', () => {
       for (const a of r.affected) expect(shown, `${r.slug} ${a.product}`).toContain(a.product);
       const noFix = r.affected.filter((a) => !a.fixed).length;
       expect(count(shown, 'No fix yet'), `${r.slug} no-fix rows`).toBeGreaterThanOrEqual(noFix);
+    }
+  });
+
+  // Each option is a title, one description, one limit, a quiet line and a guide link. Cap it so the list stays scannable.
+  const OPTION_WORD_BUDGET = 70;
+  it('shows each option as a short description, its limit, a confidence label and its guide links', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const section = html.slice(html.indexOf('id="protect-heading"'));
+      const items = [...section.slice(0, section.indexOf('</ol>')).matchAll(/<li class="opt">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+      expect(items.length, `${r.slug} options`).toBe(r.mitigations.length);
+      r.mitigations.forEach((m, i) => {
+        const text = plain(items[i]);
+        expect(text, `${r.slug} ${m.title} summary`).toContain(m.summary.replace(/`/g, '')); // backticks render as code, so they are not in the text
+        expect(text, `${r.slug} ${m.title} limit`).toContain(m.limitation.replace(/`/g, ''));
+        expect(text, `${r.slug} ${m.title} confidence`).toContain(CONFIDENCE_LABELS[m.confidence]);
+        // One implementation link per option: the first guide.
+        const guide = m.official_guides[0];
+        if (guide?.startsWith('http')) expect(items[i], `${r.slug} ${m.title} guide`).toContain(`href="${guide.replace(/&/g, '&amp;')}"`);
+        expect(count(items[i], 'href='), `${r.slug} ${m.title} links`).toBe(1);
+        expect(words(text), `${r.slug} ${m.title} words`).toBeLessThanOrEqual(OPTION_WORD_BUDGET);
+      });
     }
   });
 

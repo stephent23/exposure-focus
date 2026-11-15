@@ -59,17 +59,14 @@ placements:
 
 vectors: ["[ways in to add]"] # shown as A, B, C... in the order listed
 
-# Caps: title 80 characters, takes 120 characters.
+# Caps: title 80 characters, summary 110, limitation 110. A mitigation is a title, one short description, one limitation, a confidence label and a guide link.
 mitigations:
   - title: "[mitigation to add]"
-    summary: What it does.
+    summary: What it does, in one short sentence.
+    limitation: What it leaves open, only partly covers, or costs. # required: every option states its limit
     effect: # per way in: closed, closed_for_that_app, open or weaker
       - { vector: "[ways in to add]", status: closed_for_that_app }
-    takes: How much effort it needs (not an hour or day count).
-    might_break: What it could break. # or use a "cost:" line instead
     official_guides: ["[link to add]"]
-    check_it_worked: How to test it.
-    undo: How to roll it back.
     confidence: inference # vendor-stated, reported or inference
 
 evidence:

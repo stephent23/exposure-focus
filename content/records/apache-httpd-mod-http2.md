@@ -62,30 +62,24 @@ vectors:
 
 mitigations:
   - title: Update Apache HTTP Server or your distribution's package
-    summary: "The Apache project fixed the flaw in 2.4.71, released 2026-11-11. Distributions have backported the fix: Debian has fixed packages for bookworm (2.4.71-1~deb12u1, DLA-4902-1) and trixie (2.4.71-1~deb13u1, DSA-6620-1), with forky still listed as vulnerable; Ubuntu has fixed packages for 26.10, 26.04 LTS, 24.04 LTS, 22.04 LTS and, through Ubuntu Pro, 20.04 LTS (USN-9090-1). Red Hat says fixes are available for most affected products and the rest are being expedited; Tenable lists RHEL 9 and RHEL 10 mod_http2 updates under several RHSA numbers. Apache lists the standalone mod_h2 module 2.0.8 to 2.0.42 as affected; it is reported to have no fix because the project is archived."
+    summary: "Install Apache 2.4.71 or your distribution's package with the fix, then restart Apache."
+    limitation: "Standalone mod_h2 2.0.8 to 2.0.42 is reported to have no fix, because the project is archived."
     effect:
       - { vector: Attacker sends crafted HTTP/2 traffic to the web server, status: closed }
-    takes: A package update and a restart of Apache on each server, plus rebuilding any container images that bundle it.
-    might_break: "No breakage is reported. Version 2.4.71 also carries other fixes, so test it like any server update."
     official_guides:
       - https://httpd.apache.org/security/vulnerabilities_24.html
       - https://access.redhat.com/security/vulnerabilities/RHSB-2026-017
       - https://security-tracker.debian.org/tracker/CVE-2026-119618
       - https://ubuntu.com/security/CVE-2026-119618
-    check_it_worked: "Check the installed package against your distribution's fixed version (not against 2.4.71 alone), and confirm the running Apache process started after the update."
-    undo: Reinstall the previous package. This reopens the flaw, so switch HTTP/2 off first.
     confidence: vendor-stated
   - title: Switch HTTP/2 off until you can update
-    summary: "Red Hat's mitigation, which Wiz also recommends: edit the httpd configuration (`/etc/httpd/conf/httpd.conf` or files in `/etc/httpd/conf.d/`), remove `h2` and `h2c` from every `Protocols` directive so it reads `Protocols http/1.1`, then run `systemctl restart httpd`. The same directive applies on other distributions."
+    summary: "Remove h2 and h2c from every Protocols directive so it reads `Protocols http/1.1`, then restart Apache."
+    limitation: "Red Hat warns of some performance loss, and anything needing HTTP/2 end to end, such as gRPC, stops working."
     effect:
       - { vector: Attacker sends crafted HTTP/2 traffic to the web server, status: closed }
-    takes: A configuration change in each server and virtual host, and a restart.
-    might_break: "Red Hat warns of some loss of performance and bandwidth efficiency. Anything that needs HTTP/2 end to end, such as gRPC proxied through Apache, stops working."
     official_guides:
       - https://access.redhat.com/security/vulnerabilities/RHSB-2026-017
       - https://www.wiz.io/blog/cve-2026-119618-rce-apache-http-server-vulnerability
-    check_it_worked: "Run `curl -kI --http2 https://localhost` and confirm the reply is `HTTP/1.1 200 OK`, not `HTTP/2 200`. Repeat for each virtual host, and against Apache directly if a proxy sits in front."
-    undo: Put `h2` and `h2c` back in the Protocols directive and restart, once the fix is in place.
     confidence: vendor-stated
 
 evidence:
@@ -190,3 +184,7 @@ Search the configuration for the `Protocols` directive, server-wide and in every
 Red Hat's client check is `curl -kI --http2 https://localhost`: a reply of `HTTP/2 200` means HTTP/2 is on, `HTTP/1.1 200 OK` means it is off. If a load balancer, CDN or reverse proxy sits in front, also find out whether it passes HTTP/2 through to Apache or speaks HTTP/1.1 to it; a test from outside only shows the front door.
 
 Where no fixed package exists yet, for example the archived standalone mod_h2 module or a vendor still preparing one, HTTP/2 stays off until it does.
+
+Distribution fixes seen on 2026-11-13: Debian has fixed packages for bookworm (2.4.71-1~deb12u1, DLA-4902-1) and trixie (2.4.71-1~deb13u1, DSA-6620-1), with forky still listed as vulnerable. Ubuntu has fixed packages for 26.10, 26.04 LTS, 24.04 LTS, 22.04 LTS and, through Ubuntu Pro, 20.04 LTS (USN-9090-1). Red Hat says fixes are available for most affected products and the rest are being expedited, and Tenable lists RHEL 9 and RHEL 10 mod_http2 updates under several RHSA numbers. Apache lists the standalone mod_h2 module 2.0.8 to 2.0.42 as affected, and it is reported to have no fix because the project is archived. Rebuild any container images that bundle Apache, and test the update like any server update, as 2.4.71 carries other fixes.
+
+To switch HTTP/2 off, which is Red Hat's mitigation and which Wiz also recommends, edit `/etc/httpd/conf/httpd.conf` or files in `/etc/httpd/conf.d/` and run `systemctl restart httpd`. The same directive applies on other distributions.
