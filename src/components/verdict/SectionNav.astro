@@ -11,7 +11,8 @@ const links = [
 ];
 ---
 
-<nav class="section-nav" aria-label="Sections">
+<nav class="section-nav" aria-labelledby="section-nav-label">
+  <p class="nav-label" id="section-nav-label">Jump to</p>
   <ul role="list">
     {links.map(([label, href]) => <li><a href={href}>{label}</a></li>)}
   </ul>

@@ -229,7 +229,9 @@ describe('built site', () => {
       const html = recordPage(r.slug);
       expect(count(html, 'class="section-nav"'), `${r.slug} nav count`).toBe(1);
       const nav = /<nav\b[^>]*class="section-nav"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
-      expect(nav).toContain('aria-label="Sections"');
+      // The nav is named by its visible "Jump to" label.
+      expect(nav).toContain('aria-labelledby="section-nav-label"');
+      expect(plain(nav)).toContain('Jump to');
       const hrefs = [...nav.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)].map((m) => m[1]);
       expect(hrefs, `${r.slug} nav links`).toEqual(expected);
       for (const h of hrefs) expect(count(html, `id="${h.slice(1)}"`), `${r.slug} ${h}`).toBe(1);
@@ -260,6 +262,13 @@ describe('built site', () => {
   it('puts no tier badge in a home band header', () => {
     const bands = [...home.matchAll(/<header\b[^>]*class="[^"]*\bband[^"]*"[\s\S]*?<\/header>/g)].map((m) => m[0]);
     for (const b of bands) expect(b).not.toContain('class="badge');
+  });
+
+  it('lines the Tier 4 summary up with the placement rows above it', () => {
+    // Same two-column structure as a placement row: the badge, then the text in its own element.
+    for (const r of published.filter((x) => x.placements.some((p) => p.tier === 4))) {
+      expect(recordPage(r.slug), r.slug).toMatch(/<p class="routine-rest"><span class="badge t4">[^<]*<\/span> <span>/);
+    }
   });
 
   it('names each card\'s Tier 1-3 placements, highest first, and no Tier 4', () => {

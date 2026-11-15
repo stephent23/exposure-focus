@@ -42,6 +42,6 @@ const routine = all.filter((p) => p.tier === 4);
     })}
   </ul>}
   {routine.length > 0 && (
-    <p class="routine-rest"><span class="badge t4">Tier 4 · {TIERS[4].name}</span> {routine.map((p) => p.name).join('; ')}</p>
+    <p class="routine-rest"><span class="badge t4">Tier 4 · {TIERS[4].name}</span> <span>{routine.map((p) => p.name).join('; ')}</span></p>
   )}
 </section>

@@ -23,9 +23,9 @@ const exploited = (r: (typeof records)[number]) => r.placements.some((p) => p.fa
 const FRESH = { new: 'New', changed: 'Changed' } as const;
 const SHOW_CONTROLS_ABOVE = 15;
 const showControls = records.length > SHOW_CONTROLS_ABOVE;
-// Placements worth acting on (tier 1-3), highest first, as plain text.
-const actLine = (r: (typeof records)[number]) =>
-  sortedPlacements(r).filter((p) => p.tier <= 3).map((p) => `Tier ${p.tier}: ${p.name}`).join(' · ');
+// Placements worth acting on (tier 1-3), highest first, one per line.
+const actItems = (r: (typeof records)[number]) =>
+  sortedPlacements(r).filter((p) => p.tier <= 3).map((p) => `Tier ${p.tier}: ${p.name}`);
 ---
 
 <Base title="Exposure Focus" current="home">
@@ -107,7 +107,7 @@ const actLine = (r: (typeof records)[number]) =>
             const latest = lastChanged(record);
             // A change on the publication day is part of the verdict itself, not a later change.
             const changed = latest && latest > record.published ? latest : undefined;
-            const act = actLine(record);
+            const act = actItems(record);
             return (
               <article
                 class="card"
@@ -116,12 +116,16 @@ const actLine = (r: (typeof records)[number]) =>
                 data-kind={record.attack}
                 data-text={[record.name, ...record.cves, ...record.aliases].join(' ').toLowerCase()}
               >
-                <div class="card-top">
+                <div class="card-main">
                   <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
                   <p class="flags">
                     {exploited(record) && <span class="tag-hot">Exploited in the wild</span>}
                     <span class="tag-stale" data-review-until={record.review_until} hidden={!isStale(record, today)}>Overdue for review</span>
                   </p>
+                  <p class="summary">{record.summary}</p>
+                </div>
+                <div class="card-side">
+                  {act.length > 0 && <p class="act">{act.map((line) => <span>{line}</span>)}</p>}
                   <p class="when">
                     <span class="fresh" data-published={record.published} data-changed={changed} hidden={!fresh}>{fresh ? FRESH[fresh] : ''}</span>
                     {changed
@@ -129,8 +133,6 @@ const actLine = (r: (typeof records)[number]) =>
                       : <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>}
                   </p>
                 </div>
-                <p class="summary">{record.summary}</p>
-                {act && <p class="act">{act}</p>}
               </article>
             );
           })}

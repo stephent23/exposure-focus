@@ -15,11 +15,15 @@
 .reasoning .list { margin-top: 0; font-size: var(--fs-m); max-width: 66ch; }
 .reasoning .list li { margin-top: 4px; }
 .reasoning .meta-line { margin: 6px 0 12px; font-size: var(--fs-s); }
-.routine-rest { margin-top: 8px; font-size: var(--fs-m); color: var(--ink-2); }
-.places + .routine-rest { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--line); }
+/* The routine rest uses the same two columns as a placement row, so the text lines up. */
+.routine-rest { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 12px; align-items: start; padding: 8px 0; font-size: var(--fs-m); color: var(--ink-2); }
+.routine-rest .badge { padding: 3px 0; text-align: center; }
+.places + .routine-rest { border-top: 1px solid var(--line); }
 
 @media (max-width: 640px) {
   .place-main { grid-template-columns: 1fr; gap: 6px; }
+  .routine-rest { grid-template-columns: 1fr; gap: 6px; }
+  .routine-rest .badge { justify-self: start; padding: 3px 8px; }
   .place-main .badge { justify-self: start; padding: 3px 8px; }
   .reasoning { margin-left: 0; }
 }

@@ -1,11 +1,13 @@
 /* Verdict page: the decision in one column, section nav and key dates beside it on wide screens. Each part has its own stylesheet in styles/verdict/. */
-/* One rhythm: 28px between sections, 8px inside them. */
+/* One rhythm: 36px between sections, 10px under a heading, 8px inside rows. */
 .record { display: grid; grid-template-columns: minmax(0, 1fr); }
 .record > * { min-width: 0; }
 .record code { font-family: var(--font-mono); font-size: 0.9em; background: var(--panel); padding: 1px 4px; border-radius: 4px; overflow-wrap: anywhere; }
-.record .sec { margin-top: 28px; }
-.record .sec > h2, .timeline h2, .folds-intro { padding-bottom: 6px; border-bottom: 1px solid var(--line); font-size: var(--fs-m); font-weight: 600; color: var(--ink); }
-.record .sec > h2 + * { margin-top: 8px; }
+/* Three levels only: section headings (large, bold), item titles (normal size, semibold), labels and meta (small, muted). */
+.record .sec { margin-top: 36px; }
+.record .sec > h2, .folds-intro { font-size: var(--fs-l); font-weight: 700; color: var(--ink); }
+.record .sec > h2 + * { margin-top: 10px; }
+.timeline h2 { font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
 .record [id$='-heading'] { scroll-margin-top: 64px; }
 
 /* Wrapper for the nav and key dates: on phones its children join the page grid so the nav can stick to the top of the whole page. */
