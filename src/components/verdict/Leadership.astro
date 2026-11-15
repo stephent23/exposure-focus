@@ -1,7 +1,7 @@
 ---
 // The leadership summary, with a copy button (src/scripts/copy.ts). The plain-text fallback is folded away.
 import '../../styles/verdict/leadership.css';
-import type { RecordEntry } from '../../schema/record';
+import { headlineTier, type RecordEntry } from '../../schema/record';
 
 interface Props {
   record: RecordEntry;
@@ -10,8 +10,17 @@ interface Props {
 const { record, bossText } = Astro.props;
 ---
 
-<section class="sec leadership" aria-labelledby="leadership-heading">
-  <h2 id="leadership-heading">For leadership</h2>
+<section class="sec briefing leadership" aria-labelledby="leadership-heading">
+  <h2 id="leadership-heading">Briefing</h2>
+  <div class="briefing-panel">
+  <dl class="why">
+    <div><dt>Why Tier {headlineTier(record)}</dt><dd>{record.tier_reason}</dd></div>
+    <div>
+      <dt>What would change it</dt>
+      <dd>{record.would_change.length === 1 ? record.would_change[0] : <ul>{record.would_change.map((w) => <li>{w}</li>)}</ul>}</dd>
+    </div>
+  </dl>
+  <p class="quote-label">For leadership</p>
   <blockquote>{record.leadership_quote}</blockquote>
   <div class="boss">
     <button type="button" id="boss-copy" class="copy-btn" hidden>Copy for leadership</button>
@@ -23,5 +32,6 @@ const { record, bossText } = Astro.props;
         <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
       </details>
     </div>
+  </div>
   </div>
 </section>

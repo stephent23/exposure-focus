@@ -1,9 +1,10 @@
 ---
-// What to do: one compact row per option, with the full detail behind a disclosure.
+// What to do: one short block per option: what it is, what it leaves open, how sure we are and where to do it.
 import '../../styles/verdict/protect.css';
 import Text from '../Text.astro';
-import { CONFIDENCE_LABELS, EFFECT_LABELS } from '../../lib/tiers';
-import { coverageLine, guideLabel, isPlaceholder, letter } from '../../lib/verdict-view';
+import Guide from './Guide.astro';
+import { CONFIDENCE_LABELS } from '../../lib/tiers';
+import { coverageLine, isPlaceholder } from '../../lib/verdict-view';
 import type { RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -18,45 +19,13 @@ const { record } = Astro.props;
     {record.mitigations.map((m) => (
       <li class="opt">
         <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
-        <p class="opt-cover">{coverageLine(record.vectors, m.effect)}</p>
-        <details class="opt-more">
-          <summary>Details<span class="sr-only"> for {m.title}</span></summary>
-          <p class="opt-sum"><Text text={m.summary} /></p>
-          <ul class="opt-ways">
-            {record.vectors.map((vector, i) => {
-              const effect = m.effect.find((e) => e.vector === vector);
-              return (
-                <li class={`eff-${effect?.status ?? 'open'}`}>
-                  <span class="v">{letter(i)}</span>
-                  <span>{isPlaceholder(vector) ? <span class="placeholder">{vector}</span> : vector}: <b>{EFFECT_LABELS[effect?.status ?? 'open'].text}</b></span>
-                </li>
-              );
-            })}
-          </ul>
-          <dl class="facts">
-            <div><dt>Effort</dt><dd><Text text={m.takes} /></dd></div>
-            {m.might_break && <div><dt>Might break</dt><dd><Text text={m.might_break} /></dd></div>}
-            {m.cost && <div><dt>Costs</dt><dd><Text text={m.cost} /></dd></div>}
-            <div><dt>Check it worked</dt><dd><Text text={m.check_it_worked} /></dd></div>
-            <div><dt>Undo</dt><dd><Text text={m.undo} /></dd></div>
-            <div>
-              <dt>{m.official_guides.length === 1 ? 'Guide' : 'Guides'}</dt>
-              <dd>
-                {m.official_guides.map((g, gi) => (
-                  <>
-                    {gi > 0 && ' · '}
-                    {g.startsWith('http') ? (
-                      <a href={g}>{guideLabel(g)}<span class="sr-only"> for {m.title}</span></a>
-                    ) : (
-                      <span class="placeholder">{g}</span>
-                    )}
-                  </>
-                ))}
-              </dd>
-            </div>
-            <div><dt>Confidence</dt><dd>{CONFIDENCE_LABELS[m.confidence]}</dd></div>
-          </dl>
-        </details>
+        <p class="opt-sum"><Text text={m.summary} /></p>
+        <p class="opt-limit"><span class="opt-label">Limit</span> <Text text={m.limitation} /></p>
+        <p class="opt-line">
+          <span>{coverageLine(record.vectors, m.effect)}</span>
+          <span>{CONFIDENCE_LABELS[m.confidence]}</span>
+          {m.official_guides[0] && <span class="opt-guide"><Guide href={m.official_guides[0]} title={m.title} /></span>}
+        </p>
       </li>
     ))}
   </ol>

@@ -17,19 +17,17 @@ const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
 
 <header class="summary">
   <a class="back" href="/"><span aria-hidden="true">←</span> All verdicts</a>
-  <section class={`verdict t${top}`} aria-label="Verdict">
-    <p class="kicker">
-      <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
-      <span class="cve">{record.cves.join(' · ')}</span>
-    </p>
-    <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
-    <p class="verdict-summary">{record.summary}</p>
-    <p class="tags">
-      <span>{ATTACKS[record.attack].name}</span>
-      {unconfirmed && <span>Some facts unconfirmed</span>}
-      {stale && <span class="tag-stale">Overdue for review</span>}
-    </p>
-  </section>
+  <p class="kicker">
+    <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
+    <span class="cve">{record.cves.join(' · ')}</span>
+  </p>
+  <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
+  <p class="verdict-summary">{record.summary}</p>
+  <p class="tags">
+    <span>{ATTACKS[record.attack].name}</span>
+    {unconfirmed && <span>Some facts unconfirmed</span>}
+    <span class="tag-stale" data-review-until={record.review_until} hidden={!stale}>Overdue for review</span>
+  </p>
 
   <dl class="keyfacts">
     {keyFacts(record).map((f) => (
@@ -38,18 +36,11 @@ const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
         <dd>{f.value}</dd>
         {f.source && (
           <dd class="keyfact-src">
-            <a href={f.source.url}>Source<span class="sr-only"> for {f.label}</span></a>, <time datetime={f.source.as_of}>{shortDate(f.source.as_of)}</time>
+            <a href={f.source.url}>Source · <time datetime={f.source.as_of}>{shortDate(f.source.as_of)}</time><span class="sr-only"> for {f.label}</span></a>
           </dd>
         )}
       </div>
     ))}
-  </dl>
-  <dl class="why">
-    <div><dt>Why Tier {top}</dt><dd>{record.tier_reason}</dd></div>
-    <div>
-      <dt>What would change it</dt>
-      <dd>{record.would_change.length === 1 ? record.would_change[0] : <ul>{record.would_change.map((w) => <li>{w}</li>)}</ul>}</dd>
-    </div>
   </dl>
   <p class="meta">
     Published <time datetime={record.published}>{niceDate(record.published)}</time> · Evidence checked <time datetime={record.evidence_as_of}>{niceDate(record.evidence_as_of)}</time> · Review by <time datetime={record.review_until}>{niceDate(record.review_until)}</time> (UTC)

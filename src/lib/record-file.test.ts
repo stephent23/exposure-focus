@@ -30,12 +30,9 @@ vectors: [Remote request]
 mitigations:
   - title: Block access
     summary: Restrict the listener.
+    limitation: Remote users lose access.
     effect: [{ vector: Remote request, status: closed }]
-    takes: A firewall change.
-    might_break: Remote users lose access.
     official_guides: ["[link to add]"]
-    check_it_worked: Probe from outside.
-    undo: Remove the rule.
     confidence: reported
 evidence:
   - label: CVE record

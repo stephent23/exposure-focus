@@ -1,29 +1,20 @@
-/* The top of a verdict page: tier, title, one-line summary, the key facts strip and the dates it was checked. */
-.back { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; font-size: 13px; }
+/* The top of a verdict page: tier, title, summary, the key facts and the dates it was checked. */
+.back { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; font-size: var(--fs-m); }
 .kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 4px; }
-.cve { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
+.cve { font-family: var(--font-mono); font-size: var(--fs-s); color: var(--muted); overflow-wrap: anywhere; }
 .record h1 { margin-top: 8px; font-size: clamp(22px, 3vw, 27px); line-height: 1.2; }
-.record h1 small { display: block; margin-top: 2px; font-weight: 400; color: var(--muted); font-size: 13px; letter-spacing: 0; }
-.verdict-summary { margin-top: 8px; max-width: 66ch; font-size: 15.5px; line-height: 1.5; }
-.verdict .tags { margin-top: 10px; }
+.record h1 small { display: block; margin-top: 2px; font-weight: 400; color: var(--muted); font-size: var(--fs-m); letter-spacing: 0; }
+.verdict-summary { margin-top: 8px; max-width: 66ch; font-size: var(--fs-l); line-height: 1.5; }
+.summary .tags { margin-top: 8px; }
 
-/* Key facts: one ruled strip. The value text carries the meaning; the marker shape and colour only back it up. */
-.keyfacts { margin: 16px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line-strong); border-left: 1px solid var(--line); }
-.keyfact { padding: 7px 10px 8px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-.keyfact dt { font-size: 12px; color: var(--muted); }
-.keyfact dd { margin: 1px 0 0; display: flex; align-items: center; gap: 7px; font-size: 14.5px; font-weight: 600; }
+/* Key facts: no borders, just four columns of label and value. The value text carries the meaning; the dot only backs it up. */
+.keyfacts { margin: 16px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
+.keyfact dt { font-size: var(--fs-s); color: var(--muted); }
+.keyfact dd { margin: 2px 0 0; display: flex; align-items: center; gap: 7px; font-size: var(--fs-m); font-weight: 600; }
 .keyfact dd::before { content: ''; flex: none; width: 8px; height: 8px; border: 1.5px solid var(--muted); border-radius: 50%; }
-.keyfact.tone-bad dd::before { background: #c4554d; border-color: #c4554d; border-radius: 50%; }
-.keyfact.tone-ok dd::before { background: #1b6e3c; border-color: #1b6e3c; border-radius: 50%; }
-.meta { margin-top: 8px; font-family: var(--font-mono); font-size: 11.5px; color: var(--muted); }
-@media (min-width: 560px) { .keyfacts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-
-/* Where each key fact comes from, and the reasoning in two short lines. */
-.keyfact dd.keyfact-src { margin: 1px 0 0; display: block; font-size: 11.5px; font-weight: 400; color: var(--muted); }
+.keyfact.tone-bad dd::before { background: #c4554d; border-color: #c4554d; }
+.keyfact.tone-ok dd::before { background: #1b6e3c; border-color: #1b6e3c; }
+.keyfact dd.keyfact-src { margin: 0; display: block; font-size: var(--fs-s); font-weight: 400; color: var(--muted); }
 .keyfact dd.keyfact-src::before { content: none; }
-.why { margin: 12px 0 0; display: grid; gap: 6px; font-size: 13.5px; line-height: 1.5; }
-.why > div { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 12px; }
-.why dt { font-weight: 600; color: var(--ink-2); }
-.why dd { margin: 0; max-width: 62ch; }
-.why ul { margin: 0; padding-left: 16px; }
-@media (max-width: 560px) { .why > div { grid-template-columns: 1fr; gap: 0; } }
+.meta { margin-top: 16px; font-size: var(--fs-s); color: var(--muted); }
+@media (min-width: 560px) { .keyfacts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }

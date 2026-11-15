@@ -9,12 +9,15 @@ interface Props {
   record: RecordEntry;
 }
 const { record } = Astro.props;
+const all = sortedPlacements(record);
+const notable = all.filter((p) => p.tier <= 3);
+const routine = all.filter((p) => p.tier === 4);
 ---
 
 <section class="sec" aria-labelledby="placement-heading">
   <h2 id="placement-heading">Tier by placement</h2>
-  <ul class="places" role="list">
-    {sortedPlacements(record).map((placement) => {
+  {notable.length > 0 && <ul class="places" role="list">
+    {notable.map((placement) => {
       const result = placementResult(record, placement);
       const tier = placement.tier as TierNumber;
       return (
@@ -37,5 +40,8 @@ const { record } = Astro.props;
         </li>
       );
     })}
-  </ul>
+  </ul>}
+  {routine.length > 0 && (
+    <p class="routine-rest"><span class="badge t4">Tier 4 · {TIERS[4].name}</span> <span>{routine.map((p) => p.name).join('; ')}</span></p>
+  )}
 </section>

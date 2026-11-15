@@ -68,32 +68,26 @@ vectors:
 
 mitigations:
   - title: Update every affected runtime and library
-    summary: "Node.js has released 22.23.4, 24.22.1 and 26.12.1. CISA points to Brotli release v1.2.1 for the library. Other products that bundle the decoder need their own update. Patching one runtime does not fix the others. Rebuild container images and restart every process, or the old code keeps running."
+    summary: Install the fixed Node.js and Brotli v1.2.1, then rebuild images and restart every process.
+    limitation: Each bundled product needs its own update, and out-of-support runtimes get no fix and need upgrading.
     effect:
       - { vector: Attacker sends compressed data to your server, status: closed }
       - { vector: Your application unpacks a compressed reply from an attacker-controlled server, status: closed }
-    takes: An update, a rebuild and a restart for each affected product.
-    might_break: No breakage is reported. Test first anyway. Old versions of runtimes that are out of support will not get a fix and need upgrading.
     official_guides:
       - https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
       - https://github.com/google/brotli/releases/tag/v1.2.1
-    check_it_worked: "Ask the running service, not the image tag. Inside the container run `node --version` or the equivalent for each runtime, and confirm the process started after the update."
-    undo: Redeploy the previous image. This reopens the flaw, so put the block below in place first.
     confidence: vendor-stated
   - title: Block Brotli-compressed requests at your WAF, proxy or firewall
-    summary: "Microsoft's Azure WAF guidance is a custom rule that blocks requests whose `Content-Encoding` header contains `br`. Imperva has added WAF rules for this CVE and Fastly has a virtual patch for it; check whether your own WAF vendor has one. This protects applications behind the WAF but does nothing for replies your application downloads from other servers, so it is a stopgap until you update."
+    summary: "Block requests whose `Content-Encoding` header contains `br`, with a WAF rule or vendor virtual patch."
+    limitation: Does not cover replies your app downloads from other servers, and rejects clients that upload Brotli.
     effect:
       - { vector: Attacker sends compressed data to your server, status: closed_for_that_app }
       - { vector: Your application unpacks a compressed reply from an attacker-controlled server, status: open }
-    takes: Turn on your vendor's rule or virtual patch, or add one header rule that covers every application behind the WAF.
-    might_break: Clients that send Brotli-compressed uploads will be rejected. Azure suggests starting in log-only mode and checking the logs for legitimate compressed uploads before blocking.
     official_guides:
       - https://techcommunity.microsoft.com/t5/azure-network-security-blog/protect-against-brotli-cve-2026-111497-with-azure-web/ba-p/4567288
       - https://www.imperva.com/blog/node2shell-from-brotli-data-to-remote-code-execution/
       - https://www.fastly.com/documentation/reference/changes/2026/10/added-virtual-patch-for-cve-2026-111497/
       - https://bleepingcomputer.com/news/security/critical-http2shell-brotli-vulnerability-triggers-emergency-patches
-    check_it_worked: "Send a harmless request with a `Content-Encoding: br` header and confirm the WAF logs or rejects it. Then confirm the rule applies to every hostname that serves your applications."
-    undo: Disable the rule or virtual patch. Its log shows which clients it blocked.
     confidence: vendor-stated
 
 evidence:
@@ -196,3 +190,5 @@ This section is an editorial judgment. It is not a sourced fact, and it override
 - No source reviewed reports code execution in the wild. That is not proof there has been none.
 
 The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild.
+
+For the WAF option, Microsoft's Azure WAF guidance is a custom rule that blocks requests whose `Content-Encoding` header contains `br`; Imperva has added WAF rules for this CVE and Fastly has a virtual patch, so check whether your own WAF vendor has one. Azure suggests starting in log-only mode and checking the logs for legitimate Brotli-compressed uploads before blocking. It is a stopgap until you update.

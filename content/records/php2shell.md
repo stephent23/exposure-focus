@@ -58,61 +58,49 @@ vectors:
 
 mitigations:
   - title: Update PHP and restart every worker
-    summary: "Upgrade to PHP 8.2.35, 8.3.36, 8.4.27 or 8.5.12, or a distribution package that includes the fix. PHP calls updating the only complete mitigation for the first two flaws. Restart Apache or PHP-FPM so no old worker keeps running; rebuild container images that bundle PHP. These releases do not fix CVE-2026-115560, which PHP says it will fix in its next regular release."
+    summary: "Upgrade to a fixed PHP release or a patched distribution package, then restart Apache or PHP-FPM."
+    limitation: "Does not fix CVE-2026-115560; PHP 8.1 and older get no fix and need a supported release or backport."
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: closed }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: closed }
       - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: open }
-    takes: A package update and a service restart per server.
-    might_break: No breakage is reported. Test first anyway. PHP 8.1 and older get no fix from PHP and need a supported release or a vendor backport.
     official_guides:
       - https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
-    check_it_worked: "Run `php -v` through the same SAPI the site uses (for example a temporary page calling phpversion(), removed afterwards) and confirm a fixed release or a patched distribution build. Confirm worker processes started after the update."
-    undo: Reinstall the previous package. This reopens both flaws.
     confidence: vendor-stated
   - title: "Stopgap for CVE-2026-109618: remove the memory-limit trigger"
-    summary: "Set memory_limit=-1 administratively, keep post_max_size conservative, bound input variables, multipart parts and uploads, and block multipart form requests at the frontend if the application does not use them. Do not use RLIMIT_AS or RLIMIT_DATA. PHP calls this the primary configuration mitigation but not a complete one."
+    summary: "Set memory_limit=-1 and cap request size, input variables and uploads, then restart every worker."
+    limitation: "PHP calls it the primary configuration mitigation, not a complete one; it removes the memory cap."
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: weaker }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: open }
       - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: open }
-    takes: A configuration change and a restart of every worker.
-    might_break: Removing the per-request memory cap lets one request use much more memory, so you need frontend limits to replace it.
     official_guides: [https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w]
-    check_it_worked: "Confirm the running value with phpinfo() or `php -i` for the SAPI in use, and that workers restarted."
-    undo: Restore the previous memory_limit and limits, then restart workers.
     confidence: vendor-stated
   - title: "Stopgap for CVE-2026-109619 and CVE-2026-115560: disable upload progress"
-    summary: "Set session.upload_progress.enabled=0. This removes the session path PHP demonstrated for CVE-2026-109619, and PHP recommends it even after patching if you do not use the feature. On PHP 8.5, fatal_error_backtraces=0 removes another confirmed path. PHP says there is no complete configuration mitigation for CVE-2026-109619. For CVE-2026-115560, which has no fix yet, this setting is the mitigation PHP suggests until its next regular release."
+    summary: "Set session.upload_progress.enabled=0 and restart every worker."
+    limitation: "Only partly covers CVE-2026-109619; upload progress bars that use PHP sessions stop working."
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: open }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: weaker }
       - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: closed_for_that_app }
-    takes: A configuration change and a restart of every worker.
-    might_break: Upload progress bars that rely on PHP sessions stop working.
     official_guides:
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
       - https://www.php.net/archive/2026.php
-    check_it_worked: Confirm session.upload_progress.enabled is Off in phpinfo() for the SAPI in use.
-    undo: Set session.upload_progress.enabled back to 1 and restart workers.
     confidence: vendor-stated
   - title: Turn on your WAF vendor's PHP rules
-    summary: "Several WAF vendors have shipped rules for the first two CVEs: AWS WAF (the PHP managed rule group), Cloudflare (managed rules, set to block by default on its emergency release) and a Fastly Next-Gen WAF virtual patch. Broadcom publishes rule text for VMware Avi. All of them describe this as an interim measure that blocks known exploit patterns. AWS says no WAF rule is a complete mitigation, and Cloudflare says to patch PHP regardless. Of these, only Cloudflare says its rules also cover CVE-2026-115560. Update any pinned rule-group version to pick up the new rules."
+    summary: "Enable the managed PHP rule group or virtual patch your WAF vendor has shipped for these flaws."
+    limitation: "Blocks only known exploit patterns, can block legitimate requests, and misses traffic that bypasses the WAF."
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: weaker }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: weaker }
       - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: weaker }
-    takes: Enable a managed rule group or virtual patch on every site that serves PHP.
-    might_break: Rules match known attack patterns, so they can block some legitimate requests. Cloudflare's rule for the session upload path only works while session.upload_progress.name is left at its default. Traffic that bypasses the WAF is not covered.
     official_guides:
       - https://aws.amazon.com/security/security-bulletins/2026-143-aws/
       - https://blog.cloudflare.com/php-vulnerabilities-waf-protection/
       - https://developers.cloudflare.com/changelog/post/2026-10-22-emergency-waf-release-cfmr/
       - https://www.fastly.com/documentation/reference/changes/2026/10/added-virtual-patch-for-CVE-2026-109618-and-CVE-2026-109619/
       - https://knowledge.broadcom.com/external/article/460068
-    check_it_worked: "In your WAF console, confirm the rules or virtual patch are on, set to block and not only to log, and applied to every hostname that serves PHP. A WAF does not change the PHP version, so keep checking `php -v` as above."
-    undo: Disable the rule group or virtual patch.
     confidence: vendor-stated
 
 evidence:
@@ -172,3 +160,11 @@ Both flaws sit in the PHP runtime, not in any application built on it, which is 
 A third, related flaw, CVE-2026-115560, is handled differently on purpose. It is not in the CISA catalogue, no source reports it being exploited, and it needs an unusual configuration, so it does not set the tier above. It matters because there is no fix yet: the fixed releases listed on this page do not cover it, and the mitigation PHP suggests is turning off session upload progress.
 
 PHP's advisories are more cautious than some write-ups about which ways of serving PHP are affected: FrankenPHP and LiteSpeed are described as likely but not demonstrated.
+
+Restart Apache or PHP-FPM after updating so no old worker keeps running, and rebuild container images that bundle PHP. The fixed releases do not fix CVE-2026-115560, which PHP says it will fix in its next regular release.
+
+For the CVE-2026-109618 stopgap, PHP's advisory says to set memory_limit=-1 administratively, keep post_max_size conservative, bound input variables, multipart parts and uploads, and block multipart form requests at the frontend if the application does not use them. It says not to use RLIMIT_AS or RLIMIT_DATA.
+
+For the upload progress stopgap, PHP says there is no complete configuration mitigation for CVE-2026-109619. It recommends session.upload_progress.enabled=0 even after patching if you do not use the feature, and on PHP 8.5 fatal_error_backtraces=0 removes another confirmed path. For CVE-2026-115560 this setting is the mitigation PHP suggests until its next regular release.
+
+WAF coverage: AWS WAF has a PHP managed rule group, Cloudflare has managed rules set to block by default on its emergency release, Fastly has a Next-Gen WAF virtual patch, and Broadcom publishes rule text for VMware Avi. All describe this as an interim measure. AWS says no WAF rule is a complete mitigation and Cloudflare says to patch PHP regardless. Only Cloudflare says its rules also cover CVE-2026-115560, and its rule for the session upload path only works while session.upload_progress.name is left at its default. Update any pinned rule-group version to pick up the new rules.

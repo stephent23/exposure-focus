@@ -14,13 +14,18 @@ import { isStale, sortedPlacements } from '../schema/record';
 const today = buildDate();
 const groups = groupForHome(await getAllRecords());
 const records = groups.flatMap((g) => g.records);
-const activity = recentActivity(records);
+const activity = recentActivity(records, 5);
 // Anything that already has a published verdict drops off the watching list by itself.
 const rated = new Set(records.flatMap((r) => r.cves));
 const watching = (await getWatching()).filter((w) => !w.cves.some((id) => rated.has(id)));
 const checked = records.map((r) => r.evidence_as_of).sort().at(-1);
 const exploited = (r: (typeof records)[number]) => r.placements.some((p) => p.facts.exploited === true);
 const FRESH = { new: 'New', changed: 'Changed' } as const;
+const SHOW_CONTROLS_ABOVE = 15;
+const showControls = records.length > SHOW_CONTROLS_ABOVE;
+// Placements worth acting on (tier 1-3), highest first, one per line.
+const actItems = (r: (typeof records)[number]) =>
+  sortedPlacements(r).filter((p) => p.tier <= 3).map((p) => `Tier ${p.tier}: ${p.name}`);
 ---
 
 <Base title="Exposure Focus" current="home">
@@ -50,11 +55,16 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
           {activity.map((a) => (
             <li class="activity-row">
               <time datetime={a.date}>{shortDate(a.date)}</time>
-              <span>
+              <div>
                 <a href={`/verdicts/${a.slug}/`}>{a.name}</a>
                 <span class="activity-detail">{a.detail}</span>
-                {a.reason && <span class="activity-reason">{a.reason}</span>}
-              </span>
+                {a.reason && (
+                  <details class="why-moved">
+                    <summary>Why</summary>
+                    <p>{a.reason}</p>
+                  </details>
+                )}
+              </div>
             </li>
           ))}
         </ol>
@@ -65,18 +75,22 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
   <form class="filters" id="filters" role="search" aria-label="Filter verdicts">
     <label class="sr-only" for="q">Search name, CVE or alias</label>
     <input id="q" class="search" type="search" placeholder="Search name, CVE or alias" autocomplete="off" />
-    <fieldset class="seg">
-      <legend class="sr-only">Show verdicts with a tier of</legend>
-      {TIER_NUMBERS.map((tier) => (
-        <label class={`seg-item t${tier}`}><input type="checkbox" name="tier" value={tier} /><span>Tier {tier}</span></label>
-      ))}
-    </fieldset>
-    <label class="sr-only" for="kind">Type of attack</label>
-    <select id="kind" class="select">
-      <option value="">All attack types</option>
-      {Object.entries(ATTACKS).map(([key, a]) => <option value={key}>{a.name}</option>)}
-    </select>
-    <button type="reset" class="reset" id="reset" hidden>Clear</button>
+    {showControls && (
+      <>
+        <fieldset class="seg">
+          <legend class="sr-only">Show verdicts with a tier of</legend>
+          {TIER_NUMBERS.map((tier) => (
+            <label class={`seg-item t${tier}`}><input type="checkbox" name="tier" value={tier} /><span>Tier {tier}</span></label>
+          ))}
+        </fieldset>
+        <label class="sr-only" for="kind">Type of attack</label>
+        <select id="kind" class="select">
+          <option value="">All attack types</option>
+          {Object.entries(ATTACKS).map(([key, a]) => <option value={key}>{a.name}</option>)}
+        </select>
+        <button type="reset" class="reset" id="reset" hidden>Clear</button>
+      </>
+    )}
     <p class="count" id="count" role="status" aria-live="polite">{records.length} verdicts</p>
   </form>
 
@@ -84,13 +98,16 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
     {groups.filter((g) => g.records.length > 0).map(({ tier, records: group }) => (
       <section class={`band t${tier}`} aria-labelledby={`tier-${tier}`} data-band>
         <header>
-          <h2 id={`tier-${tier}`}><span class="badge">Tier {tier}</span> {TIERS[tier].name}</h2>
+          <h2 id={`tier-${tier}`}>{TIERS[tier].name}</h2>
           <p>{TIERS[tier].meaning}</p>
         </header>
         <div class="cards">
           {group.map((record) => {
             const fresh = freshness(record, today);
-            const changed = lastChanged(record);
+            const latest = lastChanged(record);
+            // A change on the publication day is part of the verdict itself, not a later change.
+            const changed = latest && latest > record.published ? latest : undefined;
+            const act = actItems(record);
             return (
               <article
                 class="card"
@@ -101,28 +118,21 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
               >
                 <div class="card-main">
                   <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
-                  <p class="mono">{record.cves.join(' · ')}{record.aliases.length > 0 && ` · also ${record.aliases.join(', ')}`}</p>
-                  <p class="summary">{record.summary}</p>
-                  <p class="tags">
-                    <span>{ATTACKS[record.attack].name}</span>
+                  <p class="flags">
                     {exploited(record) && <span class="tag-hot">Exploited in the wild</span>}
-                    {record.evidence.some((e) => e.confidence === 'reported') && <span>Some facts unconfirmed</span>}
-                    {isStale(record, today) && <span class="tag-stale">Overdue for review</span>}
+                    <span class="tag-stale" data-review-until={record.review_until} hidden={!isStale(record, today)}>Overdue for review</span>
+                  </p>
+                  <p class="summary">{record.summary}</p>
+                </div>
+                <div class="card-side">
+                  {act.length > 0 && <p class="act">{act.map((line) => <span>{line}</span>)}</p>}
+                  <p class="when">
+                    <span class="fresh" data-published={record.published} data-changed={changed} hidden={!fresh}>{fresh ? FRESH[fresh] : ''}</span>
+                    {changed
+                      ? <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>
+                      : <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>}
                   </p>
                 </div>
-                <ul class="rows" aria-label="Placements">
-                  {sortedPlacements(record).map((placement) => (
-                    <li>
-                      <span class={`badge t${placement.tier}`}>Tier {placement.tier}</span>
-                      <span>{placement.name}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p class="when">
-                  {fresh && <span class="fresh">{FRESH[fresh]}</span>}
-                  <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>
-                  {changed && changed !== record.published && <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>}
-                </p>
               </article>
             );
           })}
@@ -156,5 +166,8 @@ const FRESH = { new: 'New', changed: 'Changed' } as const;
 
   <script>
     import '../scripts/filters';
+  </script>
+  <script>
+    import '../scripts/freshness';
   </script>
 </Base>

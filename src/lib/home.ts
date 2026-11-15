@@ -1,5 +1,6 @@
 // Groups published records by headline tier for the home page.
 import { headlineTier, type RecordEntry } from '../schema/record';
+import { freshLabel } from './fresh-dates';
 import { TIERS } from './tiers';
 
 /** Published records grouped by headline tier 1-3. Routine (tier 4) headlines are not listed. */
@@ -38,11 +39,11 @@ export function recentActivity(records: RecordEntry[], limit = 6): Activity[] {
 /** The date of the latest logged change, if the verdict has ever changed. */
 export const lastChanged = (record: RecordEntry) => (record.changes ?? []).map((c) => c.date).sort().at(-1);
 
-const daysBetween = (from: string, to: string) => (Date.parse(to) - Date.parse(from)) / 86_400_000;
-
 /** "new" or "changed" when that happened within the last week, so the home page can flag it. */
 export function freshness(record: RecordEntry, today: string): 'new' | 'changed' | null {
-  if (daysBetween(record.published, today) <= 7) return 'new';
-  const changed = lastChanged(record);
-  return changed && daysBetween(changed, today) <= 7 ? 'changed' : null;
+  const latest = lastChanged(record);
+  // A change on the publication day is part of the new verdict, so it does not count as a change.
+  const changed = latest !== undefined && latest > record.published ? latest : undefined;
+  const label = freshLabel(record.published, changed, today);
+  return label === 'New' ? 'new' : label === 'Changed' ? 'changed' : null;
 }

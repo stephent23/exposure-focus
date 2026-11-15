@@ -1,11 +1,25 @@
-/* For leadership: the quote and the copy button. */
-.leadership blockquote { margin: 10px 0 0; padding-left: 12px; border-left: 3px solid var(--line-strong); max-width: 68ch; font-size: 14.5px; line-height: 1.55; }
-.boss { margin-top: 8px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
-.copy-btn { font-size: 13px; font-weight: 600; min-height: 32px; padding: 0 10px; border: 1px solid var(--line-strong); border-radius: 4px; background: transparent; color: var(--ink); cursor: pointer; }
-.copy-btn:hover { background: var(--panel); border-color: var(--ink-2); }
-.boss-status { font-size: 12.5px; color: var(--ink-2); }
+/* Briefing: one tinted panel, so the decision has a clear home. Reasoning as labelled rows, then the leadership quote and copy button. */
+.briefing { margin-top: 40px; }
+.briefing-panel { padding: 20px 24px; background: var(--panel); border-radius: 8px; }
+.why { margin: 0; display: grid; gap: 14px; font-size: var(--fs-m); line-height: 1.6; }
+.why > div { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 16px; }
+.why dt { font-size: var(--fs-s); font-weight: 600; color: var(--muted); padding-top: 2px; }
+.why dd { margin: 0; max-width: 60ch; }
+.why ul { margin: 0; padding-left: 18px; }
+.why li + li { margin-top: 4px; }
+.quote-label { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line-strong); font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
+.leadership blockquote { margin: 6px 0 0; max-width: 62ch; font-size: var(--fs-m); line-height: 1.6; }
+.boss { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.copy-btn { font-size: var(--fs-m); font-weight: 600; min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; color: var(--ink); cursor: pointer; }
+.copy-btn:hover { border-color: var(--ink-2); }
+.boss-status { font-size: var(--fs-s); color: var(--ink-2); }
 .boss-fallback { flex: 1 1 100%; }
-.boss-more > summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 32px; font-size: 12.5px; font-weight: 600; color: var(--link); }
+.boss-more > summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 32px; font-size: var(--fs-s); font-weight: 600; color: var(--link); }
 .boss-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
-.boss-more label { display: block; margin-bottom: 6px; font-size: 12.5px; font-weight: 600; color: var(--muted); }
-.boss-more textarea { width: 100%; font-family: var(--font-mono); font-size: 12px; line-height: 1.5; padding: 8px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink); background: #fff; resize: vertical; }
+.boss-more label { display: block; margin-bottom: 6px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
+.boss-more textarea { width: 100%; font-family: var(--font-mono); font-size: var(--fs-s); line-height: 1.5; padding: 8px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink); background: #fff; resize: vertical; }
+
+@media (max-width: 560px) {
+  .briefing-panel { margin-inline: -16px; padding: 16px; border-radius: 0; }
+  .why > div { grid-template-columns: 1fr; gap: 2px; }
+}
