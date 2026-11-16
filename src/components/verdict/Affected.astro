@@ -41,7 +41,10 @@ const { record } = Astro.props;
   {record.applies_check.map((item) => (
     <div class="applies-item">
       <h3>{item.question}</h3>
-      <p class="applies-how">{isPlaceholder(item.how_to_check) ? <span class="placeholder">{item.how_to_check}</span> : <Text text={item.how_to_check} />}</p>
+      <details class="how">
+        <summary>How to check</summary>
+        <p class="applies-how">{isPlaceholder(item.how_to_check) ? <span class="placeholder">{item.how_to_check}</span> : <Text text={item.how_to_check} />}</p>
+      </details>
     </div>
   ))}
   <p class="applies-default">If you cannot tell, answer Yes.</p>

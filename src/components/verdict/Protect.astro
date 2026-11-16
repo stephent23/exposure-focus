@@ -1,32 +1,59 @@
 ---
-// What to do: one short block per option: what it is, what it leaves open, how sure we are and where to do it.
+// What to do: the recommended fix first, then stopgaps for when patching has to wait.
+// Each option is its action, one short limit, how sure the source is, and where to do it.
 import '../../styles/verdict/protect.css';
 import Text from '../Text.astro';
 import Guide from './Guide.astro';
 import { CONFIDENCE_LABELS } from '../../lib/tiers';
-import { coverageLine, isPlaceholder } from '../../lib/verdict-view';
+import { isPlaceholder } from '../../lib/verdict-view';
 import type { RecordEntry } from '../../schema/record';
 
 interface Props {
   record: RecordEntry;
 }
 const { record } = Astro.props;
+const fixes = record.mitigations.filter((m) => m.role === 'fix');
+const stopgaps = record.mitigations.filter((m) => m.role === 'stopgap');
 ---
 
-<section class="sec" aria-labelledby="protect-heading">
+<section class="sec todo" aria-labelledby="protect-heading">
   <h2 id="protect-heading">What to do</h2>
-  <ol class="opts">
-    {record.mitigations.map((m) => (
-      <li class="opt">
-        <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
-        <p class="opt-sum"><Text text={m.summary} /></p>
-        <p class="opt-limit"><span class="opt-label">Limit</span> <Text text={m.limitation} /></p>
-        <p class="opt-line">
-          <span>{coverageLine(record.vectors, m.effect)}</span>
-          <span>{CONFIDENCE_LABELS[m.confidence]}</span>
-          {m.official_guides[0] && <span class="opt-guide"><Guide href={m.official_guides[0]} title={m.title} /></span>}
-        </p>
-      </li>
-    ))}
-  </ol>
+
+  {fixes.length > 0 ? (
+    <div class="rec">
+      <p class="rec-label">Recommended</p>
+      <ol class="opts rec-list">
+        {fixes.map((m) => (
+          <li class="opt">
+            <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
+            <p class="opt-limit"><span class="opt-label">Limit</span> <Text text={m.limitation} /></p>
+            <p class="opt-line">
+              <span>{CONFIDENCE_LABELS[m.confidence]}</span>
+              {m.official_guides[0] && <span class="opt-guide"><Guide href={m.official_guides[0]} title={m.title} /></span>}
+            </p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  ) : (
+    <p class="nofix">No fix yet. Use the stopgaps below and watch for a release.</p>
+  )}
+
+  {stopgaps.length > 0 && (
+    <>
+      <h3 class="stopgap-head">{fixes.length > 0 ? 'If you can’t patch yet' : 'In the meantime'}</h3>
+      <ul class="opts stopgaps">
+        {stopgaps.map((m) => (
+          <li class="opt">
+            <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
+            <p class="opt-limit"><span class="opt-label">Limit</span> <Text text={m.limitation} /></p>
+            <p class="opt-line">
+              <span>{CONFIDENCE_LABELS[m.confidence]}</span>
+              {m.official_guides[0] && <span class="opt-guide"><Guide href={m.official_guides[0]} title={m.title} /></span>}
+            </p>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
 </section>

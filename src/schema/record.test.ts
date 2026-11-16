@@ -28,13 +28,11 @@ function validRecord() {
         action: 'Mitigate first, then patch.'
       }
     ],
-    vectors: ['Remote request'],
     mitigations: [
       {
         title: 'Block access',
-        summary: 'Restrict the listener.',
         limitation: 'Remote users lose access.',
-        effect: [{ vector: 'Remote request', status: 'closed' }],
+        role: 'fix',
         official_guides: ['[link to add]'],
         confidence: 'reported'
       }
@@ -84,9 +82,14 @@ describe('record schema', () => {
   });
 
   it('refuses the old long-form mitigation fields, so no dead detail is kept', () => {
-    for (const key of ['takes', 'might_break', 'cost', 'check_it_worked', 'undo']) {
+    for (const key of ['summary', 'takes', 'might_break', 'cost', 'check_it_worked', 'undo']) {
       reject((r) => ((r.mitigations[0] as Record<string, unknown>)[key] = 'x'));
     }
+  });
+
+  it('refuses the retired ways-in fields (vectors and mitigation effect), so no dead data is kept', () => {
+    reject((r) => ((r as Record<string, unknown>).vectors = ['Remote request']));
+    reject((r) => ((r.mitigations[0] as Record<string, unknown>).effect = [{ vector: 'Remote request', status: 'closed' }]));
   });
 
   it('fails when the declared tier disagrees with the rubric', () => {
@@ -342,7 +345,6 @@ describe('length caps', () => {
     ['question', (r, v) => (r.applies_check[0].question = v)],
     ['howToCheck', (r, v) => (r.applies_check[0].how_to_check = v)],
     ['mitigationTitle', (r, v) => (r.mitigations[0].title = v)],
-    ['mitigationSummary', (r, v) => (r.mitigations[0].summary = v)],
     ['mitigationLimitation', (r, v) => (r.mitigations[0].limitation = v)]
   ];
   for (const [name, apply] of cases) {
@@ -405,5 +407,30 @@ describe('placeholders in the affected table', () => {
   });
   it('are allowed on a draft', () => {
     expect(recordSchema.safeParse(withRow({ status: 'draft' })).success).toBe(true);
+  });
+});
+
+describe('mitigation role', () => {
+  it('marks each option as the fix or a stopgap', () => {
+    const withRole = (role: unknown) => {
+      const r = validRecord() as unknown as { mitigations: Record<string, unknown>[] };
+      r.mitigations[0].role = role;
+      return recordSchema.safeParse(r).success;
+    };
+    expect(withRole('fix')).toBe(true);
+    expect(withRole('stopgap')).toBe(true);
+    expect(withRole('workaround')).toBe(false);
+    expect(withRole(undefined)).toBe(false);
+  });
+});
+
+describe('related CVEs', () => {
+  const ok = (extra: Record<string, unknown>) => recordSchema.safeParse({ ...validRecord(), ...extra }).success;
+  it('are optional and must be CVE IDs or the placeholder', () => {
+    expect(ok({})).toBe(true);
+    expect(ok({ related_cves: ['CVE-2026-1234'] })).toBe(true);
+    expect(ok({ related_cves: ['[CVE to confirm]'] })).toBe(true);
+    expect(ok({ related_cves: ['not-a-cve'] })).toBe(false);
+    expect(ok({ related_cves: [] })).toBe(false);
   });
 });

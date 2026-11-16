@@ -2,6 +2,7 @@
 // The page frame shared by every page: head, header, footer and global styles.
 import '../styles/global.css';
 import '../styles/fonts.css';
+import '../styles/print.css';
 import { SITE, isRealUrl } from '../lib/site';
 
 interface Props {
@@ -17,6 +18,8 @@ const nav = [
   { id: 'corrections', href: '/corrections/', label: 'Corrections' },
   { id: 'about', href: '/about/', label: 'About' }
 ] as const;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const fullTitle = title === 'Exposure Focus' ? title : `${title} — Exposure Focus`;
 const newsletterUrl = isRealUrl(SITE.newsletterUrl) ? SITE.newsletterUrl : null;
 ---
 
@@ -26,14 +29,22 @@ const newsletterUrl = isRealUrl(SITE.newsletterUrl) ? SITE.newsletterUrl : null;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="description" content={description} />
+    <meta name="theme-color" content="#fbfaf6" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content="Exposure Focus" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
     <link rel="alternate" type="application/atom+xml" title="Exposure Focus" href="/feed.xml" />
-    <title>{title === 'Exposure Focus' ? title : `${title} — Exposure Focus`}</title>
+    <title>{fullTitle}</title>
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/">Exposure Focus</a>
+        <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>Exposure Focus</a>
         <nav aria-label="Main">
           {nav.map((item) => (
             <a href={item.href} aria-current={current === item.id ? 'page' : undefined}>{item.label}</a>
@@ -46,7 +57,7 @@ const newsletterUrl = isRealUrl(SITE.newsletterUrl) ? SITE.newsletterUrl : null;
     </main>
     <footer class="site-footer">
       <div class="wrap">
-        <strong>Independent by design.</strong> No sponsors, no affiliate links, no product to sell.
+        <p class="independence"><strong>Independent by design.</strong> No sponsors, no affiliate links, no product to sell.</p>
         {newsletterUrl && (
           <section class="brief" aria-labelledby="brief-title">
             <h2 id="brief-title">The weekly brief</h2>

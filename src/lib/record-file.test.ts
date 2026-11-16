@@ -26,12 +26,10 @@ placements:
     why: [Reachable and exploited.]
     tier: 1
     action: Look to mitigate first, then patch.
-vectors: [Remote request]
 mitigations:
   - title: Block access
-    summary: Restrict the listener.
     limitation: Remote users lose access.
-    effect: [{ vector: Remote request, status: closed }]
+    role: fix
     official_guides: ["[link to add]"]
     confidence: reported
 evidence:

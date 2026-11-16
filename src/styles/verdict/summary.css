@@ -1,20 +1,30 @@
-/* The top of a verdict page: tier, title, summary, the key facts and the dates it was checked. */
+/* The top of a verdict page: one tinted panel in the tier's colour holding the verdict and the four facts, then the dates. */
 .back { display: inline-flex; align-items: center; gap: 4px; min-height: 40px; font-size: var(--fs-m); }
-.kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; margin-top: 4px; }
-.cve { font-family: var(--font-mono); font-size: var(--fs-s); color: var(--muted); overflow-wrap: anywhere; }
-.record h1 { margin-top: 8px; font-size: clamp(22px, 3vw, 27px); line-height: 1.2; }
-.record h1 small { display: block; margin-top: 2px; font-weight: 400; color: var(--muted); font-size: var(--fs-m); letter-spacing: 0; }
-.verdict-summary { margin-top: 8px; max-width: 66ch; font-size: var(--fs-l); line-height: 1.5; }
-.summary .tags { margin-top: 8px; }
+.verdict-panel { margin-top: 4px; padding: 20px 24px 18px; background: var(--wash); border-left: 6px solid var(--edge); border-radius: 0 8px 8px 0; }
+.kicker { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.kicker .badge { font-size: var(--fs-s); padding: 3px 10px; }
+.cve { font-family: var(--font-mono); font-size: var(--fs-s); color: var(--ink-2); overflow-wrap: anywhere; }
+.record h1 { margin-top: 10px; font-size: clamp(24px, 3.4vw, 30px); line-height: 1.15; }
+.record h1 small { display: block; margin-top: 4px; font-weight: 400; color: var(--ink-2); font-size: var(--fs-m); letter-spacing: 0; }
+.verdict-summary { margin-top: 10px; max-width: 62ch; font-size: var(--fs-l); line-height: 1.5; }
+.summary .tags { margin-top: 10px; color: var(--ink-2); }
 
-/* Key facts: no borders, just four columns of label and value. The value text carries the meaning; the dot only backs it up. */
-.keyfacts { margin: 16px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px 16px; }
-.keyfact dt { font-size: var(--fs-s); color: var(--muted); }
-.keyfact dd { margin: 2px 0 0; display: flex; align-items: center; gap: 7px; font-size: var(--fs-m); font-weight: 600; }
-.keyfact dd::before { content: ''; flex: none; width: 8px; height: 8px; border: 1.5px solid var(--muted); border-radius: 50%; }
+/* Key facts: four cells on a white strip inside the panel. The value text carries the meaning; the dot only backs it up. */
+.keyfacts { margin: 14px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.keyfact { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; padding: 7px 12px; background: #fff; }
+.keyfact dt { flex: 1 1 100%; font-size: var(--fs-s); color: var(--muted); }
+.keyfact dd { margin: 0; display: inline-flex; align-items: center; gap: 6px; font-size: var(--fs-m); font-weight: 600; white-space: nowrap; }
+.keyfact dd::before { content: ''; flex: none; width: 9px; height: 9px; border: 1.5px solid var(--muted); border-radius: 50%; }
 .keyfact.tone-bad dd::before { background: #c4554d; border-color: #c4554d; }
 .keyfact.tone-ok dd::before { background: #1b6e3c; border-color: #1b6e3c; }
-.keyfact dd.keyfact-src { margin: 0; display: block; font-size: var(--fs-s); font-weight: 400; color: var(--muted); }
+.keyfact dd.keyfact-src { margin: 0; display: inline; font-size: var(--fs-s); font-weight: 400; color: var(--muted); }
 .keyfact dd.keyfact-src::before { content: none; }
-.meta { margin-top: 16px; font-size: var(--fs-s); color: var(--muted); }
+.meta { margin-top: 12px; font-size: var(--fs-s); color: var(--muted); }
+.last-change { margin-top: 6px; font-size: var(--fs-s); color: var(--ink-2); }
+.last-change-label { margin-right: 6px; padding: 1px 7px; border-radius: 4px; background: var(--tier3-bg); color: var(--tier3-fg); font-weight: 600; }
 @media (min-width: 560px) { .keyfacts { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 560px) { .verdict-panel { margin-inline: -16px; padding: 16px; border-radius: 0; border-left-width: 5px; } }
+
+/* White card with a hairline edge; the tier colour is only the left rule. */
+.verdict-panel { border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.related { margin-top: 6px; font-size: var(--fs-s); color: var(--ink-2); }

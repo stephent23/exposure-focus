@@ -8,6 +8,8 @@ slug: template
 name: Name of the vulnerability
 aliases: []
 cves: ["[CVE to confirm]"]
+related_cves: # optional: related flaws the verdict mentions but does not rate (not in the headline, still searchable)
+  - "[CVE to confirm]"
 summary: One plain sentence. # at most 200 characters
 attack: rce # rce, privilege-escalation, auth-bypass, data-exposure, data-tampering or dos
 status: draft # draft is hidden from the home page; published is listed there
@@ -57,15 +59,11 @@ placements:
     tier: 2
     action: What to do for this placement.
 
-vectors: ["[ways in to add]"] # shown as A, B, C... in the order listed
-
-# Caps: title 80 characters, summary 110, limitation 110. A mitigation is a title, one short description, one limitation, a confidence label and a guide link.
+# Caps: title 60 characters, limitation 80. A mitigation is an action a leader can read at a glance, one short limit, a confidence label and a guide link.
 mitigations:
-  - title: "[mitigation to add]"
-    summary: What it does, in one short sentence.
+  - title: "[action to add, e.g. Update PHP and restart every worker]"
     limitation: What it leaves open, only partly covers, or costs. # required: every option states its limit
-    effect: # per way in: closed, closed_for_that_app, open or weaker
-      - { vector: "[ways in to add]", status: closed_for_that_app }
+    role: fix # fix (patch or upgrade) or stopgap (for when patching has to wait); the page leads with the fix
     official_guides: ["[link to add]"]
     confidence: inference # vendor-stated, reported or inference
 

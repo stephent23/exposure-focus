@@ -1,5 +1,5 @@
 ---
-// Your tier by placement, one row each.
+// Where it matters: the tier for each placement, most urgent first. This is the decision, so it comes straight after the header.
 import '../../styles/verdict/placements.css';
 import Text from '../Text.astro';
 import { TIERS, type TierNumber } from '../../lib/tiers';
@@ -14,8 +14,9 @@ const notable = all.filter((p) => p.tier <= 3);
 const routine = all.filter((p) => p.tier === 4);
 ---
 
-<section class="sec" aria-labelledby="placement-heading">
-  <h2 id="placement-heading">Tier by placement</h2>
+<section class="sec where" aria-labelledby="placement-heading">
+  <h2 id="placement-heading">Where it matters</h2>
+  <p class="sec-lede">The same flaw needs a different response depending on where the software runs.</p>
   {notable.length > 0 && <ul class="places" role="list">
     {notable.map((placement) => {
       const result = placementResult(record, placement);

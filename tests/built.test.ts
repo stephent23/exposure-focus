@@ -6,7 +6,7 @@ import { recentActivity } from '../src/lib/home';
 import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
 import { CONFIDENCE_LABELS } from '../src/lib/tiers';
-import { coverageLine, keyFacts } from '../src/lib/verdict-view';
+import { keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
 
 const dist = join(process.cwd(), 'dist-test');
@@ -16,7 +16,8 @@ const files = (dir = dist): string[] =>
 const count = (s: string, needle: string) => s.split(needle).length - 1;
 const text = (html: string) =>
   html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->|<[^>]+>/gi, ' ').replace(/\s+/g, ' ');
-const external = (url: string) => /^(?:https?:)?\/\//i.test(url.trim());
+// Absolute URLs are third-party unless they point at this site itself (the canonical link does).
+const external = (url: string) => /^(?:https?:)?\/\//i.test(url.trim()) && !url.trim().startsWith('https://exposure.infosecuriosity.co.uk/');
 // Astro escapes & < > and quotes; decode them so text from the page can be compared with record data.
 const decode = (s: string) =>
   s
@@ -41,8 +42,13 @@ const recordBody = (html: string) => {
 // checks, placements) must stay short; "What to do" is capped per option instead, so a longer list does not break it.
 // The key-dates list beside it is counted separately: at most eight dated events.
 const VISIBLE_WORD_BUDGET = 480;
-// A home card shows badges, a name, a summary and placement rows only.
-const CARD_WORD_BUDGET = 90;
+// The What to do section of a verdict page, up to the end of its <section>.
+const protectSection = (html: string) => {
+  const start = html.indexOf('id="protect-heading"');
+  return html.slice(start, html.indexOf('</section>', start));
+};
+// A home card shows badges, a name, dates, flags, a summary, a fix line and placement rows only.
+const CARD_WORD_BUDGET = 120;
 
 const records = await getAllRecords();
 const published = records.filter((r) => r.status === 'published');
@@ -107,7 +113,8 @@ describe('built site', () => {
   it('keeps the visible text of a record page within the word budget', () => {
     for (const r of published) {
       const body = withoutDetails(recordBody(recordPage(r.slug))).replace(/<aside[\s\S]*?<\/aside>/g, ' ');
-      const visible = plain(body.slice(0, body.indexOf('id="protect-heading"')));
+      const start = body.indexOf('id="protect-heading"');
+      const visible = plain(body.slice(0, start) + body.slice(body.indexOf('</section>', start)));
       expect(r.timeline?.length ?? 0, `${r.slug} key dates`).toBeLessThanOrEqual(8);
       expect(words(visible), `${r.slug} visible words`).toBeLessThanOrEqual(VISIBLE_WORD_BUDGET);
     }
@@ -149,34 +156,83 @@ describe('built site', () => {
     }
   });
 
-  // Each option is a title, one description, one limit, a quiet line and a guide link. Cap it so the list stays scannable.
-  const OPTION_WORD_BUDGET = 70;
-  it('shows each option as a short description, its limit, a confidence label and its guide links', () => {
+  // Each option is an action, one short limit, a confidence label and a guide link. Cap it so the list reads at a glance.
+  const OPTION_WORD_BUDGET = 30;
+  it('shows each option as its action, a short limit, a confidence label and one guide link', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
-      const section = html.slice(html.indexOf('id="protect-heading"'));
-      const items = [...section.slice(0, section.indexOf('</ol>')).matchAll(/<li class="opt">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
-      expect(items.length, `${r.slug} options`).toBe(r.mitigations.length);
-      r.mitigations.forEach((m, i) => {
+      const section = protectSection(html);
+      const items = [...section.matchAll(/<li class="opt">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+      const ordered = [...r.mitigations.filter((m) => m.role === 'fix'), ...r.mitigations.filter((m) => m.role === 'stopgap')];
+      expect(items.length, `${r.slug} options`).toBe(ordered.length);
+      ordered.forEach((m, i) => {
         const text = plain(items[i]);
         // Inline code adds spacing and drops its backticks, so compare with spaces and backticks removed.
         const squash = (x: string) => x.replace(/[\s`]/g, '');
-        expect(squash(text), `${r.slug} ${m.title} summary`).toContain(squash(m.summary));
         expect(squash(text), `${r.slug} ${m.title} limit`).toContain(squash(m.limitation));
         expect(text, `${r.slug} ${m.title} confidence`).toContain(CONFIDENCE_LABELS[m.confidence]);
         // One implementation link per option: the first guide.
         const guide = m.official_guides[0];
         if (guide?.startsWith('http')) expect(items[i], `${r.slug} ${m.title} guide`).toContain(`href="${guide.replace(/&/g, '&amp;')}"`);
         expect(count(items[i], 'href='), `${r.slug} ${m.title} links`).toBe(1);
-        expect(words(text), `${r.slug} ${m.title} words`).toBeLessThanOrEqual(OPTION_WORD_BUDGET);
+        // Count what is seen: screen-reader-only text (the guide link repeats the title for context) is left out.
+        const seen = plain(items[i].replace(/<span class="sr-only">[\s\S]*?<\/span>/g, ' '));
+        expect(words(seen), `${r.slug} ${m.title} words`).toBeLessThanOrEqual(OPTION_WORD_BUDGET);
       });
     }
   });
 
-  it('shows one coverage line per mitigation outside the folds', () => {
+  it('leads What to do with the recommended fix, then the stopgaps for when patching has to wait', () => {
     for (const r of published) {
-      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))));
-      for (const m of r.mitigations) expect(visible, `${r.slug} ${m.title}`).toContain(coverageLine(r.vectors, m.effect));
+      const html = recordPage(r.slug);
+      const section = protectSection(html);
+      const fixes = r.mitigations.filter((m) => m.role === 'fix');
+      const stopgaps = r.mitigations.filter((m) => m.role === 'stopgap');
+      expect(html, `${r.slug} has no coverage table`).not.toContain('class="coverage"');
+      if (fixes.length) {
+        const rec = /<div class="rec">[\s\S]*?<\/ol>/.exec(section)?.[0] ?? '';
+        expect(plain(rec), `${r.slug} recommended`).toContain('Recommended');
+        for (const m of fixes) expect(plain(rec), `${r.slug} fix ${m.title}`).toContain(m.title);
+      } else {
+        expect(plain(section), `${r.slug} says there is no fix`).toContain('No fix yet');
+      }
+      if (stopgaps.length) {
+        const list = /<ul class="opts stopgaps">[\s\S]*?<\/ul>/.exec(section)?.[0] ?? '';
+        expect(plain(section), `${r.slug} stopgap heading`).toContain(fixes.length ? 'If you can’t patch yet' : 'In the meantime');
+        for (const m of stopgaps) expect(plain(list), `${r.slug} stopgap ${m.title}`).toContain(m.title);
+        if (fixes.length) expect(section.indexOf('class="rec"'), `${r.slug} fix first`).toBeLessThan(section.indexOf('class="opts stopgaps"'));
+      }
+    }
+  });
+
+  it('puts the decision first: where it matters, then what to do, then whether you are affected, then why', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const at = ['placement', 'protect', 'applies', 'leadership', 'evidence'].map((id) => html.indexOf(`id="${id}-heading"`));
+      expect(at.every((x) => x > 0), `${r.slug} all sections`).toBe(true);
+      expect([...at].sort((x, y) => x - y), `${r.slug} order`).toEqual(at);
+    }
+  });
+
+  it('folds the check commands away but keeps each question and the versions table visible', () => {
+    const squash = (x: string) => x.replace(/[\s`]/g, '');
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const shown = squash(plain(withoutDetails(recordBody(html))));
+      for (const c of r.applies_check) {
+        expect(shown, `${r.slug} question`).toContain(squash(c.question));
+        expect(shown, `${r.slug} how to check is folded`).not.toContain(squash(c.how_to_check));
+        expect(squash(plain(html)), `${r.slug} how to check is on the page`).toContain(squash(c.how_to_check));
+      }
+    }
+  });
+
+  it('names the latest tier move in the header when a verdict has one', () => {
+    for (const r of published) {
+      const move = [...(r.changes ?? [])].filter((c) => c.to_tier !== undefined).sort((a, b) => b.date.localeCompare(a.date))[0];
+      const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(recordPage(r.slug))?.[0] ?? '';
+      if (move) expect(header, `${r.slug} last change`).toContain('class="last-change"');
+      else expect(header, `${r.slug} no change line`).not.toContain('class="last-change"');
     }
   });
 
@@ -235,14 +291,17 @@ describe('built site', () => {
     }
   });
 
-  it('puts the tier reason, triggers and leadership quote in the briefing, not the summary header', () => {
+  it('explains the tier in Why this tier, and keeps the board summary one click away', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
       const start = html.indexOf('id="leadership-heading"');
-      const briefing = plain(html.slice(start, html.indexOf('id="applies-heading"', start)));
-      expect(briefing, `${r.slug} tier reason`).toContain(r.tier_reason);
-      for (const w of r.would_change) expect(briefing, `${r.slug} trigger`).toContain(w);
-      expect(briefing, `${r.slug} quote`).toContain(r.leadership_quote);
+      const why = html.slice(start, html.indexOf('</section>', start));
+      expect(plain(why), `${r.slug} heading`).toContain('Why this tier');
+      expect(plain(withoutDetails(why)), `${r.slug} tier reason`).toContain(r.tier_reason);
+      for (const w of r.would_change) expect(plain(withoutDetails(why)), `${r.slug} trigger`).toContain(w);
+      expect(why, `${r.slug} copy button`).toContain('id="boss-copy"');
+      expect(plain(why), `${r.slug} quote on the page`).toContain(r.leadership_quote);
+      expect(plain(withoutDetails(why)), `${r.slug} quote folded`).not.toContain(r.leadership_quote);
       const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(html)?.[0] ?? '';
       expect(header, `${r.slug} summary header`).not.toBe('');
       expect(plain(header), `${r.slug} header repeats the reason`).not.toContain(r.tier_reason);
@@ -250,7 +309,7 @@ describe('built site', () => {
   });
 
   it('has one section nav on each verdict page, linking five sections that exist', () => {
-    const expected = ['leadership', 'applies', 'placement', 'protect', 'evidence'].map((id) => `#${id}-heading`);
+    const expected = ['placement', 'protect', 'applies', 'leadership', 'evidence'].map((id) => `#${id}-heading`);
     for (const r of published) {
       const html = recordPage(r.slug);
       expect(count(html, 'class="section-nav"'), `${r.slug} nav count`).toBe(1);
@@ -454,6 +513,21 @@ describe('built site', () => {
       expect(recordPage(r.slug), r.slug).toContain(`${origin}/verdicts/${r.slug}/`);
       expect(recordPage(r.slug), r.slug).not.toContain('example.com');
     }
+  });
+
+  it('keeps related CVEs out of the headline list, says they are related, and still finds them by search', () => {
+    for (const r of published.filter((x) => x.related_cves?.length)) {
+      const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(recordPage(r.slug))?.[0] ?? '';
+      const headline = /<span class="cve">([\s\S]*?)<\/span>/.exec(header)?.[1] ?? '';
+      for (const id of r.cves) expect(headline, `${r.slug} headline ${id}`).toContain(id);
+      for (const id of r.related_cves!) {
+        expect(headline, `${r.slug} related ${id} not in headline`).not.toContain(id);
+        expect(plain(header), `${r.slug} related line`).toMatch(new RegExp(`Related[^.]*${id}`));
+        const card = home.slice(home.indexOf(`data-record="${r.slug}"`));
+        expect(card.slice(0, card.indexOf('>')), `${r.slug} search finds ${id}`).toContain(id.toLowerCase());
+      }
+    }
+    expect(published.some((x) => x.related_cves?.length), 'at least one record uses related CVEs').toBe(true);
   });
 
   it('shows when each verdict was published and last checked', () => {

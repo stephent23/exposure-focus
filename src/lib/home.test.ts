@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import type { RecordEntry } from '../schema/record';
-import { freshness, groupForHome, lastChanged, recentActivity } from './home';
+import { fixTitle, freshness, groupForHome, lastChanged, lastTierMove, recentActivity } from './home';
 
 function fake(slug: string, tier: number, status: 'draft' | 'published' | 'retired' = 'published'): RecordEntry {
   return { slug, status, placements: [{ tier }] } as unknown as RecordEntry;
@@ -84,5 +84,26 @@ describe('recentActivity reasons', () => {
       ['2026-11-04', 'moved', 'Now exploited.'],
       ['2026-11-01', 'new', undefined]
     ]);
+  });
+});
+
+describe('fixTitle', () => {
+  it('gives the first fix mitigation title, skipping stopgaps, or undefined', () => {
+    const r = rec({ mitigations: [{ role: 'stopgap', title: 'Block it' }, { role: 'fix', title: 'Patch it' }, { role: 'fix', title: 'Other' }] });
+    expect(fixTitle(r)).toBe('Patch it');
+    expect(fixTitle(rec({ mitigations: [{ role: 'stopgap', title: 'Block it' }] }))).toBeUndefined();
+  });
+});
+
+describe('lastTierMove', () => {
+  it('gives the latest tier move only when it is after publication', () => {
+    const r = rec({ changes: [
+      { date: '2026-11-03', from_tier: 3, to_tier: 2 },
+      { date: '2026-11-09', from_tier: 2, to_tier: 3 },
+      { date: '2026-11-12' }
+    ] });
+    expect(lastTierMove(r)).toEqual({ date: '2026-11-09', from: 2, to: 3 });
+    expect(lastTierMove(rec({ changes: [{ date: '2026-11-01', from_tier: 1, to_tier: 2 }] }))).toBeUndefined();
+    expect(lastTierMove(rec({}))).toBeUndefined();
   });
 });

@@ -7,10 +7,11 @@
 
 /* Tally */
 .tally { list-style: none; margin: 16px 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; }
-.tally li { border-left: 3px solid var(--edge); }
+.tally li { background: var(--wash); border-left: 5px solid var(--edge); border-radius: 0 8px 8px 0; }
 .tally-hot { --edge: var(--ink-2); }
 .tally a, .tally li > span { display: flex; align-items: baseline; gap: 8px; min-height: 40px; padding: 6px 10px; color: var(--ink); text-decoration: none; }
-.tally a:hover { background: var(--panel); }
+.tally a { border-radius: 0 8px 8px 0; }
+.tally a:hover b + span { text-decoration: underline; }
 .tally b { font-size: var(--fs-l); font-weight: 700; }
 .tally .empty b { color: var(--muted); }
 .tally b + span { font-size: var(--fs-m); color: var(--ink-2); }
@@ -44,34 +45,37 @@
 
 /* Tier bands: header carries name and meaning; the colour rule carries the tier */
 .band { margin-top: 48px; }
+.band > header h2 { margin-right: 4px; }
 .band > header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding-bottom: 6px; border-bottom: 2px solid var(--edge); }
 .band > header p { font-size: var(--fs-s); color: var(--muted); }
 
-/* Verdict row: name, flags and summary on the left; placements to act on and the date on the right */
-.card { position: relative; min-width: 0; display: grid; gap: 10px 32px; padding: 20px 0; border-bottom: 1px solid var(--line); }
-.card:hover { background: var(--panel); }
+/* Verdict row: a tier-washed card. Left: name and date, flags, summary, fix. Right: placements to act on. */
+.card { position: relative; min-width: 0; display: grid; gap: 10px 32px; margin-top: 12px; padding: 14px 16px; background: var(--wash); border-left: 5px solid var(--edge); border-radius: 0 8px 8px 0; }
 .card:focus-within { outline: 3px solid var(--link); outline-offset: 2px; }
-.card-main { display: grid; gap: 6px; align-content: start; }
+.card-main { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 2px 16px; }
 .card h3 { font-size: var(--fs-m); font-weight: 700; line-height: 1.35; }
 .card h3 a { color: var(--ink); text-decoration: none; }
 .card h3 a:focus-visible { outline: none; }
 .card h3 a::after { content: ''; position: absolute; inset: 0; }
 .card:hover h3 a { text-decoration: underline; }
-.flags { display: flex; flex-wrap: wrap; gap: 2px 12px; font-size: var(--fs-s); }
-.flags:has(> :not([hidden])) { margin-top: -2px; }
-.flags:not(:has(> :not([hidden]))) { display: none; }
-.card .summary { max-width: 64ch; font-size: var(--fs-m); line-height: 1.5; color: var(--ink-2); }
-.card-side { display: grid; gap: 6px; align-content: start; }
-.card .act { display: grid; gap: 2px; font-size: var(--fs-s); line-height: 1.45; color: var(--ink); }
 .when { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; font-size: var(--fs-s); color: var(--muted); }
 .fresh { padding: 0 6px; background: var(--tier3-bg); color: var(--tier3-fg); font-size: var(--fs-s); font-weight: 600; border-radius: 4px; }
+.flags { display: flex; flex-wrap: wrap; gap: 2px 14px; font-size: var(--fs-s); font-weight: 600; color: var(--ink-2); }
+.flags:not(:has(> :not([hidden]))) { display: none; }
+.flags .tag-stale { font-weight: 400; }
+.tier-move { padding: 0 6px; border: 1px solid var(--edge); border-radius: 4px; font-weight: 600; color: var(--ink); }
+.card .summary { max-width: 64ch; font-size: var(--fs-m); line-height: 1.5; color: var(--ink-2); display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden; }
+.fixline { font-size: var(--fs-s); color: var(--ink-2); }
+.card-side { display: grid; gap: 6px; align-content: start; }
+.card .act { display: grid; gap: 2px; font-size: var(--fs-s); line-height: 1.45; color: var(--ink); }
 .home-foot { margin-top: 24px; font-size: var(--fs-s); }
 
 @media (min-width: 560px) {
   .tally { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (min-width: 760px) {
-  .card { grid-template-columns: minmax(0, 1fr) 280px; padding: 20px 8px; }
+  .card { grid-template-columns: minmax(0, 1fr) 260px; }
   .activity-row > div { grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr); }
   .why-moved { grid-column: 2; }
 }
@@ -96,3 +100,6 @@
 .watch-date { grid-column: 2; grid-row: 1; font-size: var(--fs-s); color: var(--muted); white-space: nowrap; }
 @media (min-width: 700px) { .watching ul { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 1000px) { .watching ul { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+
+/* White cards with a hairline edge; the tier colour is only the left rule. */
+.card, .tally li { border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }

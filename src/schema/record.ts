@@ -13,9 +13,8 @@ export const CAPS = {
   placementAction: 140,
   question: 100,
   howToCheck: 240,
-  mitigationTitle: 80,
-  mitigationSummary: 110,
-  mitigationLimitation: 110,
+  mitigationTitle: 60,
+  mitigationLimitation: 80,
   product: 60,
   vulnerable: 80,
   fixed: 80,
@@ -88,17 +87,10 @@ const placementSchema = z.object({
 const mitigationSchema = z
   .object({
     title: capped(CAPS.mitigationTitle),
-    summary: capped(CAPS.mitigationSummary),
     /** What the option leaves open, only partly covers, or costs. Required: every mitigation states its limit. */
     limitation: capped(CAPS.mitigationLimitation),
-    effect: z
-      .array(
-        z.object({
-          vector: text,
-          status: z.enum(['closed', 'closed_for_that_app', 'open', 'weaker'])
-        })
-      )
-      .min(1),
+    /** The fix (patch or upgrade) or a stopgap for when patching has to wait. The page leads with the fix. */
+    role: z.enum(['fix', 'stopgap']),
     official_guides: z.array(link),
     confidence
   })
@@ -162,6 +154,8 @@ const baseRecordSchema = z.object({
   name: text,
   aliases: z.array(text),
   cves: z.array(cve).min(1),
+  /** CVEs the verdict mentions but does not rate: related flaws, tracked separately. Shown as "Related", never in the headline. */
+  related_cves: z.array(cve).min(1).optional(),
   summary: capped(CAPS.summary),
   attack: z.enum(ATTACK_KEYS),
   status: z.enum(['draft', 'published', 'retired']),
@@ -178,7 +172,6 @@ const baseRecordSchema = z.object({
   exposed_when: z.array(capped(CAPS.exposedWhen)).min(1).max(4).optional(),
   applies_check: z.array(appliesCheckSchema).min(1),
   placements: z.array(placementSchema).min(1),
-  vectors: z.array(text).min(1),
   mitigations: z.array(mitigationSchema).min(1),
   evidence: z.array(evidenceSchema).min(1),
   timeline: z.array(timelineSchema).optional(),
@@ -188,7 +181,7 @@ const baseRecordSchema = z.object({
   sources: z.array(sourceSchema).min(1),
   /** Free-form markdown from below the front matter. */
   analysis: z.string().optional()
-});
+}).strict();
 
 // Rule: the site names tiers but never gives an hour or day count for one.
 export const TIMEFRAME = /\b\d+\s*(?:-|to|–)?\s*\d*\s*(?:hours?|hrs?|days?|weeks?)\b/i;

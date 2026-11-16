@@ -47,3 +47,16 @@ export function freshness(record: RecordEntry, today: string): 'new' | 'changed'
   const label = freshLabel(record.published, changed, today);
   return label === 'New' ? 'new' : label === 'Changed' ? 'changed' : null;
 }
+
+/** Title of the first mitigation that is a real fix (not a stopgap), if any. */
+export const fixTitle = (record: RecordEntry) => record.mitigations.find((m) => m.role === 'fix')?.title;
+
+/** The latest logged tier move, only when it happened after the verdict was published. */
+export function lastTierMove(record: RecordEntry): { date: string; from: number; to: number } | undefined {
+  const moves = (record.changes ?? [])
+    .filter((c) => c.to_tier !== undefined)
+    .sort((a, b) => a.date.localeCompare(b.date));
+  const latest = moves.at(-1);
+  if (!latest || latest.date <= record.published || latest.to_tier === undefined) return undefined;
+  return { date: latest.date, from: latest.from_tier ?? latest.to_tier, to: latest.to_tier };
+}

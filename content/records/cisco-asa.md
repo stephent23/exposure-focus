@@ -54,29 +54,20 @@ placements:
     tier: 4
     action: No special action. Routine patching.
 
-vectors:
-  - Crafted request to the SSL remote access VPN login service
-
 mitigations:
-  - title: Upgrade to a fixed release
-    summary: "Upgrade each ASA or FTD firewall to the first fixed release for its train, which Cisco strongly recommends."
-    limitation: "Needs a restart that interrupts the VPN unless you have a failover pair; test on a lab or standby unit first."
-    effect:
-      - { vector: Crafted request to the SSL remote access VPN login service, status: closed }
+  - title: "Upgrade ASA and FTD to a fixed release"
+    limitation: "Restart interrupts the VPN unless you have a failover pair"
+    role: fix
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
-  - title: "Remove the tunnel group list if the default group lacks secondary auth"
-    summary: "Enter `no tunnel-group-list enable` in WebVPN mode if DefaultWEBVPNGroup lacks secondary authentication."
-    limitation: "Users can no longer pick a profile at login and must know its name; Cisco calls this temporary."
-    effect:
-      - { vector: Crafted request to the SSL remote access VPN login service, status: closed_for_that_app }
+  - title: "Remove the VPN login group list"
+    limitation: "Users must type their profile name; Cisco calls it temporary"
+    role: stopgap
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
-  - title: "Disable secondary authentication on the default group"
-    summary: "Enter `no secondary-authentication-server-group` if DefaultWEBVPNGroup uses secondary authentication."
-    limitation: "Cisco says it lowers remote access VPN security, because the second factor is removed."
-    effect:
-      - { vector: Crafted request to the SSL remote access VPN login service, status: closed_for_that_app }
+  - title: "Turn off secondary authentication on the default group"
+    limitation: "Lowers VPN security: removes the second factor"
+    role: stopgap
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
 
@@ -117,3 +108,5 @@ Cisco lists two mitigations that avoid an upgrade. Cisco says there are no worka
 The call would move up if the impact were shown to go beyond a reload, or if exploitation became widespread enough to stop access across many organisations.
 
 Use Cisco's Software Checker to find the first fixed release for your exact release. Cisco says the tunnel group list mitigation was tested in a lab. Removing the group list does not help if DefaultWEBVPNGroup uses secondary authentication; in that case Cisco's mitigation is to remove the secondary authentication server group from it.
+
+Upgrade each ASA or FTD to the first fixed release for its train, which Cisco strongly recommends. The restart interrupts the VPN unless you have a failover pair, so test on a lab or standby unit first. The group list mitigation is `no tunnel-group-list enable` in WebVPN mode and applies where DefaultWEBVPNGroup lacks secondary authentication; users then cannot pick a profile at login and must know its name. The second mitigation is `no secondary-authentication-server-group` on DefaultWEBVPNGroup where it uses secondary authentication.

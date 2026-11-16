@@ -59,34 +59,22 @@ placements:
     tier: 4
     action: Patch in your normal cycle.
 
-vectors:
-  - Incoming IPv4 TCP connection carrying IP options (the base flaw)
-  - Request-socket migration, if enabled (a similar flaw)
-
 mitigations:
-  - title: Install a fixed kernel and reboot
-    summary: Install a kernel that contains the upstream fix and reboot; Red Hat calls this the only complete solution.
-    limitation: Needs a reboot of each server unless live patching is offered, and a new kernel can change drivers.
-    effect:
-      - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: closed }
-      - { vector: "Request-socket migration, if enabled (a similar flaw)", status: closed }
+  - title: "Install a fixed kernel and reboot"
+    limitation: "Needs a reboot per server unless live patching is offered"
+    role: fix
     official_guides:
       - https://access.redhat.com/security/vulnerabilities/RHSB-2026-016
       - https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack
     confidence: vendor-stated
-  - title: Drop IPv4 TCP packets that carry IP options
-    summary: Temporary nftables rule that drops incoming IPv4 TCP packets with IP options, lost on reboot.
-    limitation: Red Hat says it cannot fully prevent the flaw; may break CIPSO labelling; misses OpenShift pod traffic.
-    effect:
-      - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: weaker }
+  - title: "Block IPv4 TCP packets with IP options"
+    limitation: "Red Hat: cannot fully prevent the flaw; lost on reboot"
+    role: stopgap
     official_guides: [https://access.redhat.com/security/vulnerabilities/RHSB-2026-016]
     confidence: vendor-stated
-  - title: Turn off MPTCP and request-socket migration
-    summary: "Sets `net.mptcp.enabled=0` and `net.ipv4.tcp_migrate_req=0` to block the researchers' exploit route."
-    limitation: Akamai and Red Hat say it does not stop exploitation, and services that rely on MPTCP stop using it.
-    effect:
-      - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: open }
-      - { vector: "Request-socket migration, if enabled (a similar flaw)", status: weaker }
+  - title: "Turn off MPTCP and request-socket migration"
+    limitation: "Akamai and Red Hat say it does not stop exploitation"
+    role: stopgap
     official_guides: [https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack]
     confidence: reported
 
@@ -154,3 +142,5 @@ As of 2026-11-13 no source reviewed reports the flaw in the CISA KEV catalogue; 
 Both internet-facing rows are Tier 3. The researchers' exploit is described in Anthropic's own write-up, but without the code, kernel version or configuration, so it counts as a lab result rather than a published demonstration.
 
 Red Hat's temporary nftables rule is `ip protocol tcp ip hdrlength > 5 counter drop`, in a table named cve_2026_98432. It takes effect at once for new and existing connections and needs no service restart. Red Hat says it is not a substitute for patching.
+
+Red Hat calls a fixed kernel the only complete solution; a new kernel can change drivers, so test first. The nftables rule can break CIPSO labelling, is lost on reboot and misses OpenShift pod traffic. The MPTCP option sets `net.mptcp.enabled=0` and `net.ipv4.tcp_migrate_req=0` to block the researchers' exploit route; services that rely on MPTCP stop using it.

@@ -1,11 +1,20 @@
-/* What to do: a numbered list. Each option is a title, a one-line description, its limit, and a quiet line with coverage, confidence and the guide. */
-.opts { list-style: none; margin: 0; padding: 0; counter-reset: opt; }
-.opt { position: relative; counter-increment: opt; padding: 16px 0 16px 36px; }
-.opt + .opt { border-top: 1px solid var(--line); }
-.opt::before { content: counter(opt); position: absolute; left: 0; top: 16px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel); font-size: var(--fs-s); font-weight: 600; color: var(--ink-2); }
-.opt h3 { font-size: var(--fs-m); line-height: 1.4; overflow-wrap: anywhere; }
-.opt-sum { margin-top: 2px; color: var(--ink-2); }
-.opt-limit { margin-top: 4px; color: var(--ink-2); }
+/* What to do: the recommended fix in a green-edged card, then the stopgaps as a plain list under their own heading. */
+.rec { padding: 16px 20px; background: #fff; border: 1px solid var(--line-strong); border-left: 5px solid #1b6e3c; border-radius: 0 8px 8px 0; }
+.rec-label { display: flex; align-items: center; gap: 8px; font-size: var(--fs-s); font-weight: 700; color: #1b6e3c; }
+.rec-label::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: #1b6e3c; }
+.opts { list-style: none; margin: 0; padding: 0; }
+.rec-list .opt { padding: 6px 0 0; }
+.rec-list .opt + .opt { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line); }
+.rec h3 { font-size: var(--fs-l); line-height: 1.35; }
+.nofix { padding: 14px 18px; border-left: 5px solid #a1221b; background: #fbeeed; border-radius: 0 8px 8px 0; font-weight: 600; }
+
+.stopgap-head { margin-top: 24px; font-size: var(--fs-m); font-weight: 700; color: var(--ink); }
+.stopgaps .opt { position: relative; padding: 12px 0 12px 22px; border-bottom: 1px solid var(--line); }
+.stopgaps .opt::before { content: ''; position: absolute; left: 2px; top: 19px; width: 8px; height: 8px; border-radius: 50%; border: 2px solid #7a5600; }
+.stopgaps h3 { font-size: var(--fs-m); line-height: 1.4; }
+
+.opt h3 { overflow-wrap: anywhere; }
+.opt-limit { margin-top: 2px; color: var(--ink-2); }
 .opt-label { margin-right: 4px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
-.opt-line { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 6px; font-size: var(--fs-s); color: var(--muted); }
+.opt-line { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 4px; font-size: var(--fs-s); color: var(--muted); }
 .opt-guide a { color: var(--link); }
