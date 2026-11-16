@@ -10,6 +10,6 @@ export default function setup() {
     });
   } catch (e) {
     const err = e as { stdout?: string; stderr?: string };
-    throw new Error(`astro build failed:\n${err.stdout}\n${err.stderr}`);
+    throw new Error(`astro build failed:\n${err.stdout}\n${err.stderr}`, { cause: e });
   }
 }
