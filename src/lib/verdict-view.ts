@@ -138,3 +138,10 @@ export function coverageLine(vectors: string[], effects: { vector: string; statu
 
 /** 2026-10-05 → "5 Oct", for dense lists where the year is obvious. */
 export const shortDate = (iso: string) => niceDate(iso).slice(0, -5);
+
+/** The coverage table: one row per way in, one cell per option, in the record's order. A way in an option does not mention is open. */
+export const coverageGrid = (vectors: string[], mitigations: { effect: { vector: string; status: Status }[] }[]) =>
+  vectors.map((vector) => ({
+    vector,
+    cells: mitigations.map((m) => m.effect.find((e) => e.vector === vector)?.status ?? ('open' as Status))
+  }));

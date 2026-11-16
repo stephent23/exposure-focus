@@ -5,8 +5,8 @@ import { join, sep } from 'node:path';
 import { recentActivity } from '../src/lib/home';
 import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
-import { CONFIDENCE_LABELS } from '../src/lib/tiers';
-import { coverageLine, keyFacts } from '../src/lib/verdict-view';
+import { CONFIDENCE_LABELS, EFFECT_LABELS } from '../src/lib/tiers';
+import { coverageGrid, coverageLine, keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
 
 const dist = join(process.cwd(), 'dist-test');
@@ -169,6 +169,25 @@ describe('built site', () => {
         if (guide?.startsWith('http')) expect(items[i], `${r.slug} ${m.title} guide`).toContain(`href="${guide.replace(/&/g, '&amp;')}"`);
         expect(count(items[i], 'href='), `${r.slug} ${m.title} links`).toBe(1);
         expect(words(text), `${r.slug} ${m.title} words`).toBeLessThanOrEqual(OPTION_WORD_BUDGET);
+      });
+    }
+  });
+
+  it('names every way in and shows, in a table, what each option does to it, when there is more than one way in', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      if (r.vectors.length < 2) {
+        expect(html, `${r.slug} needs no table for one way in`).not.toContain('class="coverage"');
+        continue;
+      }
+      const table = /<table class="coverage"[\s\S]*?<\/table>/.exec(html)?.[0] ?? '';
+      expect(table, `${r.slug} coverage table`).not.toBe('');
+      const rows = [...table.matchAll(/<tr class="coverage-row">([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
+      expect(rows.length, `${r.slug} one row per way in`).toBe(r.vectors.length);
+      coverageGrid(r.vectors, r.mitigations).forEach((row, i) => {
+        expect(plain(rows[i]), `${r.slug} way in`).toContain(row.vector);
+        const cells = [...rows[i].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => plain(m[1]).trim());
+        expect(cells, `${r.slug} ${row.vector}`).toEqual(row.cells.map((s) => EFFECT_LABELS[s].short));
       });
     }
   });

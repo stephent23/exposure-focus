@@ -1,0 +1,30 @@
+/* Coverage table: a filled mark for closed, a half mark for partial, an empty ring for open. The word is always there too. */
+.coverage-wrap { margin-bottom: 8px; }
+.coverage { width: 100%; border-collapse: collapse; font-size: var(--fs-s); }
+.coverage caption { text-align: left; padding-bottom: 8px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
+.coverage th, .coverage td { padding: 8px 8px 8px 0; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+.coverage thead th { font-weight: 600; color: var(--muted); }
+.coverage tbody th { font-weight: 400; color: var(--ink); width: 46%; overflow-wrap: anywhere; }
+.coverage .opt-col { text-align: center; }
+.cov { text-align: center; white-space: nowrap; color: var(--ink-2); }
+.cov-mark { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border-radius: 50%; border: 2px solid currentColor; }
+.cov-closed, .cov-closed_for_that_app { color: #1b6e3c; }
+.cov-closed .cov-mark, .cov-closed_for_that_app .cov-mark { background: currentColor; }
+.cov-weaker { color: #7a5600; }
+.cov-weaker .cov-mark { background: linear-gradient(90deg, currentColor 50%, transparent 50%); }
+.cov-open { color: #a1221b; }
+.cov-text { color: var(--ink-2); }
+
+/* On phones the words go (the marks and the key below carry it); screen readers still read the word. */
+@media (max-width: 640px) {
+  .cov-text { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+  .cov-mark { margin-right: 0; }
+  .coverage tbody th { width: auto; }
+}
+
+/* Key: only needed on phones, where the table shows marks without words. */
+.coverage-key { display: none; }
+@media (max-width: 640px) {
+  .coverage-key { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 8px; font-size: var(--fs-s); }
+  .coverage-key .cov-mark { margin-right: 5px; }
+}

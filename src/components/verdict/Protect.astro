@@ -3,6 +3,7 @@
 import '../../styles/verdict/protect.css';
 import Text from '../Text.astro';
 import Guide from './Guide.astro';
+import Coverage from './Coverage.astro';
 import { CONFIDENCE_LABELS } from '../../lib/tiers';
 import { coverageLine, isPlaceholder } from '../../lib/verdict-view';
 import type { RecordEntry } from '../../schema/record';
@@ -15,6 +16,7 @@ const { record } = Astro.props;
 
 <section class="sec" aria-labelledby="protect-heading">
   <h2 id="protect-heading">What to do</h2>
+  <Coverage record={record} />
   <ol class="opts">
     {record.mitigations.map((m) => (
       <li class="opt">

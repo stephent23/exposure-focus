@@ -1,0 +1,41 @@
+---
+// Which way in each option closes: ways in down the side, options (numbered as in the list below) across the top.
+// Only shown when there is more than one way in; with one, the line under each option says it all.
+import '../../styles/verdict/coverage.css';
+import { EFFECT_LABELS } from '../../lib/tiers';
+import { coverageGrid } from '../../lib/verdict-view';
+import type { RecordEntry } from '../../schema/record';
+
+interface Props {
+  record: RecordEntry;
+}
+const { record } = Astro.props;
+const grid = coverageGrid(record.vectors, record.mitigations);
+// The key lists only the marks this table uses.
+const used = [...new Set(grid.flatMap((row) => row.cells))];
+---
+
+{record.vectors.length > 1 && (
+  <div class="coverage-wrap">
+    <table class="coverage">
+      <caption>Ways in, and what each option does to them</caption>
+      <thead>
+        <tr>
+          <th scope="col">Way in</th>
+          {record.mitigations.map((m, i) => (
+            <th scope="col" class="opt-col"><span aria-hidden="true">{i + 1}</span><span class="sr-only">Option {i + 1}: {m.title}</span></th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {grid.map((row) => (
+          <tr class="coverage-row">
+            <th scope="row">{row.vector}</th>
+            {row.cells.map((s) => <td class={`cov cov-${s}`}><span class="cov-mark" aria-hidden="true"></span><span class="cov-text">{EFFECT_LABELS[s].short}</span></td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <p class="coverage-key" aria-hidden="true">{used.map((s) => <span class={`cov cov-${s}`}><span class="cov-mark"></span>{EFFECT_LABELS[s].short}</span>)}</p>
+  </div>
+)}
