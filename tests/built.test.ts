@@ -6,7 +6,7 @@ import { recentActivity } from '../src/lib/home';
 import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
 import { CONFIDENCE_LABELS, EFFECT_LABELS } from '../src/lib/tiers';
-import { coverageGrid, coverageLine, keyFacts } from '../src/lib/verdict-view';
+import { coverageGrid, keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
 
 const dist = join(process.cwd(), 'dist-test');
@@ -149,9 +149,9 @@ describe('built site', () => {
     }
   });
 
-  // Each option is a title, one description, one limit, a quiet line and a guide link. Cap it so the list stays scannable.
-  const OPTION_WORD_BUDGET = 70;
-  it('shows each option as a short description, its limit, a confidence label and its guide links', () => {
+  // Each option is an action, one short limit, a confidence label and a guide link. Cap it so the list reads at a glance.
+  const OPTION_WORD_BUDGET = 30;
+  it('shows each option as its action, a short limit, a confidence label and one guide link', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
       const section = html.slice(html.indexOf('id="protect-heading"'));
@@ -161,25 +161,22 @@ describe('built site', () => {
         const text = plain(items[i]);
         // Inline code adds spacing and drops its backticks, so compare with spaces and backticks removed.
         const squash = (x: string) => x.replace(/[\s`]/g, '');
-        expect(squash(text), `${r.slug} ${m.title} summary`).toContain(squash(m.summary));
         expect(squash(text), `${r.slug} ${m.title} limit`).toContain(squash(m.limitation));
         expect(text, `${r.slug} ${m.title} confidence`).toContain(CONFIDENCE_LABELS[m.confidence]);
         // One implementation link per option: the first guide.
         const guide = m.official_guides[0];
         if (guide?.startsWith('http')) expect(items[i], `${r.slug} ${m.title} guide`).toContain(`href="${guide.replace(/&/g, '&amp;')}"`);
         expect(count(items[i], 'href='), `${r.slug} ${m.title} links`).toBe(1);
-        expect(words(text), `${r.slug} ${m.title} words`).toBeLessThanOrEqual(OPTION_WORD_BUDGET);
+        // Count what is seen: screen-reader-only text (the guide link repeats the title for context) is left out.
+        const seen = plain(items[i].replace(/<span class="sr-only">[\s\S]*?<\/span>/g, ' '));
+        expect(words(seen), `${r.slug} ${m.title} words`).toBeLessThanOrEqual(OPTION_WORD_BUDGET);
       });
     }
   });
 
-  it('names every way in and shows, in a table, what each option does to it, when there is more than one way in', () => {
+  it('names every way in and shows, in a table, what each option does to it', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
-      if (r.vectors.length < 2) {
-        expect(html, `${r.slug} needs no table for one way in`).not.toContain('class="coverage"');
-        continue;
-      }
       const table = /<table class="coverage"[\s\S]*?<\/table>/.exec(html)?.[0] ?? '';
       expect(table, `${r.slug} coverage table`).not.toBe('');
       const rows = [...table.matchAll(/<tr class="coverage-row">([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
@@ -192,12 +189,6 @@ describe('built site', () => {
     }
   });
 
-  it('shows one coverage line per mitigation outside the folds', () => {
-    for (const r of published) {
-      const visible = plain(withoutDetails(recordBody(recordPage(r.slug))));
-      for (const m of r.mitigations) expect(visible, `${r.slug} ${m.title}`).toContain(coverageLine(r.vectors, m.effect));
-    }
-  });
 
   it('has no sidebar and no "On this page" list', () => {
     for (const f of pages) {

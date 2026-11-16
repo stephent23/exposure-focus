@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import type { RecordEntry } from '../schema/record';
 import { EFFECT_LABELS } from './tiers';
-import { changeHeadline, coverageLine, coverageGrid, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
+import { changeHeadline, coverageGrid, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
   it('letters ways in from A', () => {
@@ -117,34 +117,6 @@ describe('keyFacts', () => {
   });
 });
 
-describe('coverageLine', () => {
-  type S = 'closed' | 'closed_for_that_app' | 'open' | 'weaker';
-  const v = ['a', 'b', 'c'];
-  const e = (...s: S[]) => s.map((status, i) => ({ vector: v[i], status }));
-
-  it('says all ways in are closed', () => {
-    expect(coverageLine(v, e('closed', 'closed_for_that_app', 'closed'))).toBe('Closes all 3 ways in');
-    expect(coverageLine(['a'], e('closed'))).toBe('Closes the one way in');
-  });
-
-  it('counts closed, partial and open parts', () => {
-    expect(coverageLine(v, e('closed', 'closed', 'open'))).toBe('Closes 2 of 3 ways in · 1 left open');
-    expect(coverageLine(v, e('closed', 'weaker', 'open'))).toBe('Closes 1 of 3 ways in · partial for 1 · 1 left open');
-    expect(coverageLine(v, e('closed', 'closed', 'weaker'))).toBe('Closes 2 of 3 ways in · partial for 1');
-  });
-
-  it('starts with a capital when nothing is closed', () => {
-    expect(coverageLine(v, e('weaker', 'weaker', 'weaker'))).toBe('Partial for 3 of 3 ways in');
-    expect(coverageLine(v, e('weaker', 'open', 'open'))).toBe('Partial for 1 of 3 ways in · 2 left open');
-    expect(coverageLine(v, e('open', 'open', 'open'))).toBe('Leaves all 3 ways in open');
-  });
-
-  it('treats a way in with no effect entry as open, and uses the singular for one', () => {
-    expect(coverageLine(v, e('closed'))).toBe('Closes 1 of 3 ways in · 2 left open');
-    expect(coverageLine(['a'], [])).toBe('Leaves the one way in open');
-    expect(coverageLine(['a'], e('weaker'))).toBe('Partial for 1 of 1 way in');
-  });
-});
 
 describe('coverageGrid', () => {
   it('gives one row per way in and one cell per option, treating a missing entry as open', () => {

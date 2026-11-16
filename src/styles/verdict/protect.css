@@ -1,11 +1,10 @@
-/* What to do: a numbered list. Each option is a title, a one-line description, its limit, and a quiet line with coverage, confidence and the guide. */
+/* What to do: a numbered list. Each option is its action, one short limit, and a quiet line with confidence and the guide. */
 .opts { list-style: none; margin: 0; padding: 0; counter-reset: opt; }
 .opt { position: relative; counter-increment: opt; padding: 16px 0 16px 36px; }
 .opt + .opt { border-top: 1px solid var(--line); }
 .opt::before { content: counter(opt); position: absolute; left: 0; top: 16px; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: var(--panel); font-size: var(--fs-s); font-weight: 600; color: var(--ink-2); }
 .opt h3 { font-size: var(--fs-m); line-height: 1.4; overflow-wrap: anywhere; }
-.opt-sum { margin-top: 2px; color: var(--ink-2); }
-.opt-limit { margin-top: 4px; color: var(--ink-2); }
+.opt-limit { margin-top: 2px; color: var(--ink-2); }
 .opt-label { margin-right: 4px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
 .opt-line { display: flex; flex-wrap: wrap; gap: 2px 16px; margin-top: 6px; font-size: var(--fs-s); color: var(--muted); }
 .opt-guide a { color: var(--link); }

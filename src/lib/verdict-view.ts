@@ -117,24 +117,6 @@ export function keyFacts(record: RecordEntry): KeyFact[] {
   ];
 }
 
-/** One line for a mitigation: "Closes all 3 ways in" / "Closes 2 of 3 ways in · 1 left open" / "Partial for 3 of 3 ways in". */
-export function coverageLine(vectors: string[], effects: { vector: string; status: Status }[]): string {
-  const n = vectors.length;
-  const statuses = vectors.map((v) => effects.find((e) => e.vector === v)?.status ?? 'open');
-  const closed = statuses.filter((s) => s === 'closed' || s === 'closed_for_that_app').length;
-  const partial = statuses.filter((s) => s === 'weaker').length;
-  const open = n - closed - partial;
-  const ways = n === 1 ? 'way in' : 'ways in';
-
-  if (closed === n) return n === 1 ? 'Closes the one way in' : `Closes all ${n} ways in`;
-  if (open === n) return n === 1 ? 'Leaves the one way in open' : `Leaves all ${n} ways in open`;
-  const parts = [
-    closed > 0 ? `Closes ${closed} of ${n} ${ways}` : '',
-    partial > 0 ? (closed > 0 ? `partial for ${partial}` : `Partial for ${partial} of ${n} ${ways}`) : '',
-    open > 0 ? `${open} left open` : ''
-  ];
-  return parts.filter(Boolean).join(' · ');
-}
 
 /** 2026-10-05 → "5 Oct", for dense lists where the year is obvious. */
 export const shortDate = (iso: string) => niceDate(iso).slice(0, -5);

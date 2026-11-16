@@ -19,3 +19,4 @@
   .affected td { display: inline; padding: 0; border: 0; margin-right: 14px; }
   .affected td::before { content: attr(data-label) ': '; color: var(--muted); }
 }
+.affected thead th { white-space: nowrap; }

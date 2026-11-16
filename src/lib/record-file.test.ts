@@ -29,7 +29,6 @@ placements:
 vectors: [Remote request]
 mitigations:
   - title: Block access
-    summary: Restrict the listener.
     limitation: Remote users lose access.
     effect: [{ vector: Remote request, status: closed }]
     official_guides: ["[link to add]"]

@@ -32,7 +32,6 @@ function validRecord() {
     mitigations: [
       {
         title: 'Block access',
-        summary: 'Restrict the listener.',
         limitation: 'Remote users lose access.',
         effect: [{ vector: 'Remote request', status: 'closed' }],
         official_guides: ['[link to add]'],
@@ -84,7 +83,7 @@ describe('record schema', () => {
   });
 
   it('refuses the old long-form mitigation fields, so no dead detail is kept', () => {
-    for (const key of ['takes', 'might_break', 'cost', 'check_it_worked', 'undo']) {
+    for (const key of ['summary', 'takes', 'might_break', 'cost', 'check_it_worked', 'undo']) {
       reject((r) => ((r.mitigations[0] as Record<string, unknown>)[key] = 'x'));
     }
   });
@@ -342,7 +341,6 @@ describe('length caps', () => {
     ['question', (r, v) => (r.applies_check[0].question = v)],
     ['howToCheck', (r, v) => (r.applies_check[0].how_to_check = v)],
     ['mitigationTitle', (r, v) => (r.mitigations[0].title = v)],
-    ['mitigationSummary', (r, v) => (r.mitigations[0].summary = v)],
     ['mitigationLimitation', (r, v) => (r.mitigations[0].limitation = v)]
   ];
   for (const [name, apply] of cases) {

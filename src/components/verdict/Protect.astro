@@ -1,11 +1,11 @@
 ---
-// What to do: one short block per option: what it is, what it leaves open, how sure we are and where to do it.
+// What to do: the coverage table, then one short block per option: the action, its limit, how sure the source is, and where to do it.
 import '../../styles/verdict/protect.css';
 import Text from '../Text.astro';
 import Guide from './Guide.astro';
 import Coverage from './Coverage.astro';
 import { CONFIDENCE_LABELS } from '../../lib/tiers';
-import { coverageLine, isPlaceholder } from '../../lib/verdict-view';
+import { isPlaceholder } from '../../lib/verdict-view';
 import type { RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -21,10 +21,8 @@ const { record } = Astro.props;
     {record.mitigations.map((m) => (
       <li class="opt">
         <h3>{isPlaceholder(m.title) ? <span class="placeholder">{m.title}</span> : m.title}</h3>
-        <p class="opt-sum"><Text text={m.summary} /></p>
         <p class="opt-limit"><span class="opt-label">Limit</span> <Text text={m.limitation} /></p>
         <p class="opt-line">
-          <span>{coverageLine(record.vectors, m.effect)}</span>
           <span>{CONFIDENCE_LABELS[m.confidence]}</span>
           {m.official_guides[0] && <span class="opt-guide"><Guide href={m.official_guides[0]} title={m.title} /></span>}
         </p>

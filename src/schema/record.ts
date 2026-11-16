@@ -13,9 +13,8 @@ export const CAPS = {
   placementAction: 140,
   question: 100,
   howToCheck: 240,
-  mitigationTitle: 80,
-  mitigationSummary: 110,
-  mitigationLimitation: 110,
+  mitigationTitle: 60,
+  mitigationLimitation: 80,
   product: 60,
   vulnerable: 80,
   fixed: 80,
@@ -88,7 +87,6 @@ const placementSchema = z.object({
 const mitigationSchema = z
   .object({
     title: capped(CAPS.mitigationTitle),
-    summary: capped(CAPS.mitigationSummary),
     /** What the option leaves open, only partly covers, or costs. Required: every mitigation states its limit. */
     limitation: capped(CAPS.mitigationLimitation),
     effect: z
