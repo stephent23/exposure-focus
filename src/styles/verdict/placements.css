@@ -40,3 +40,6 @@
   .where .place-main, .where .routine-rest { grid-template-columns: 1fr; }
   .where .reasoning { margin-left: 0; }
 }
+
+/* White card with a hairline edge; the tier colour is only the left rule. */
+.where .place { border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }

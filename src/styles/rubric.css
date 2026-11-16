@@ -51,3 +51,6 @@ table.grid tbody tr:last-child :is(td, .rowhead) { border-bottom: 0; }
 
 /* Column headers wrap between words, never mid-word, on narrow screens. */
 table.grid thead th { overflow-wrap: normal; hyphens: auto; }
+
+/* White cards with a hairline edge; the tier colour is only the left rule or the cell underline. */
+.tiercard, .gate, .adjust li { border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }

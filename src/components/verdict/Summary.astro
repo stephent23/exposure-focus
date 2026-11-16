@@ -2,7 +2,7 @@
 // The top of a verdict: tier, what the flaw is, four facts at a glance, and when it was last checked.
 import '../../styles/verdict/summary.css';
 import { ATTACKS } from '../../lib/attacks';
-import { TIERS, type TierNumber } from '../../lib/tiers';
+import type { TierNumber } from '../../lib/tiers';
 import { keyFacts, niceDate, shortDate, sortedChanges } from '../../lib/verdict-view';
 import { headlineTier, type RecordEntry } from '../../schema/record';
 
@@ -21,7 +21,6 @@ const move = sortedChanges(record.changes).find((c) => c.to_tier !== undefined);
   <a class="back" href="/"><span aria-hidden="true">←</span> All verdicts</a>
   <div class="verdict-panel">
   <p class="kicker">
-    <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
     <span class="cve">{record.cves.join(' · ')}</span>
   </p>
   <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>

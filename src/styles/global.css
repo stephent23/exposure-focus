@@ -1,5 +1,5 @@
 /* Site-wide styles: colour tokens, base, type, header, footer and the badges and panels every page shares. */
-/* --bg, --fg, --edge and --wash default to neutral grey; .t1 to .t4 override them for each tier. */
+/* --bg, --fg, --edge and --wash default to neutral grey; .t1 to .t4 override them. Cards stay white: the tier shows only in the left edge and the badge, never as a tinted background. */
 :root {
   --ink: #16181d;
   --ink-2: #33373f;
@@ -30,10 +30,10 @@
   --fs-m: 15px;
   --fs-l: 18px;
 }
-.t1 { --bg: var(--tier1-bg); --fg: var(--tier1-fg); --edge: #c4554d; --wash: #fbeeed; }
-.t2 { --bg: var(--tier2-bg); --fg: var(--tier2-fg); --edge: #d1a32a; --wash: #fdf6de; }
-.t3 { --bg: var(--tier3-bg); --fg: var(--tier3-fg); --edge: #5b84b1; --wash: #eef3f9; }
-.t4 { --bg: #e3e0d8; --fg: var(--ink-2); --edge: #6b7078; --wash: var(--panel); }
+.t1 { --bg: var(--tier1-bg); --fg: var(--tier1-fg); --edge: #c4554d; --wash: #fff; }
+.t2 { --bg: var(--tier2-bg); --fg: var(--tier2-fg); --edge: #d1a32a; --wash: #fff; }
+.t3 { --bg: var(--tier3-bg); --fg: var(--tier3-fg); --edge: #5b84b1; --wash: #fff; }
+.t4 { --bg: #e3e0d8; --fg: var(--ink-2); --edge: #6b7078; --wash: #fff; }
 
 /* Base */
 * { box-sizing: border-box; }
