@@ -60,7 +60,7 @@ mitigations:
     role: fix
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
-  - title: "Remove the VPN login group list"
+  - title: "Stop listing VPN login groups to users"
     limitation: "Users must type their profile name; Cisco calls it temporary"
     role: stopgap
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
