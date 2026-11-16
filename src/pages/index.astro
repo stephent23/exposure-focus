@@ -6,10 +6,10 @@ import { ATTACKS } from '../lib/attacks';
 import { buildDate } from '../lib/today';
 import { getAllRecords } from '../lib/records';
 import { TIERS, TIER_NUMBERS } from '../lib/tiers';
-import { freshness, groupForHome, lastChanged, recentActivity } from '../lib/home';
-import { niceDate, shortDate } from '../lib/verdict-view';
+import { fixTitle, freshness, groupForHome, lastChanged, lastTierMove, recentActivity } from '../lib/home';
+import { keyFacts, niceDate, shortDate } from '../lib/verdict-view';
 import { cveLink, getWatching } from '../lib/watching';
-import { isStale, sortedPlacements } from '../schema/record';
+import { headlineTier, isStale, sortedPlacements } from '../schema/record';
 
 const today = buildDate();
 const groups = groupForHome(await getAllRecords());
@@ -108,33 +108,44 @@ const actItems = (r: (typeof records)[number]) =>
             // A change on the publication day is part of the verdict itself, not a later change.
             const changed = latest && latest > record.published ? latest : undefined;
             const act = actItems(record);
+            const fix = fixTitle(record);
+            const fixStatus = keyFacts(record).find((f) => f.label === 'Fix');
+            const move = lastTierMove(record);
             return (
               <article
-                class="card"
+                class={`card t${headlineTier(record)}`}
                 data-record={record.slug}
                 data-tiers={[...new Set(record.placements.map((p) => p.tier))].join(' ')}
                 data-kind={record.attack}
                 data-text={[record.name, ...record.cves, ...record.aliases].join(' ').toLowerCase()}
               >
                 <div class="card-main">
-                  <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
+                  <div class="card-head">
+                    <h3><a href={`/verdicts/${record.slug}/`}>{record.name}</a></h3>
+                    <p class="when">
+                      <span class="fresh" data-published={record.published} data-changed={changed} hidden={!fresh}>{fresh ? FRESH[fresh] : ''}</span>
+                      {changed
+                        ? <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>
+                        : <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>}
+                    </p>
+                  </div>
                   <p class="flags">
                     {exploited(record) && <span class="tag-hot">Exploited in the wild</span>}
+                    {fixStatus && <span class="tag-fix">Fix: {fixStatus.value.toLowerCase()}</span>}
                     <span class="tag-stale" data-review-until={record.review_until} hidden={!isStale(record, today)}>Overdue for review</span>
+                    {move && <span class="tier-move">Tier {move.from} → {move.to}, <time datetime={move.date}>{shortDate(move.date)}</time></span>}
                   </p>
                   <p class="summary">{record.summary}</p>
+                  <p class="fixline">{fix ? `Fix: ${fix}` : 'No fix yet'}</p>
                 </div>
-                <div class="card-side">
-                  {act.length > 0 && <p class="act">{act.map((line) => <span>{line}</span>)}</p>}
-                  <p class="when">
-                    <span class="fresh" data-published={record.published} data-changed={changed} hidden={!fresh}>{fresh ? FRESH[fresh] : ''}</span>
-                    {changed
-                      ? <span>Changed <time datetime={changed}>{shortDate(changed)}</time></span>
-                      : <span>Added <time datetime={record.published}>{shortDate(record.published)}</time></span>}
-                  </p>
-                </div>
+                {act.length > 0 && (
+                  <div class="card-side">
+                    <p class="act">{act.map((line) => <span>{line}</span>)}</p>
+                  </div>
+                )}
               </article>
             );
+
           })}
         </div>
       </section>

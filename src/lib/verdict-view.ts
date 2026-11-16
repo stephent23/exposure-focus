@@ -1,12 +1,8 @@
 // Small helpers shared by the verdict page components.
 import type { RecordEntry } from '../schema/record';
-import { EFFECT_LABELS, TIERS, type TierNumber } from './tiers';
+import { TIERS, type TierNumber } from './tiers';
 
-type Status = keyof typeof EFFECT_LABELS;
 type Event = NonNullable<RecordEntry['timeline']>[number];
-
-/** Ways in are lettered A, B, C… */
-export const letter = (index: number) => String.fromCharCode(65 + index);
 
 /** Owner placeholders such as "[link to add]" stay visible and marked. */
 export const isPlaceholder = (value: string) => value.includes('[');
@@ -63,13 +59,6 @@ export const changeHeadline = (c: Change) => {
   const tier = (n: number) => `Tier ${n} (${TIERS[n as TierNumber].name})`;
   return `${c.placement}: ${tier(c.from_tier)} to ${tier(c.to_tier)}`;
 };
-
-/** What an option does to each way in, in letter order (A, B, C…), so the letters never appear out of order. */
-export const effectByWay = (vectors: string[], effects: { vector: string; status: Status }[]) =>
-  vectors.flatMap((vector, i) => {
-    const effect = effects.find((e) => e.vector === vector);
-    return effect ? [{ letter: letter(i), status: effect.status, label: EFFECT_LABELS[effect.status].text }] : [];
-  });
 
 export type KeyFact = { label: string; value: string; tone: 'bad' | 'ok' | 'unknown'; source?: { url: string; as_of: string } };
 

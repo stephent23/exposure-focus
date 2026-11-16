@@ -28,13 +28,11 @@ function validRecord() {
         action: 'Mitigate first, then patch.'
       }
     ],
-    vectors: ['Remote request'],
     mitigations: [
       {
         title: 'Block access',
         limitation: 'Remote users lose access.',
         role: 'fix',
-        effect: [{ vector: 'Remote request', status: 'closed' }],
         official_guides: ['[link to add]'],
         confidence: 'reported'
       }
@@ -87,6 +85,11 @@ describe('record schema', () => {
     for (const key of ['summary', 'takes', 'might_break', 'cost', 'check_it_worked', 'undo']) {
       reject((r) => ((r.mitigations[0] as Record<string, unknown>)[key] = 'x'));
     }
+  });
+
+  it('refuses the retired ways-in fields (vectors and mitigation effect), so no dead data is kept', () => {
+    reject((r) => ((r as Record<string, unknown>).vectors = ['Remote request']));
+    reject((r) => ((r.mitigations[0] as Record<string, unknown>).effect = [{ vector: 'Remote request', status: 'closed' }]));
   });
 
   it('fails when the declared tier disagrees with the rubric', () => {

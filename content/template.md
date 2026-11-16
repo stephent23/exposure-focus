@@ -57,15 +57,11 @@ placements:
     tier: 2
     action: What to do for this placement.
 
-vectors: ["[ways in to add]"] # shown as A, B, C... in the order listed
-
 # Caps: title 60 characters, limitation 80. A mitigation is an action a leader can read at a glance, one short limit, a confidence label and a guide link.
 mitigations:
   - title: "[action to add, e.g. Update PHP and restart every worker]"
     limitation: What it leaves open, only partly covers, or costs. # required: every option states its limit
     role: fix # fix (patch or upgrade) or stopgap (for when patching has to wait); the page leads with the fix
-    effect: # per way in: closed, closed_for_that_app, open or weaker
-      - { vector: "[ways in to add]", status: closed_for_that_app }
     official_guides: ["[link to add]"]
     confidence: inference # vendor-stated, reported or inference
 

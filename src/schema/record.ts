@@ -91,14 +91,6 @@ const mitigationSchema = z
     limitation: capped(CAPS.mitigationLimitation),
     /** The fix (patch or upgrade) or a stopgap for when patching has to wait. The page leads with the fix. */
     role: z.enum(['fix', 'stopgap']),
-    effect: z
-      .array(
-        z.object({
-          vector: text,
-          status: z.enum(['closed', 'closed_for_that_app', 'open', 'weaker'])
-        })
-      )
-      .min(1),
     official_guides: z.array(link),
     confidence
   })
@@ -178,7 +170,6 @@ const baseRecordSchema = z.object({
   exposed_when: z.array(capped(CAPS.exposedWhen)).min(1).max(4).optional(),
   applies_check: z.array(appliesCheckSchema).min(1),
   placements: z.array(placementSchema).min(1),
-  vectors: z.array(text).min(1),
   mitigations: z.array(mitigationSchema).min(1),
   evidence: z.array(evidenceSchema).min(1),
   timeline: z.array(timelineSchema).optional(),
@@ -188,7 +179,7 @@ const baseRecordSchema = z.object({
   sources: z.array(sourceSchema).min(1),
   /** Free-form markdown from below the front matter. */
   analysis: z.string().optional()
-});
+}).strict();
 
 // Rule: the site names tiers but never gives an hour or day count for one.
 export const TIMEFRAME = /\b\d+\s*(?:-|to|–)?\s*\d*\s*(?:hours?|hrs?|days?|weeks?)\b/i;

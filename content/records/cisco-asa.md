@@ -54,29 +54,20 @@ placements:
     tier: 4
     action: No special action. Routine patching.
 
-vectors:
-  - Crafted request to the SSL remote access VPN login service
-
 mitigations:
   - title: "Upgrade ASA and FTD to a fixed release"
     limitation: "Restart interrupts the VPN unless you have a failover pair"
     role: fix
-    effect:
-      - { vector: Crafted request to the SSL remote access VPN login service, status: closed }
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
   - title: "Remove the VPN login group list"
     limitation: "Users must type their profile name; Cisco calls it temporary"
     role: stopgap
-    effect:
-      - { vector: Crafted request to the SSL remote access VPN login service, status: closed_for_that_app }
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
   - title: "Turn off secondary authentication on the default group"
     limitation: "Lowers VPN security: removes the second factor"
     role: stopgap
-    effect:
-      - { vector: Crafted request to the SSL remote access VPN login service, status: closed_for_that_app }
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
 

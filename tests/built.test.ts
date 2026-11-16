@@ -16,7 +16,8 @@ const files = (dir = dist): string[] =>
 const count = (s: string, needle: string) => s.split(needle).length - 1;
 const text = (html: string) =>
   html.replace(/<(script|style)\b[\s\S]*?<\/\1>|<!--[\s\S]*?-->|<[^>]+>/gi, ' ').replace(/\s+/g, ' ');
-const external = (url: string) => /^(?:https?:)?\/\//i.test(url.trim());
+// Absolute URLs are third-party unless they point at this site itself (the canonical link does).
+const external = (url: string) => /^(?:https?:)?\/\//i.test(url.trim()) && !url.trim().startsWith('https://exposure.infosecuriosity.co.uk/');
 // Astro escapes & < > and quotes; decode them so text from the page can be compared with record data.
 const decode = (s: string) =>
   s
@@ -46,8 +47,8 @@ const protectSection = (html: string) => {
   const start = html.indexOf('id="protect-heading"');
   return html.slice(start, html.indexOf('</section>', start));
 };
-// A home card shows badges, a name, a summary and placement rows only.
-const CARD_WORD_BUDGET = 90;
+// A home card shows badges, a name, dates, flags, a summary, a fix line and placement rows only.
+const CARD_WORD_BUDGET = 120;
 
 const records = await getAllRecords();
 const published = records.filter((r) => r.status === 'published');

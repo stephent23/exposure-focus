@@ -1,13 +1,9 @@
 import { describe, expect, it } from 'vitest';
 
 import type { RecordEntry } from '../schema/record';
-import { changeHeadline, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
+import { changeHeadline, keyFacts, guideLabel, isPlaceholder, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
-  it('letters ways in from A', () => {
-    expect([0, 1, 25].map(letter)).toEqual(['A', 'B', 'Z']);
-  });
-
   it('spots owner placeholders', () => {
     expect(isPlaceholder('[link to add]')).toBe(true);
     expect(isPlaceholder('Patch PHP')).toBe(false);
@@ -27,20 +23,6 @@ describe('verdict view helpers', () => {
       '2026-10-29 '
     ]);
     expect(sortedTimeline(undefined)).toEqual([]);
-  });
-
-  it('lists what an option does to each way in, always in letter order', () => {
-    const vectors = ['Memory corruption', 'Stale state', 'Upload path'];
-    const ways = effectByWay(vectors, [
-      { vector: 'Stale state', status: 'weaker' },
-      { vector: 'Upload path', status: 'closed_for_that_app' },
-      { vector: 'Memory corruption', status: 'open' }
-    ]);
-    expect(ways).toEqual([
-      { letter: 'A', status: 'open', label: 'Left open' },
-      { letter: 'B', status: 'weaker', label: 'Partial mitigation' },
-      { letter: 'C', status: 'closed_for_that_app', label: 'Closed for that app' }
-    ]);
   });
 
   it('names the source of a guide, and only calls vendor or authority pages official', () => {

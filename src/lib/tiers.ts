@@ -10,13 +10,6 @@ export type TierNumber = keyof typeof TIERS;
 
 export const TIER_NUMBERS: TierNumber[] = [1, 2, 3, 4];
 
-export const EFFECT_LABELS = {
-  closed: { text: 'Closed' },
-  closed_for_that_app: { text: 'Closed for that app' },
-  open: { text: 'Left open' },
-  weaker: { text: 'Partial mitigation' }
-} as const;
-
 export const CONFIDENCE_LABELS = {
   'vendor-stated': 'Vendor-stated',
   reported: 'Reported, not yet confirmed',

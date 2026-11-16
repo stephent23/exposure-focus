@@ -51,19 +51,10 @@ placements:
     tier: 4
     action: Patch in your normal cycle. Move up if it becomes reachable from the internet.
 
-vectors:
-  - "Out-of-memory corruption during request handling (CVE-2026-109618)"
-  - "Stale state left behind between requests (CVE-2026-109619)"
-  - "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)"
-
 mitigations:
   - title: "Update PHP and restart every worker"
     limitation: "Leaves CVE-2026-115560 unfixed; PHP 8.1 and older get no fix"
     role: fix
-    effect:
-      - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: closed }
-      - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: closed }
-      - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: open }
     official_guides:
       - https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
@@ -71,19 +62,11 @@ mitigations:
   - title: "Stopgap for the memory-limit flaw"
     limitation: "Partial only; removes the memory cap"
     role: stopgap
-    effect:
-      - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: weaker }
-      - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: open }
-      - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: open }
     official_guides: [https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w]
     confidence: vendor-stated
   - title: "Disable PHP session upload progress"
     limitation: "Partly covers the stale-state flaw; progress bars stop"
     role: stopgap
-    effect:
-      - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: open }
-      - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: weaker }
-      - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: closed_for_that_app }
     official_guides:
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
       - https://www.php.net/archive/2026.php
@@ -91,10 +74,6 @@ mitigations:
   - title: "Turn on your WAF vendor's PHP rules"
     limitation: "Known exploit patterns only; can block legitimate requests"
     role: stopgap
-    effect:
-      - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: weaker }
-      - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: weaker }
-      - { vector: "Session upload progress with an unusual session setup (CVE-2026-115560, not yet fixed)", status: weaker }
     official_guides:
       - https://aws.amazon.com/security/security-bulletins/2026-143-aws/
       - https://blog.cloudflare.com/php-vulnerabilities-waf-protection/

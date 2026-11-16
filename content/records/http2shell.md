@@ -62,17 +62,10 @@ placements:
     tier: 4
     action: No special action. Routine patching.
 
-vectors:
-  - Attacker sends compressed data to your server
-  - Your application unpacks a compressed reply from an attacker-controlled server
-
 mitigations:
   - title: "Update Node.js and Brotli, rebuild images, restart"
     limitation: "Each bundled product needs its own update; old runtimes get no fix"
     role: fix
-    effect:
-      - { vector: Attacker sends compressed data to your server, status: closed }
-      - { vector: Your application unpacks a compressed reply from an attacker-controlled server, status: closed }
     official_guides:
       - https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
       - https://github.com/google/brotli/releases/tag/v1.2.1
@@ -80,9 +73,6 @@ mitigations:
   - title: "Block Brotli uploads at the WAF"
     limitation: "Misses replies your app downloads; rejects Brotli uploads"
     role: stopgap
-    effect:
-      - { vector: Attacker sends compressed data to your server, status: closed_for_that_app }
-      - { vector: Your application unpacks a compressed reply from an attacker-controlled server, status: open }
     official_guides:
       - https://techcommunity.microsoft.com/t5/azure-network-security-blog/protect-against-brotli-cve-2026-111497-with-azure-web/ba-p/4567288
       - https://www.imperva.com/blog/node2shell-from-brotli-data-to-remote-code-execution/
