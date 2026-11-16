@@ -25,6 +25,6 @@ export function parseRecordFile(source: string, fileName: string): RecordEntry {
     return record;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`${fileName}: ${message}`);
+    throw new Error(`${fileName}: ${message}`, { cause: error });
   }
 }

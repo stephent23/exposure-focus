@@ -30,7 +30,7 @@ export function parseCorrectionsFile(source: string, knownSlugs: string[]): Corr
     return [...list.corrections].sort((a, b) => b.date.localeCompare(a.date));
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    throw new Error(`corrections.md: ${message}`);
+    throw new Error(`corrections.md: ${message}`, { cause: error });
   }
 }
 
