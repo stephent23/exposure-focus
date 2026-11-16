@@ -60,13 +60,13 @@ mitigations:
       - https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
     confidence: vendor-stated
-  - title: "Stopgap for the memory-limit flaw"
-    limitation: "Partial only; removes the memory cap"
+  - title: "Set PHP memory_limit to -1 and cap request sizes"
+    limitation: "Partial only; unlimited memory needs size limits at the frontend"
     role: stopgap
     official_guides: [https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w]
     confidence: vendor-stated
   - title: "Disable PHP session upload progress"
-    limitation: "Partly covers the stale-state flaw; progress bars stop"
+    limitation: "Partial for CVE-2026-109619; upload progress bars stop working"
     role: stopgap
     official_guides:
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
