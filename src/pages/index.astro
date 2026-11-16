@@ -16,7 +16,7 @@ const groups = groupForHome(await getAllRecords());
 const records = groups.flatMap((g) => g.records);
 const activity = recentActivity(records, 5);
 // Anything that already has a published verdict drops off the watching list by itself.
-const rated = new Set(records.flatMap((r) => r.cves));
+const rated = new Set(records.flatMap((r) => [...r.cves, ...(r.related_cves ?? [])]));
 const watching = (await getWatching()).filter((w) => !w.cves.some((id) => rated.has(id)));
 const checked = records.map((r) => r.evidence_as_of).sort().at(-1);
 const exploited = (r: (typeof records)[number]) => r.placements.some((p) => p.facts.exploited === true);
@@ -117,7 +117,7 @@ const actItems = (r: (typeof records)[number]) =>
                 data-record={record.slug}
                 data-tiers={[...new Set(record.placements.map((p) => p.tier))].join(' ')}
                 data-kind={record.attack}
-                data-text={[record.name, ...record.cves, ...record.aliases].join(' ').toLowerCase()}
+                data-text={[record.name, ...record.cves, ...(record.related_cves ?? []), ...record.aliases].join(' ').toLowerCase()}
               >
                 <div class="card-main">
                   <div class="card-head">

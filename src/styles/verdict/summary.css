@@ -27,3 +27,4 @@
 
 /* White card with a hairline edge; the tier colour is only the left rule. */
 .verdict-panel { border-top: 1px solid var(--line); border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.related { margin-top: 6px; font-size: var(--fs-s); color: var(--ink-2); }

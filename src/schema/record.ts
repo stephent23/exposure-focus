@@ -154,6 +154,8 @@ const baseRecordSchema = z.object({
   name: text,
   aliases: z.array(text),
   cves: z.array(cve).min(1),
+  /** CVEs the verdict mentions but does not rate: related flaws, tracked separately. Shown as "Related", never in the headline. */
+  related_cves: z.array(cve).min(1).optional(),
   summary: capped(CAPS.summary),
   attack: z.enum(ATTACK_KEYS),
   status: z.enum(['draft', 'published', 'retired']),

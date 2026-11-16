@@ -23,6 +23,9 @@ const move = sortedChanges(record.changes).find((c) => c.to_tier !== undefined);
   <p class="kicker">
     <span class="cve">{record.cves.join(' · ')}</span>
   </p>
+  {record.related_cves && record.related_cves.length > 0 && (
+    <p class="related">Related, tracked separately: <span class="cve">{record.related_cves.join(' · ')}</span></p>
+  )}
   <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
   <p class="verdict-summary">{record.summary}</p>
   <p class="tags">

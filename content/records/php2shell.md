@@ -2,7 +2,8 @@
 slug: php2shell
 name: PHP2Shell
 aliases: []
-cves: [CVE-2026-109618, CVE-2026-109619, CVE-2026-115560]
+cves: [CVE-2026-109618, CVE-2026-109619]
+related_cves: [CVE-2026-115560]
 summary: Two flaws in the PHP runtime let an attacker run code from a web request with no login, and both are exploited. Internet-facing PHP needs an out-of-cycle response; internal-only PHP does not.
 attack: rce
 status: published

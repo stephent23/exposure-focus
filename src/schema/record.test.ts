@@ -423,3 +423,14 @@ describe('mitigation role', () => {
     expect(withRole(undefined)).toBe(false);
   });
 });
+
+describe('related CVEs', () => {
+  const ok = (extra: Record<string, unknown>) => recordSchema.safeParse({ ...validRecord(), ...extra }).success;
+  it('are optional and must be CVE IDs or the placeholder', () => {
+    expect(ok({})).toBe(true);
+    expect(ok({ related_cves: ['CVE-2026-1234'] })).toBe(true);
+    expect(ok({ related_cves: ['[CVE to confirm]'] })).toBe(true);
+    expect(ok({ related_cves: ['not-a-cve'] })).toBe(false);
+    expect(ok({ related_cves: [] })).toBe(false);
+  });
+});

@@ -8,6 +8,8 @@ slug: template
 name: Name of the vulnerability
 aliases: []
 cves: ["[CVE to confirm]"]
+related_cves: # optional: related flaws the verdict mentions but does not rate (not in the headline, still searchable)
+  - "[CVE to confirm]"
 summary: One plain sentence. # at most 200 characters
 attack: rce # rce, privilege-escalation, auth-bypass, data-exposure, data-tampering or dos
 status: draft # draft is hidden from the home page; published is listed there

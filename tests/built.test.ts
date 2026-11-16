@@ -515,6 +515,21 @@ describe('built site', () => {
     }
   });
 
+  it('keeps related CVEs out of the headline list, says they are related, and still finds them by search', () => {
+    for (const r of published.filter((x) => x.related_cves?.length)) {
+      const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(recordPage(r.slug))?.[0] ?? '';
+      const headline = /<span class="cve">([\s\S]*?)<\/span>/.exec(header)?.[1] ?? '';
+      for (const id of r.cves) expect(headline, `${r.slug} headline ${id}`).toContain(id);
+      for (const id of r.related_cves!) {
+        expect(headline, `${r.slug} related ${id} not in headline`).not.toContain(id);
+        expect(plain(header), `${r.slug} related line`).toMatch(new RegExp(`Related[^.]*${id}`));
+        const card = home.slice(home.indexOf(`data-record="${r.slug}"`));
+        expect(card.slice(0, card.indexOf('>')), `${r.slug} search finds ${id}`).toContain(id.toLowerCase());
+      }
+    }
+    expect(published.some((x) => x.related_cves?.length), 'at least one record uses related CVEs').toBe(true);
+  });
+
   it('shows when each verdict was published and last checked', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
