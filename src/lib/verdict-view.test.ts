@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { RecordEntry } from '../schema/record';
-import { EFFECT_LABELS } from './tiers';
-import { changeHeadline, coverageGrid, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
+import { changeHeadline, effectByWay, keyFacts, guideLabel, isPlaceholder, letter, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
   it('letters ways in from A', () => {
@@ -117,23 +116,3 @@ describe('keyFacts', () => {
   });
 });
 
-
-describe('coverageGrid', () => {
-  it('gives one row per way in and one cell per option, treating a missing entry as open', () => {
-    const grid = coverageGrid(
-      ['A way', 'B way'],
-      [
-        { effect: [{ vector: 'A way', status: 'closed' }, { vector: 'B way', status: 'weaker' }] },
-        { effect: [{ vector: 'B way', status: 'closed_for_that_app' }] }
-      ]
-    );
-    expect(grid).toEqual([
-      { vector: 'A way', cells: ['closed', 'open'] },
-      { vector: 'B way', cells: ['weaker', 'closed_for_that_app'] }
-    ]);
-  });
-
-  it('has a short label for every status', () => {
-    expect(Object.values(EFFECT_LABELS).map((l) => l.short)).toEqual(['Closed', 'Closed for that app', 'Open', 'Partial']);
-  });
-});

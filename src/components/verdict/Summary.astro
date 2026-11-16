@@ -3,7 +3,7 @@
 import '../../styles/verdict/summary.css';
 import { ATTACKS } from '../../lib/attacks';
 import { TIERS, type TierNumber } from '../../lib/tiers';
-import { keyFacts, niceDate, shortDate } from '../../lib/verdict-view';
+import { keyFacts, niceDate, shortDate, sortedChanges } from '../../lib/verdict-view';
 import { headlineTier, type RecordEntry } from '../../schema/record';
 
 interface Props {
@@ -13,10 +13,13 @@ interface Props {
 const { record, stale } = Astro.props;
 const top = headlineTier(record) as TierNumber;
 const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
+// The latest tier move, if any, so a returning reader sees at once that the call changed.
+const move = sortedChanges(record.changes).find((c) => c.to_tier !== undefined);
 ---
 
-<header class="summary">
+<header class={`summary t${top}`}>
   <a class="back" href="/"><span aria-hidden="true">←</span> All verdicts</a>
+  <div class="verdict-panel">
   <p class="kicker">
     <span class={`badge t${top}`}>Tier {top} · {TIERS[top].name}</span>
     <span class="cve">{record.cves.join(' · ')}</span>
@@ -42,7 +45,13 @@ const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
       </div>
     ))}
   </dl>
+  </div>
   <p class="meta">
     Published <time datetime={record.published}>{niceDate(record.published)}</time> · Evidence checked <time datetime={record.evidence_as_of}>{niceDate(record.evidence_as_of)}</time> · Review by <time datetime={record.review_until}>{niceDate(record.review_until)}</time> (UTC)
   </p>
+  {move && (
+    <p class="last-change">
+      <span class="last-change-label">Changed <time datetime={move.date}>{niceDate(move.date)}</time></span> {move.placement}: Tier {move.from_tier} → Tier {move.to_tier}
+    </p>
+  )}
 </header>

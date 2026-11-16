@@ -59,6 +59,7 @@ vectors:
 mitigations:
   - title: "Update PHP and restart every worker"
     limitation: "Leaves CVE-2026-115560 unfixed; PHP 8.1 and older get no fix"
+    role: fix
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: closed }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: closed }
@@ -69,6 +70,7 @@ mitigations:
     confidence: vendor-stated
   - title: "Stopgap for the memory-limit flaw"
     limitation: "Partial only; removes the memory cap"
+    role: stopgap
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: weaker }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: open }
@@ -77,6 +79,7 @@ mitigations:
     confidence: vendor-stated
   - title: "Disable PHP session upload progress"
     limitation: "Partly covers the stale-state flaw; progress bars stop"
+    role: stopgap
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: open }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: weaker }
@@ -87,6 +90,7 @@ mitigations:
     confidence: vendor-stated
   - title: "Turn on your WAF vendor's PHP rules"
     limitation: "Known exploit patterns only; can block legitimate requests"
+    role: stopgap
     effect:
       - { vector: "Out-of-memory corruption during request handling (CVE-2026-109618)", status: weaker }
       - { vector: "Stale state left behind between requests (CVE-2026-109619)", status: weaker }

@@ -5,8 +5,8 @@ import { join, sep } from 'node:path';
 import { recentActivity } from '../src/lib/home';
 import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
-import { CONFIDENCE_LABELS, EFFECT_LABELS } from '../src/lib/tiers';
-import { coverageGrid, keyFacts } from '../src/lib/verdict-view';
+import { CONFIDENCE_LABELS } from '../src/lib/tiers';
+import { keyFacts } from '../src/lib/verdict-view';
 import { headlineTier, TIMEFRAME } from '../src/schema/record';
 
 const dist = join(process.cwd(), 'dist-test');
@@ -41,6 +41,11 @@ const recordBody = (html: string) => {
 // checks, placements) must stay short; "What to do" is capped per option instead, so a longer list does not break it.
 // The key-dates list beside it is counted separately: at most eight dated events.
 const VISIBLE_WORD_BUDGET = 480;
+// The What to do section of a verdict page, up to the end of its <section>.
+const protectSection = (html: string) => {
+  const start = html.indexOf('id="protect-heading"');
+  return html.slice(start, html.indexOf('</section>', start));
+};
 // A home card shows badges, a name, a summary and placement rows only.
 const CARD_WORD_BUDGET = 90;
 
@@ -107,7 +112,8 @@ describe('built site', () => {
   it('keeps the visible text of a record page within the word budget', () => {
     for (const r of published) {
       const body = withoutDetails(recordBody(recordPage(r.slug))).replace(/<aside[\s\S]*?<\/aside>/g, ' ');
-      const visible = plain(body.slice(0, body.indexOf('id="protect-heading"')));
+      const start = body.indexOf('id="protect-heading"');
+      const visible = plain(body.slice(0, start) + body.slice(body.indexOf('</section>', start)));
       expect(r.timeline?.length ?? 0, `${r.slug} key dates`).toBeLessThanOrEqual(8);
       expect(words(visible), `${r.slug} visible words`).toBeLessThanOrEqual(VISIBLE_WORD_BUDGET);
     }
@@ -154,10 +160,11 @@ describe('built site', () => {
   it('shows each option as its action, a short limit, a confidence label and one guide link', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
-      const section = html.slice(html.indexOf('id="protect-heading"'));
-      const items = [...section.slice(0, section.indexOf('</ol>')).matchAll(/<li class="opt">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
-      expect(items.length, `${r.slug} options`).toBe(r.mitigations.length);
-      r.mitigations.forEach((m, i) => {
+      const section = protectSection(html);
+      const items = [...section.matchAll(/<li class="opt">([\s\S]*?)<\/li>/g)].map((m) => m[1]);
+      const ordered = [...r.mitigations.filter((m) => m.role === 'fix'), ...r.mitigations.filter((m) => m.role === 'stopgap')];
+      expect(items.length, `${r.slug} options`).toBe(ordered.length);
+      ordered.forEach((m, i) => {
         const text = plain(items[i]);
         // Inline code adds spacing and drops its backticks, so compare with spaces and backticks removed.
         const squash = (x: string) => x.replace(/[\s`]/g, '');
@@ -174,21 +181,59 @@ describe('built site', () => {
     }
   });
 
-  it('names every way in and shows, in a table, what each option does to it', () => {
+  it('leads What to do with the recommended fix, then the stopgaps for when patching has to wait', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
-      const table = /<table class="coverage"[\s\S]*?<\/table>/.exec(html)?.[0] ?? '';
-      expect(table, `${r.slug} coverage table`).not.toBe('');
-      const rows = [...table.matchAll(/<tr class="coverage-row">([\s\S]*?)<\/tr>/g)].map((m) => m[1]);
-      expect(rows.length, `${r.slug} one row per way in`).toBe(r.vectors.length);
-      coverageGrid(r.vectors, r.mitigations).forEach((row, i) => {
-        expect(plain(rows[i]), `${r.slug} way in`).toContain(row.vector);
-        const cells = [...rows[i].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)].map((m) => plain(m[1]).trim());
-        expect(cells, `${r.slug} ${row.vector}`).toEqual(row.cells.map((s) => EFFECT_LABELS[s].short));
-      });
+      const section = protectSection(html);
+      const fixes = r.mitigations.filter((m) => m.role === 'fix');
+      const stopgaps = r.mitigations.filter((m) => m.role === 'stopgap');
+      expect(html, `${r.slug} has no coverage table`).not.toContain('class="coverage"');
+      if (fixes.length) {
+        const rec = /<div class="rec">[\s\S]*?<\/ol>/.exec(section)?.[0] ?? '';
+        expect(plain(rec), `${r.slug} recommended`).toContain('Recommended');
+        for (const m of fixes) expect(plain(rec), `${r.slug} fix ${m.title}`).toContain(m.title);
+      } else {
+        expect(plain(section), `${r.slug} says there is no fix`).toContain('No fix yet');
+      }
+      if (stopgaps.length) {
+        const list = /<ul class="opts stopgaps">[\s\S]*?<\/ul>/.exec(section)?.[0] ?? '';
+        expect(plain(section), `${r.slug} stopgap heading`).toContain(fixes.length ? 'If you can’t patch yet' : 'In the meantime');
+        for (const m of stopgaps) expect(plain(list), `${r.slug} stopgap ${m.title}`).toContain(m.title);
+        if (fixes.length) expect(section.indexOf('class="rec"'), `${r.slug} fix first`).toBeLessThan(section.indexOf('class="opts stopgaps"'));
+      }
     }
   });
 
+  it('puts the decision first: where it matters, then what to do, then whether you are affected, then why', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const at = ['placement', 'protect', 'applies', 'leadership', 'evidence'].map((id) => html.indexOf(`id="${id}-heading"`));
+      expect(at.every((x) => x > 0), `${r.slug} all sections`).toBe(true);
+      expect([...at].sort((x, y) => x - y), `${r.slug} order`).toEqual(at);
+    }
+  });
+
+  it('folds the check commands away but keeps each question and the versions table visible', () => {
+    const squash = (x: string) => x.replace(/[\s`]/g, '');
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const shown = squash(plain(withoutDetails(recordBody(html))));
+      for (const c of r.applies_check) {
+        expect(shown, `${r.slug} question`).toContain(squash(c.question));
+        expect(shown, `${r.slug} how to check is folded`).not.toContain(squash(c.how_to_check));
+        expect(squash(plain(html)), `${r.slug} how to check is on the page`).toContain(squash(c.how_to_check));
+      }
+    }
+  });
+
+  it('names the latest tier move in the header when a verdict has one', () => {
+    for (const r of published) {
+      const move = [...(r.changes ?? [])].filter((c) => c.to_tier !== undefined).sort((a, b) => b.date.localeCompare(a.date))[0];
+      const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(recordPage(r.slug))?.[0] ?? '';
+      if (move) expect(header, `${r.slug} last change`).toContain('class="last-change"');
+      else expect(header, `${r.slug} no change line`).not.toContain('class="last-change"');
+    }
+  });
 
   it('has no sidebar and no "On this page" list', () => {
     for (const f of pages) {
@@ -245,14 +290,17 @@ describe('built site', () => {
     }
   });
 
-  it('puts the tier reason, triggers and leadership quote in the briefing, not the summary header', () => {
+  it('explains the tier in Why this tier, and keeps the board summary one click away', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
       const start = html.indexOf('id="leadership-heading"');
-      const briefing = plain(html.slice(start, html.indexOf('id="applies-heading"', start)));
-      expect(briefing, `${r.slug} tier reason`).toContain(r.tier_reason);
-      for (const w of r.would_change) expect(briefing, `${r.slug} trigger`).toContain(w);
-      expect(briefing, `${r.slug} quote`).toContain(r.leadership_quote);
+      const why = html.slice(start, html.indexOf('</section>', start));
+      expect(plain(why), `${r.slug} heading`).toContain('Why this tier');
+      expect(plain(withoutDetails(why)), `${r.slug} tier reason`).toContain(r.tier_reason);
+      for (const w of r.would_change) expect(plain(withoutDetails(why)), `${r.slug} trigger`).toContain(w);
+      expect(why, `${r.slug} copy button`).toContain('id="boss-copy"');
+      expect(plain(why), `${r.slug} quote on the page`).toContain(r.leadership_quote);
+      expect(plain(withoutDetails(why)), `${r.slug} quote folded`).not.toContain(r.leadership_quote);
       const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(html)?.[0] ?? '';
       expect(header, `${r.slug} summary header`).not.toBe('');
       expect(plain(header), `${r.slug} header repeats the reason`).not.toContain(r.tier_reason);
@@ -260,7 +308,7 @@ describe('built site', () => {
   });
 
   it('has one section nav on each verdict page, linking five sections that exist', () => {
-    const expected = ['leadership', 'applies', 'placement', 'protect', 'evidence'].map((id) => `#${id}-heading`);
+    const expected = ['placement', 'protect', 'applies', 'leadership', 'evidence'].map((id) => `#${id}-heading`);
     for (const r of published) {
       const html = recordPage(r.slug);
       expect(count(html, 'class="section-nav"'), `${r.slug} nav count`).toBe(1);

@@ -69,6 +69,7 @@ vectors:
 mitigations:
   - title: "Update Node.js and Brotli, rebuild images, restart"
     limitation: "Each bundled product needs its own update; old runtimes get no fix"
+    role: fix
     effect:
       - { vector: Attacker sends compressed data to your server, status: closed }
       - { vector: Your application unpacks a compressed reply from an attacker-controlled server, status: closed }
@@ -78,6 +79,7 @@ mitigations:
     confidence: vendor-stated
   - title: "Block Brotli uploads at the WAF"
     limitation: "Misses replies your app downloads; rejects Brotli uploads"
+    role: stopgap
     effect:
       - { vector: Attacker sends compressed data to your server, status: closed_for_that_app }
       - { vector: Your application unpacks a compressed reply from an attacker-controlled server, status: open }

@@ -66,6 +66,7 @@ vectors:
 mitigations:
   - title: "Install a fixed kernel and reboot"
     limitation: "Needs a reboot per server unless live patching is offered"
+    role: fix
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: closed }
       - { vector: "Request-socket migration, if enabled (a similar flaw)", status: closed }
@@ -75,12 +76,14 @@ mitigations:
     confidence: vendor-stated
   - title: "Block IPv4 TCP packets with IP options"
     limitation: "Red Hat: cannot fully prevent the flaw; lost on reboot"
+    role: stopgap
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: weaker }
     official_guides: [https://access.redhat.com/security/vulnerabilities/RHSB-2026-016]
     confidence: vendor-stated
   - title: "Turn off MPTCP and request-socket migration"
     limitation: "Akamai and Red Hat say it does not stop exploitation"
+    role: stopgap
     effect:
       - { vector: Incoming IPv4 TCP connection carrying IP options (the base flaw), status: open }
       - { vector: "Request-socket migration, if enabled (a similar flaw)", status: weaker }

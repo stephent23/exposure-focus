@@ -1,25 +1,25 @@
-/* Briefing: one tinted panel, so the decision has a clear home. Reasoning as labelled rows, then the leadership quote and copy button. */
-.briefing { margin-top: 40px; }
-.briefing-panel { padding: 20px 24px; background: var(--panel); border-radius: 8px; }
-.why { margin: 0; display: grid; gap: 14px; font-size: var(--fs-m); line-height: 1.6; }
-.why > div { display: grid; grid-template-columns: 9.5em minmax(0, 1fr); gap: 16px; }
+/* Why this tier: the reason and the triggers as labelled rows, then the board summary behind one click and the copy button. */
+.why { margin: 0; display: grid; gap: 12px; font-size: var(--fs-m); line-height: 1.6; }
+.why > div { display: grid; grid-template-columns: 10em minmax(0, 1fr); gap: 16px; }
 .why dt { font-size: var(--fs-s); font-weight: 600; color: var(--muted); padding-top: 2px; }
-.why dd { margin: 0; max-width: 60ch; }
+.why dd { margin: 0; max-width: 62ch; }
 .why ul { margin: 0; padding-left: 18px; }
 .why li + li { margin-top: 4px; }
-.quote-label { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--line-strong); font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
-.leadership blockquote { margin: 6px 0 0; max-width: 62ch; font-size: var(--fs-m); line-height: 1.6; }
-.boss { margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
-.copy-btn { font-size: var(--fs-m); font-weight: 600; min-height: 36px; padding: 0 14px; border: 1px solid var(--line-strong); border-radius: 4px; background: #fff; color: var(--ink); cursor: pointer; }
-.copy-btn:hover { border-color: var(--ink-2); }
+
+.board { margin-top: 20px; display: flex; flex-wrap: wrap; align-items: flex-start; gap: 8px 16px; }
+.board-text { flex: 1 1 100%; }
+.board-text > summary, .boss-more > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; font-size: var(--fs-s); font-weight: 600; color: var(--link); list-style: none; }
+.board-text > summary::-webkit-details-marker, .boss-more > summary::-webkit-details-marker { display: none; }
+.board-text > summary::before, .boss-more > summary::before { content: '+'; font-family: var(--font-mono); font-weight: 400; }
+.board-text[open] > summary::before, .boss-more[open] > summary::before { content: '−'; }
+.board-text > summary:hover, .boss-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
+.board-text blockquote { margin: 6px 0 0; padding: 14px 18px; max-width: 64ch; background: var(--panel); border-radius: 6px; font-size: var(--fs-m); line-height: 1.6; }
+.boss { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; }
+.copy-btn { font-size: var(--fs-m); font-weight: 600; min-height: 38px; padding: 0 16px; border: 1px solid var(--ink-2); border-radius: 6px; background: #fff; color: var(--ink); cursor: pointer; }
+.copy-btn:hover { background: var(--panel); }
 .boss-status { font-size: var(--fs-s); color: var(--ink-2); }
 .boss-fallback { flex: 1 1 100%; }
-.boss-more > summary { cursor: pointer; display: inline-flex; align-items: center; min-height: 32px; font-size: var(--fs-s); font-weight: 600; color: var(--link); }
-.boss-more > summary:hover { color: var(--link-hover); text-decoration: underline; }
 .boss-more label { display: block; margin-bottom: 6px; font-size: var(--fs-s); font-weight: 600; color: var(--muted); }
 .boss-more textarea { width: 100%; font-family: var(--font-mono); font-size: var(--fs-s); line-height: 1.5; padding: 8px; border: 1px solid var(--line-strong); border-radius: 4px; color: var(--ink); background: #fff; resize: vertical; }
 
-@media (max-width: 560px) {
-  .briefing-panel { margin-inline: -16px; padding: 16px; border-radius: 0; }
-  .why > div { grid-template-columns: 1fr; gap: 2px; }
-}
+@media (max-width: 560px) { .why > div { grid-template-columns: 1fr; gap: 2px; } }

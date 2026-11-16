@@ -20,3 +20,10 @@
   .affected td::before { content: attr(data-label) ': '; color: var(--muted); }
 }
 .affected thead th { white-space: nowrap; }
+
+/* How to check: the commands are for the engineer, so they sit one click away under each question. */
+.how > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; font-size: var(--fs-s); font-weight: 600; color: var(--link); list-style: none; }
+.how > summary::-webkit-details-marker { display: none; }
+.how > summary::before { content: '+'; font-family: var(--font-mono); font-weight: 400; }
+.how[open] > summary::before { content: '−'; }
+.how > summary:hover { color: var(--link-hover); text-decoration: underline; }

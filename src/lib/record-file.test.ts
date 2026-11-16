@@ -30,6 +30,7 @@ vectors: [Remote request]
 mitigations:
   - title: Block access
     limitation: Remote users lose access.
+    role: fix
     effect: [{ vector: Remote request, status: closed }]
     official_guides: ["[link to add]"]
     confidence: reported

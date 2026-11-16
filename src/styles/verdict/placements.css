@@ -27,3 +27,16 @@
   .place-main .badge { justify-self: start; padding: 3px 8px; }
   .reasoning { margin-left: 0; }
 }
+
+/* Where it matters: each placement is a soft card in its tier's colour, so the urgency reads before the words. */
+.sec-lede { margin: 4px 0 12px; font-size: var(--fs-m); color: var(--ink-2); }
+.where .places { display: grid; gap: 8px; }
+.where .place { padding: 12px 16px 4px; background: var(--wash); border-left: 5px solid var(--edge); border-radius: 0 8px 8px 0; }
+.where .place + .place { border-top: 0; }
+.where .place-main { grid-template-columns: 140px minmax(0, 1fr); }
+.where .reasoning { margin-left: 152px; }
+.where .routine-rest { grid-template-columns: 140px minmax(0, 1fr); margin-top: 8px; padding: 8px 16px; border-top: 0; border-left: 5px solid transparent; }
+@media (max-width: 640px) {
+  .where .place-main, .where .routine-rest { grid-template-columns: 1fr; }
+  .where .reasoning { margin-left: 0; }
+}

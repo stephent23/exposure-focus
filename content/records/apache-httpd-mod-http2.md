@@ -63,6 +63,7 @@ vectors:
 mitigations:
   - title: "Update Apache and restart it"
     limitation: "Standalone mod_h2 is reported to have no fix (archived)"
+    role: fix
     effect:
       - { vector: Attacker sends crafted HTTP/2 traffic to the web server, status: closed }
     official_guides:
@@ -73,6 +74,7 @@ mitigations:
     confidence: vendor-stated
   - title: "Turn off HTTP/2 until patched"
     limitation: "Costs some performance; breaks end-to-end HTTP/2 such as gRPC"
+    role: stopgap
     effect:
       - { vector: Attacker sends crafted HTTP/2 traffic to the web server, status: closed }
     official_guides:

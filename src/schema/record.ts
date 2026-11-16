@@ -89,6 +89,8 @@ const mitigationSchema = z
     title: capped(CAPS.mitigationTitle),
     /** What the option leaves open, only partly covers, or costs. Required: every mitigation states its limit. */
     limitation: capped(CAPS.mitigationLimitation),
+    /** The fix (patch or upgrade) or a stopgap for when patching has to wait. The page leads with the fix. */
+    role: z.enum(['fix', 'stopgap']),
     effect: z
       .array(
         z.object({

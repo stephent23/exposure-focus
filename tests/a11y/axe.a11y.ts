@@ -84,13 +84,13 @@ test.describe('section nav at phone width', () => {
 
 test.describe('reading order at phone width', () => {
   test.use({ viewport: { width: 390, height: 844 } });
-  test('the Briefing comes before the key dates', async ({ page }) => {
+  test('What to do comes before the key dates', async ({ page }) => {
     await page.goto(recordRoute);
-    const briefing = await page.locator('#leadership-heading').boundingBox();
+    const todo = await page.locator('#protect-heading').boundingBox();
     const dates = await page.locator('#dates-heading').boundingBox();
-    expect(briefing, 'briefing heading has a box').not.toBeNull();
+    expect(todo, 'What to do heading has a box').not.toBeNull();
     expect(dates, 'key dates heading has a box').not.toBeNull();
-    expect(briefing!.y, 'the Briefing is above the key dates').toBeLessThan(dates!.y);
+    expect(todo!.y, 'What to do is above the key dates').toBeLessThan(dates!.y);
   });
 });
 

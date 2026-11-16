@@ -1,5 +1,6 @@
 ---
-// The leadership summary, with a copy button (src/scripts/copy.ts). The plain-text fallback is folded away.
+// Why this tier: the reason and what would change it, then the summary for the board behind one click,
+// with a copy button (src/scripts/copy.ts). The plain-text fallback for when copying fails is folded too.
 import '../../styles/verdict/leadership.css';
 import { headlineTier, type RecordEntry } from '../../schema/record';
 
@@ -10,9 +11,8 @@ interface Props {
 const { record, bossText } = Astro.props;
 ---
 
-<section class="sec briefing leadership" aria-labelledby="leadership-heading">
-  <h2 id="leadership-heading">Briefing</h2>
-  <div class="briefing-panel">
+<section class="sec why-sec leadership" aria-labelledby="leadership-heading">
+  <h2 id="leadership-heading">Why this tier</h2>
   <dl class="why">
     <div><dt>Why Tier {headlineTier(record)}</dt><dd>{record.tier_reason}</dd></div>
     <div>
@@ -20,18 +20,21 @@ const { record, bossText } = Astro.props;
       <dd>{record.would_change.length === 1 ? record.would_change[0] : <ul>{record.would_change.map((w) => <li>{w}</li>)}</ul>}</dd>
     </div>
   </dl>
-  <p class="quote-label">For leadership</p>
-  <blockquote>{record.leadership_quote}</blockquote>
-  <div class="boss">
-    <button type="button" id="boss-copy" class="copy-btn" hidden>Copy for leadership</button>
-    <p id="boss-status" class="boss-status" role="status" aria-live="polite"></p>
-    <div id="boss-fallback" class="boss-fallback">
-      <details class="boss-more">
-        <summary>Summary as plain text</summary>
-        <label for="boss-text">Summary you can copy and paste</label>
-        <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
-      </details>
+  <div class="board">
+    <details class="board-text">
+      <summary>Summary for the board</summary>
+      <blockquote>{record.leadership_quote}</blockquote>
+    </details>
+    <div class="boss">
+      <button type="button" id="boss-copy" class="copy-btn" hidden>Copy summary for the board</button>
+      <p id="boss-status" class="boss-status" role="status" aria-live="polite"></p>
+      <div id="boss-fallback" class="boss-fallback">
+        <details class="boss-more">
+          <summary>Summary as plain text</summary>
+          <label for="boss-text">Summary you can copy and paste</label>
+          <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
+        </details>
+      </div>
     </div>
-  </div>
   </div>
 </section>

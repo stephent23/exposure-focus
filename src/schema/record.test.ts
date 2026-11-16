@@ -33,6 +33,7 @@ function validRecord() {
       {
         title: 'Block access',
         limitation: 'Remote users lose access.',
+        role: 'fix',
         effect: [{ vector: 'Remote request', status: 'closed' }],
         official_guides: ['[link to add]'],
         confidence: 'reported'
@@ -403,5 +404,19 @@ describe('placeholders in the affected table', () => {
   });
   it('are allowed on a draft', () => {
     expect(recordSchema.safeParse(withRow({ status: 'draft' })).success).toBe(true);
+  });
+});
+
+describe('mitigation role', () => {
+  it('marks each option as the fix or a stopgap', () => {
+    const withRole = (role: unknown) => {
+      const r = validRecord() as unknown as { mitigations: Record<string, unknown>[] };
+      r.mitigations[0].role = role;
+      return recordSchema.safeParse(r).success;
+    };
+    expect(withRole('fix')).toBe(true);
+    expect(withRole('stopgap')).toBe(true);
+    expect(withRole('workaround')).toBe(false);
+    expect(withRole(undefined)).toBe(false);
   });
 });

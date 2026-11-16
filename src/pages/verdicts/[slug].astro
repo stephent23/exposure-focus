@@ -1,5 +1,5 @@
 ---
-// One verdict page, built from a record: a compact dashboard with detail folded away.
+// One verdict page, decision first: where it matters, what to do, whether you are affected, why, then the detail.
 import Base from '../../layouts/Base.astro';
 import '../../styles/verdict.css';
 import Summary from '../../components/verdict/Summary.astro';
@@ -32,10 +32,10 @@ const bossText = bossSummary(record, new URL(`/verdicts/${record.slug}/`, Astro.
       <SectionNav />
       <Timeline record={record} />
     </div>
-    <Leadership record={record} bossText={bossText} />
-    <Affected record={record} />
     <Placements record={record} />
     <Protect record={record} />
+    <Affected record={record} />
+    <Leadership record={record} bossText={bossText} />
     <Detail record={record} />
   </div>
   <script>
