@@ -3,17 +3,17 @@ slug: java4shell
 name: Java4Shell
 aliases: []
 cves: [CVE-2026-114938]
-summary: A flaw in Java's fast Base64 decoder lets an attacker with no login corrupt memory and, as researchers have shown, run code. It needs Java 17.0.6 or later on recent Intel or AMD server chips.
+summary: A flaw in Java's fast Base64 decoder lets an attacker with no login corrupt memory; its finders report code execution in tests. It needs Java 17.0.6 or later on recent Intel or AMD server chips.
 attack: rce
 status: published
 published: 2026-11-17
 evidence_as_of: 2026-11-17
 review_until: 2026-12-01
-leadership_quote: "A flaw in Java lets an outsider take over common business applications such as Jira, Confluence, Jenkins and Keycloak without logging in, as its finders have shown. Oracle has fixed it. No attacks are reported, but internet-facing Java on recent x86 servers should be updated ahead of other planned work."
-tier_reason: "Code execution without a login is published with a demonstration, but no attacks are reported and the product exploits are withheld, so it is Urgent, not Emergency."
+leadership_quote: "A Java flaw could let an outsider take over business applications such as Jira, Confluence and Keycloak without logging in. Its finders did this under controlled conditions; each product needs its own exploit and none is public. Oracle has fixed it. Update internet-facing Java on recent x86 servers sooner than usual."
+tier_reason: "The code execution was shown only under controlled conditions, with bespoke exploits per product that are withheld, and no attacks are reported, so it is Prioritised, not Urgent."
 would_change:
   - Moves to Emergency if attacks are reported or a working product exploit is published
-  - Java clients move up if the client-side exploit is published
+  - Moves to Urgent if code execution is shown against an unprepared target, not only a controlled one
   - Drops to Routine once the JVM runs a fixed build or a confirmed flag
 affected:
   - product: Oracle Java SE 17
@@ -48,14 +48,15 @@ applies_check:
     how_to_check: "List internet-facing Java services, including login pages, SSO servers, CI servers and APIs that accept Basic auth, tokens or file uploads."
 placements:
   - name: Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI
-    facts: { reachable: true, no_login: true, impact: critical, credible_researcher_claim: true }
+    facts: { reachable: true, no_login: true, impact: critical }
     why:
       - Reachable from the internet.
       - No login needed for Keycloak, Jira, Confluence, Artifactory, Jenkins and PingFederate, per Calif.
-      - Calif published a write-up and demo of code execution; its product exploits are withheld.
+      - "Calif's code execution was shown on its own targets, from a VM rented next to them, with per-product exploits it withholds."
+      - Under the published-claims rule, a result under controlled conditions is recorded but does not raise the call.
       - No attacks or public product exploit reported.
-    tier: 2
-    action: Update Java and restart ahead of everything planned; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
+    tier: 3
+    action: Update Java and restart sooner than your normal cycle; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
   - name: Java client that connects to untrusted TLS servers
     facts: { reachable: true, no_login: true, impact: critical }
     why:
@@ -64,13 +65,13 @@ placements:
     tier: 3
     action: Update Java sooner than your normal cycle.
   - name: Internal-only Java services
-    facts: { reachable: false, no_login: true, impact: critical, credible_researcher_claim: true }
+    facts: { reachable: false, no_login: true, impact: critical }
     why:
       - Not reachable from the internet.
     tier: 4
     action: Patch in your normal cycle. Move up if it becomes reachable from the internet.
   - name: ARM64, or x86 without AVX-512 VBMI
-    facts: { reachable: true, no_login: true, impact: critical, credible_researcher_claim: true }
+    facts: { reachable: true, no_login: true, impact: critical }
     why:
       - Calif and Equixly say the vulnerable code only runs on x86-64 with AVX-512 VBMI.
     tier: 4
@@ -110,7 +111,7 @@ evidence:
     source_url: https://www.oracle.com/java/technologies/javase/17-0-21-1-relnotes.html
     confidence: vendor-stated
   - label: Researcher demonstration
-    text: "Calif's write-up (17 Nov) says malformed Base64 such as 64 'A' characters and '=' makes the AVX-512 decoder write 62 bytes past its output buffer; Calif turned this into a heap leak and code execution. It reports pre-auth code execution in default Keycloak, Jira, Confluence, Artifactory, Jenkins and PingFederate, with a demo video, and post-auth in Kafka, Solr, Elasticsearch, Gerrit and Spinnaker. Product exploits are withheld."
+    text: "Calif's write-up (17 Nov) says malformed Base64 such as 64 'A' characters and '=' makes the AVX-512 decoder write 62 bytes past its output buffer; Calif turned this into a heap leak and code execution. It reports pre-auth code execution in default Keycloak, Jira, Confluence, Artifactory, Jenkins and PingFederate, with a demo video, and post-auth in Kafka, Solr, Elasticsearch, Gerrit and Spinnaker. Product exploits are withheld. Calif says each product needs its own profile, the attack is sensitive to network latency and jitter, and it rented a VM in the target's region."
     as_of: 2026-11-17
     source_url: https://calif.io/java4shell/
     confidence: reported
@@ -158,6 +159,6 @@ sources:
 
 Oracle's advisory confirms the flaw, the credit to Calif and the fixed builds, but not the mechanism: it names the Compiler component and gives no hardware condition. The Base64, AVX-512 and product details come from Calif's write-up and two independent analyses, so they are marked reported.
 
-Why Urgent and not Emergency: the rubric counts Calif's published write-up and demo as a demonstration of code execution, but no attacks are reported, no product exploit is public, and Calif says each product needs its own exploit and good network conditions. CVSS (Oracle 8.1 under 3.1; 9.2 under 4.0 in early reports) is for reference only.
+Why Prioritised and not Urgent: a working attack needs many things to line up. The JVM must be an affected build on x86 with AVX-512 VBMI; the application must pass attacker text to the basic or URL Base64 decoder; the decoder must already be JIT-compiled; the input must have a specific length ending in `=`; and turning the fixed-byte overwrite into code execution needs a heap layout tuned to each product, retries that can crash the JVM, partial request bodies that a buffering proxy such as nginx removes, and low, stable network latency (Calif rented a VM in the same region as its target). Calif's demonstrations were on its own targets under those controlled conditions and its product exploits are withheld, so under the published-claims rule they are recorded but do not raise the call. Blind exploitation against an unknown target is much harder, and widespread exploitation is unlikely while no product exploit is public. A crash of the JVM is the more realistic outcome of a failed attempt. CVSS (Oracle 8.1 under 3.1, with attack complexity high; 9.2 under 4.0 in early reports) is for reference only.
 
 Upwind warns that a widely shared alternative, `-XX:DisableIntrinsic=_base64_decodeBlock`, does not work as written and can stop the JVM from starting if pushed through `JAVA_TOOL_OPTIONS`. Catching the decoder's exception does not help, because the write happens first. No official WAF or CDN rule was found on 17 Nov; Cloudflare's WAF changelog and Zero Wire page list none. Calif notes that a proxy which buffers whole request bodies breaks some of its attack timings, but not all, so it is not a mitigation. Oracle's fixed builds are out; other OpenJDK distributions (Temurin, Corretto and others) had not published fixed builds when checked, so use the JVM flag until your vendor's build arrives.
