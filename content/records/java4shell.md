@@ -1,0 +1,163 @@
+---
+slug: java4shell
+name: Java4Shell
+aliases: []
+cves: [CVE-2026-114938]
+summary: A flaw in Java's fast Base64 decoder lets an attacker with no login corrupt memory and, as researchers have shown, run code. It needs Java 17.0.6 or later on recent Intel or AMD server chips.
+attack: rce
+status: published
+published: 2026-11-17
+evidence_as_of: 2026-11-17
+review_until: 2026-12-01
+leadership_quote: "A flaw in Java lets an outsider take over common business applications such as Jira, Confluence, Jenkins and Keycloak without logging in, as its finders have shown. Oracle has fixed it. No attacks are reported, but internet-facing Java on recent x86 servers should be updated ahead of other planned work."
+tier_reason: "Code execution without a login is published with a demonstration, but no attacks are reported and the product exploits are withheld, so it is Urgent, not Emergency."
+would_change:
+  - Moves to Emergency if attacks are reported or a working product exploit is published
+  - Java clients move up if the client-side exploit is published
+  - Drops to Routine once the JVM runs a fixed build or a confirmed flag
+affected:
+  - product: Oracle Java SE 17
+    vulnerable: "17.0.6 up to 17.0.21.0.3 (Oracle lists 17.0.21.0.3; the range is per Calif)"
+    fixed: "17.0.21.1 (released 17 Nov 2026)"
+  - product: Oracle Java SE 21
+    vulnerable: "Up to 21.0.13.0.3 (Oracle lists supported versions only)"
+    fixed: "21.0.13.1 (released 17 Nov 2026)"
+  - product: Oracle Java SE 25
+    vulnerable: "Up to 25.0.5.0.3 (Oracle lists supported versions only)"
+    fixed: "25.0.5.1 (released 17 Nov 2026)"
+  - product: Oracle Java SE 27
+    vulnerable: "Up to 27.0.1.0.3 (Oracle lists supported versions only)"
+    fixed: "27.0.1.1 (released 17 Nov 2026)"
+  - product: Oracle Java SE 8 perf build
+    vulnerable: "8u511b33-perf (standard Java 8 is not listed)"
+    fixed: "8u513 released 17 Nov 2026; Oracle does not name a fixed perf build"
+  - product: Oracle GraalVM for JDK and GraalVM Enterprise
+    vulnerable: "GraalVM for JDK 17.0.21.0.3, 21.0.13.0.3; Enterprise 21.3.20.0.3"
+  - product: Other OpenJDK builds (Temurin, Corretto, Zulu, others)
+    vulnerable: "17.0.6 and later, 21, 25 and 27 per Calif; no fixed build seen on 17 Nov"
+exposed_when:
+  - "Java 17.0.6 or later, 21, 25 or 27 runs on x86-64 with AVX-512 VBMI (Intel Ice Lake or newer Xeon, AMD Zen 4 or newer)"
+  - "The application passes attacker-supplied text to `java.util.Base64` basic or URL decoding, for example a Basic auth header"
+  - The decoder has been used often enough for the JIT compiler to switch to the fast path
+applies_check:
+  - question: Do you run Java 17.0.6 or later, 21, 25 or 27?
+    how_to_check: "Run `jcmd <pid> VM.version` on running JVMs, or check `java -version` and the runtimes bundled inside products such as Jira, Jenkins and Keycloak."
+  - question: Do those JVMs run on x86 servers with AVX-512 VBMI?
+    how_to_check: "On Linux, `grep -m1 '^flags' /proc/cpuinfo` must show `avx512f`, `avx512bw`, `avx512vbmi` and `bmi2`. ARM64 hosts (for example AWS Graviton) are not affected."
+  - question: Is the application reachable from the internet?
+    how_to_check: "List internet-facing Java services, including login pages, SSO servers, CI servers and APIs that accept Basic auth, tokens or file uploads."
+placements:
+  - name: Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI
+    facts: { reachable: true, no_login: true, impact: critical, credible_researcher_claim: true }
+    why:
+      - Reachable from the internet.
+      - No login needed for Keycloak, Jira, Confluence, Artifactory, Jenkins and PingFederate, per Calif.
+      - Calif published a write-up and demo of code execution; its product exploits are withheld.
+      - No attacks or public product exploit reported.
+    tier: 2
+    action: Update Java and restart ahead of everything planned; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
+  - name: Java client that connects to untrusted TLS servers
+    facts: { reachable: true, no_login: true, impact: critical }
+    why:
+      - Calif says a client-side exploit was shared with it, but it is not published.
+      - An unpublished claim does not raise the call.
+    tier: 3
+    action: Update Java sooner than your normal cycle.
+  - name: Internal-only Java services
+    facts: { reachable: false, no_login: true, impact: critical, credible_researcher_claim: true }
+    why:
+      - Not reachable from the internet.
+    tier: 4
+    action: Patch in your normal cycle. Move up if it becomes reachable from the internet.
+  - name: ARM64, or x86 without AVX-512 VBMI
+    facts: { reachable: true, no_login: true, impact: critical, credible_researcher_claim: true }
+    why:
+      - Calif and Equixly say the vulnerable code only runs on x86-64 with AVX-512 VBMI.
+    tier: 4
+    action: No special action. Routine patching.
+    override_reason: "Editorial judgement: the finder and an independent analysis say the flawed code never runs without AVX-512 VBMI; Oracle does not state the hardware condition."
+  - name: Java 8 (standard builds) and Java 11
+    facts: { vendor_stated_exposure_condition: false }
+    why:
+      - Oracle does not list them as affected, and Calif says the affected range starts at 17.0.6.
+    tier: 4
+    action: No special action. Routine patching.
+mitigations:
+  - title: Update Java to the 17 Nov 2026 builds and restart
+    limitation: "Other OpenJDK builds were not out on 17 Nov; bundled runtimes need app updates"
+    role: fix
+    official_guides: [https://www.oracle.com/security-alerts/cspunov2026.html]
+    confidence: vendor-stated
+  - title: Start the JVM with -XX:-UseBASE64Intrinsics
+    limitation: "Needs a restart and slows Base64 decoding; not confirmed by Oracle"
+    role: stopgap
+    official_guides: [https://www.upwind.io/blog/java4shell-what-we-know-now-and-what-comes-next]
+    confidence: reported
+  - title: Start the JVM with -XX:UseAVX=2 on x86 hosts only
+    limitation: "JVM fails to start on ARM with this flag; slows other AVX-512 code"
+    role: stopgap
+    official_guides: [https://equixly.com/blog/2026/11/17/cve-2026-114938-pre-auth-heap-overflow-in-java-17-21-and-25/]
+    confidence: reported
+evidence:
+  - label: Vendor advisory
+    text: "Oracle's November 2026 Critical Security Patch Update (Rev 1, 17 Nov) lists CVE-2026-114938 in the Java SE Compiler component: remotely exploitable without authentication, CVSS 3.1 base 8.1 (attack complexity high). Affected: Java SE 8u511b33-perf, 17.0.21.0.3, 21.0.13.0.3, 25.0.5.0.3, 27.0.1.0.3; GraalVM for JDK 17.0.21.0.3, 21.0.13.0.3; GraalVM Enterprise 21.3.20.0.3. Credit: Quang Luong of Calif.io. Oracle does not name Base64 or AVX-512."
+    as_of: 2026-11-17
+    source_url: https://www.oracle.com/security-alerts/cspunov2026.html
+    confidence: vendor-stated
+  - label: Fixed releases
+    text: "Oracle release notes dated 17 Nov 2026: 17.0.21.1+4, 21.0.13.1+4, 25.0.5.1+4, 27.0.1.1+4, 11.0.33.1+4 and 1.8.0_513-b04. The notes point to the patch update but do not name this CVE, so the fixed build per train is read from the advisory's affected list."
+    as_of: 2026-11-17
+    source_url: https://www.oracle.com/java/technologies/javase/17-0-21-1-relnotes.html
+    confidence: vendor-stated
+  - label: Researcher demonstration
+    text: "Calif's write-up (17 Nov) says malformed Base64 such as 64 'A' characters and '=' makes the AVX-512 decoder write 62 bytes past its output buffer; Calif turned this into a heap leak and code execution. It reports pre-auth code execution in default Keycloak, Jira, Confluence, Artifactory, Jenkins and PingFederate, with a demo video, and post-auth in Kafka, Solr, Elasticsearch, Gerrit and Spinnaker. Product exploits are withheld."
+    as_of: 2026-11-17
+    source_url: https://calif.io/java4shell/
+    confidence: reported
+  - label: Public exploit code
+    text: "Calif published a trigger that only shows the 62-byte write inside a test array; it is not an attack. Calif says each product needs its own exploit and that the attack is sensitive to network timing. No public product exploit is reported."
+    as_of: 2026-11-17
+    source_url: https://calif.io/java4shell/
+    confidence: reported
+  - label: Exploitation status
+    text: "watchTowr's FAQ (updated 17 Nov) reports no exploitation in the wild and no CISA KEV listing. Equixly and Upwind also report none."
+    as_of: 2026-11-17
+    source_url: https://watchtowr.com/intelligence/java4shell-cve-2026-114938-faq/
+    confidence: reported
+  - label: Independent analysis
+    text: "Equixly and Upwind independently describe an AVX-512 VBMI Base64 tail bug writing 62 or 63 bytes out of bounds, reached through Basic auth in Spring Security, Tomcat and Jetty; ARM and Java 8 and 11 are not affected. Both called code execution unproven before Calif's write-up."
+    as_of: 2026-11-17
+    source_url: https://equixly.com/blog/2026/11/17/cve-2026-114938-pre-auth-heap-overflow-in-java-17-21-and-25/
+    confidence: reported
+timeline:
+  - { event: "Calif says the flaw has leaked ahead of the patch", date: 2026-11-17, source_url: "https://securityonline.info/java4shell-cve-2026-114938/", confidence: reported }
+  - { event: "Oracle publishes its November patch update and fixed Java builds", date: 2026-11-17, source_url: "https://www.oracle.com/security-alerts/cspunov2026.html", confidence: vendor-stated }
+  - { event: "Calif publishes its write-up and demonstration", date: 2026-11-17, source_url: "https://calif.io/java4shell/", confidence: reported }
+were_you_hit:
+  assume_compromise_when: "An internet-facing affected JVM on AVX-512 x86 shows unexplained crashes or restarts, or a product Calif named shows unexpected admin changes."
+  check:
+    - "hs_err_pid*.log crash files and unexpected JVM or worker restarts"
+    - "Logs for `IllegalArgumentException: Input byte array has wrong 4-byte ending unit` from Base64 decoding"
+    - "Authorization headers with long Base64 tokens ending in `=` whose length is not a multiple of 4"
+  rotate:
+    - Secrets held in memory by exposed JVMs (keys, tokens, session secrets), if crashes or odd requests are found
+sources:
+  - { title: "Oracle Critical Security Patch Update Advisory, November 2026", url: "https://www.oracle.com/security-alerts/cspunov2026.html", accessed: 2026-11-17 }
+  - { title: "Oracle JDK 17.0.21.1 release notes", url: "https://www.oracle.com/java/technologies/javase/17-0-21-1-relnotes.html", accessed: 2026-11-17 }
+  - { title: "Oracle JDK 21.0.13.1 release notes", url: "https://www.oracle.com/java/technologies/javase/21-0-13-1-relnotes.html", accessed: 2026-11-17 }
+  - { title: "Oracle JDK 25.0.5.1 release notes", url: "https://www.oracle.com/java/technologies/javase/25-0-5-1-relnotes.html", accessed: 2026-11-17 }
+  - { title: "Oracle JDK 27.0.1.1 release notes", url: "https://www.oracle.com/java/technologies/javase/27-0-1-1-relnotes.html", accessed: 2026-11-17 }
+  - { title: "Oracle JDK 8u513 release notes", url: "https://www.oracle.com/java/technologies/javase/8u513-relnotes.html", accessed: 2026-11-17 }
+  - { title: "Calif: Java4Shell, write once, RCE everywhere", url: "https://calif.io/java4shell/", accessed: 2026-11-17 }
+  - { title: "watchTowr: Java CVE-2026-114938 FAQ", url: "https://watchtowr.com/intelligence/java4shell-cve-2026-114938-faq/", accessed: 2026-11-17 }
+  - { title: "Equixly: CVE-2026-114938 pre-auth heap overflow in Java 17, 21 and 25", url: "https://equixly.com/blog/2026/11/17/cve-2026-114938-pre-auth-heap-overflow-in-java-17-21-and-25/", accessed: 2026-11-17 }
+  - { title: "Upwind: Java4Shell, what we know now", url: "https://www.upwind.io/blog/java4shell-what-we-know-now-and-what-comes-next", accessed: 2026-11-17 }
+  - { title: "Cloudflare Zero Wire: Java4Shell", url: "https://radar.cloudflare.com/zero-wire/java4shell", accessed: 2026-11-17 }
+  - { title: "SecurityOnline: Java4Shell (CVE-2026-114938)", url: "https://securityonline.info/java4shell-cve-2026-114938/", accessed: 2026-11-17 }
+---
+
+Oracle's advisory confirms the flaw, the credit to Calif and the fixed builds, but not the mechanism: it names the Compiler component and gives no hardware condition. The Base64, AVX-512 and product details come from Calif's write-up and two independent analyses, so they are marked reported.
+
+Why Urgent and not Emergency: the rubric counts Calif's published write-up and demo as a demonstration of code execution, but no attacks are reported, no product exploit is public, and Calif says each product needs its own exploit and good network conditions. CVSS (Oracle 8.1 under 3.1; 9.2 under 4.0 in early reports) is for reference only.
+
+Upwind warns that a widely shared alternative, `-XX:DisableIntrinsic=_base64_decodeBlock`, does not work as written and can stop the JVM from starting if pushed through `JAVA_TOOL_OPTIONS`. Catching the decoder's exception does not help, because the write happens first. No official WAF or CDN rule was found on 17 Nov; Cloudflare's WAF changelog and Zero Wire page list none. Calif notes that a proxy which buffers whole request bodies breaks some of its attack timings, but not all, so it is not a mitigation. Oracle's fixed builds are out; other OpenJDK distributions (Temurin, Corretto and others) had not published fixed builds when checked, so use the JVM flag until your vendor's build arrives.

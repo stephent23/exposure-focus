@@ -2,6 +2,6 @@
 # Only a name (max 80 characters), confirmed CVE IDs and the UTC date last noted. No tier and no claims:
 # those belong in a verdict with sources. Remove an item when its verdict is published or it is dropped.
 #
-# Add an item only if it is publicised widely enough to meet the site's criteria and a verdict is
-# likely soon. While this list is empty the section does not appear on the home page.
-- { name: "Java (OpenJDK) flaw, details unconfirmed", cves: [CVE-2026-114938], noted: 2026-11-17 }
+# Empty on purpose. Add an item only if it is publicised widely enough to meet the site's criteria
+# and a verdict is likely soon. While this list is empty the section does not appear on the home page.
+[]
