@@ -13,32 +13,32 @@ leadership_quote: "A Java flaw could let an outsider take over business applicat
 tier_reason: "The code execution was shown only under controlled conditions, with bespoke exploits per product that are withheld, and no attacks are reported, so it is Prioritised, not Urgent."
 would_change:
   - Moves to Emergency if attacks are reported or a working product exploit is published
-  - Moves to Urgent if code execution is shown against an unprepared target, not only a controlled one
-  - Drops to Routine once the JVM runs a fixed build or a confirmed flag
+  - Moves to Urgent if code execution is shown against an unprepared target
+  - Drops to Routine once the JVM runs a fixed build
 affected:
   - product: Oracle Java SE 17
-    vulnerable: "17.0.6 up to 17.0.21.0.3 (Oracle lists 17.0.21.0.3; the range is per Calif)"
-    fixed: "17.0.21.1 (released 17 Nov 2026)"
+    vulnerable: "17.0.6 to 17.0.21.0.3 (start of range per Calif)"
+    fixed: "17.0.21.1"
   - product: Oracle Java SE 21
-    vulnerable: "Up to 21.0.13.0.3 (Oracle lists supported versions only)"
-    fixed: "21.0.13.1 (released 17 Nov 2026)"
+    vulnerable: "Up to 21.0.13.0.3"
+    fixed: "21.0.13.1"
   - product: Oracle Java SE 25
-    vulnerable: "Up to 25.0.5.0.3 (Oracle lists supported versions only)"
-    fixed: "25.0.5.1 (released 17 Nov 2026)"
+    vulnerable: "Up to 25.0.5.0.3"
+    fixed: "25.0.5.1"
   - product: Oracle Java SE 27
-    vulnerable: "Up to 27.0.1.0.3 (Oracle lists supported versions only)"
-    fixed: "27.0.1.1 (released 17 Nov 2026)"
+    vulnerable: "Up to 27.0.1.0.3"
+    fixed: "27.0.1.1"
   - product: Oracle Java SE 8 perf build
-    vulnerable: "8u511b33-perf (standard Java 8 is not listed)"
-    fixed: "8u513 released 17 Nov 2026; Oracle does not name a fixed perf build"
+    vulnerable: "8u511b33-perf"
+    fixed: "8u513 (no fixed perf build named)"
   - product: Oracle GraalVM for JDK and GraalVM Enterprise
-    vulnerable: "GraalVM for JDK 17.0.21.0.3, 21.0.13.0.3; Enterprise 21.3.20.0.3"
-  - product: Other OpenJDK builds (Temurin, Corretto, Zulu, others)
-    vulnerable: "17.0.6 and later, 21, 25 and 27 per Calif; no fixed build seen on 17 Nov"
+    vulnerable: "17.0.21.0.3, 21.0.13.0.3; Enterprise 21.3.20.0.3"
+  - product: Other OpenJDK builds (Temurin, Corretto and others)
+    vulnerable: "17.0.6 and later, 21, 25, 27 (Calif); no fix seen on 17 Nov"
 exposed_when:
-  - "Java 17.0.6 or later, 21, 25 or 27 runs on x86-64 with AVX-512 VBMI (Intel Ice Lake or newer Xeon, AMD Zen 4 or newer)"
-  - "The application passes attacker-supplied text to `java.util.Base64` basic or URL decoding, for example a Basic auth header"
-  - The decoder has been used often enough for the JIT compiler to switch to the fast path
+  - "An affected Java runs on x86-64 with AVX-512 VBMI (Xeon Ice Lake or newer, AMD Zen 4 or newer)"
+  - "Attacker text reaches `java.util.Base64` decoding, for example a Basic auth header"
+  - The JIT compiler has already switched the decoder to its fast path
 applies_check:
   - question: Do you run Java 17.0.6 or later, 21, 25 or 27?
     how_to_check: "Run `jcmd <pid> VM.version` on running JVMs, or check `java -version` and the runtimes bundled inside products such as Jira, Jenkins and Keycloak."
@@ -50,18 +50,15 @@ placements:
   - name: Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI
     facts: { reachable: true, no_login: true, impact: critical }
     why:
-      - Reachable from the internet.
-      - No login needed for Keycloak, Jira, Confluence, Artifactory, Jenkins and PingFederate, per Calif.
-      - "Calif's code execution was shown on its own targets, from a VM rented next to them, with per-product exploits it withholds."
-      - Under the published-claims rule, a result under controlled conditions is recorded but does not raise the call.
+      - Reachable, and no login needed in Jira, Confluence, Keycloak and others, per Calif.
+      - Calif's code execution was shown only under controlled conditions, so it does not raise the call.
       - No attacks or public product exploit reported.
     tier: 3
     action: Update Java and restart sooner than your normal cycle; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
   - name: Java client that connects to untrusted TLS servers
     facts: { reachable: true, no_login: true, impact: critical }
     why:
-      - Calif says a client-side exploit was shared with it, but it is not published.
-      - An unpublished claim does not raise the call.
+      - A client-side exploit is claimed but not published, so it does not raise the call.
     tier: 3
     action: Update Java sooner than your normal cycle.
   - name: Internal-only Java services
@@ -94,8 +91,8 @@ mitigations:
     role: stopgap
     official_guides: [https://www.upwind.io/blog/java4shell-what-we-know-now-and-what-comes-next]
     confidence: reported
-  - title: Start the JVM with -XX:UseAVX=2 on x86 hosts only
-    limitation: "JVM fails to start on ARM with this flag; slows other AVX-512 code"
+  - title: Start the JVM with -XX:UseAVX=2 (x86 only)
+    limitation: "Stops the JVM starting on ARM; slows other AVX-512 code"
     role: stopgap
     official_guides: [https://equixly.com/blog/2026/11/17/cve-2026-114938-pre-auth-heap-overflow-in-java-17-21-and-25/]
     confidence: reported
@@ -152,7 +149,7 @@ sources:
   - { title: "Calif: Java4Shell, write once, RCE everywhere", url: "https://calif.io/java4shell/", accessed: 2026-11-17 }
   - { title: "watchTowr: Java CVE-2026-114938 FAQ", url: "https://watchtowr.com/intelligence/java4shell-cve-2026-114938-faq/", accessed: 2026-11-17 }
   - { title: "Equixly: CVE-2026-114938 pre-auth heap overflow in Java 17, 21 and 25", url: "https://equixly.com/blog/2026/11/17/cve-2026-114938-pre-auth-heap-overflow-in-java-17-21-and-25/", accessed: 2026-11-17 }
-  - { title: "Upwind: Java4Shell, what we know now", url: "https://www.upwind.io/blog/java4shell-what-we-know-now-and-what-comes-next", accessed: 2026-11-17 }
+  - { title: "Upwind: Java4Shell analysis", url: "https://www.upwind.io/blog/java4shell-what-we-know-now-and-what-comes-next", accessed: 2026-11-17 }
   - { title: "Cloudflare Zero Wire: Java4Shell", url: "https://radar.cloudflare.com/zero-wire/java4shell", accessed: 2026-11-17 }
   - { title: "SecurityOnline: Java4Shell (CVE-2026-114938)", url: "https://securityonline.info/java4shell-cve-2026-114938/", accessed: 2026-11-17 }
 ---
