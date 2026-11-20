@@ -7,13 +7,13 @@ summary: A flaw in Java's Base64 decoder lets an attacker with no login corrupt 
 attack: rce
 status: published
 published: 2026-11-17
-evidence_as_of: 2026-11-19
+evidence_as_of: 2026-11-20
 review_until: 2026-12-01
-leadership_quote: "A flaw in Java itself could let an outsider take over applications built on Java without logging in. The researchers who found it did so only in controlled tests; each application needs its own exploit and none is public. Oracle has fixed it. Update internet-facing Java on recent x86 servers sooner than usual."
-tier_reason: "The code execution was shown only under controlled conditions, with a separate exploit per application that is withheld, and no attacks are reported, so it is Prioritised, not Urgent."
+leadership_quote: "A flaw in Java itself could let an outsider take over applications built on Java without logging in. Attackers began probing for it on 18 Nov; no break-in is confirmed. Fixes are out. Update internet-facing Java on recent x86 servers sooner than usual."
+tier_reason: "Attackers are probing for it, but public code only corrupts memory and code execution was shown only in controlled tests, so Urgent, not Emergency."
 would_change:
-  - Moves to Emergency if attacks are reported or a working exploit for an application is published
-  - Moves to Urgent if code execution is shown against an unprepared target
+  - Moves to Emergency if a break-in is confirmed or a working exploit for an application is published
+  - Moves back to Prioritised if the probing stops and no working exploit appears
   - Drops to Routine once the JVM runs a fixed build
 affected:
   - product: Oracle Java SE 17
@@ -34,7 +34,7 @@ affected:
   - product: Oracle GraalVM for JDK and GraalVM Enterprise
     vulnerable: "17.0.21.0.3, 21.0.13.0.3; Enterprise 21.3.20.0.3"
   - product: Other OpenJDK builds (Temurin, Corretto and others)
-    vulnerable: "17.0.6 and later, 21, 25, 27 (researchers); no fix seen on 17 Nov"
+    vulnerable: "17.0.6 and later, 21, 25, 27; Amazon, Microsoft, Azul fixes out (reported)"
 exposed_when:
   - "An affected Java runs on x86-64 with AVX-512 VBMI (Xeon Ice Lake or newer, AMD Zen 4 or newer)"
   - "Attacker text reaches `java.util.Base64` decoding, for example a Basic auth header"
@@ -48,12 +48,12 @@ applies_check:
     how_to_check: "List internet-facing Java services, including login pages, SSO servers, CI servers and APIs that accept Basic auth, tokens or file uploads."
 placements:
   - name: Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI
-    facts: { reachable: true, no_login: true, impact: critical }
+    facts: { reachable: true, no_login: true, impact: critical, exploitation_imminent: true, exploit_achieves: significant }
     why:
       - Reachable, and the researchers report no login needed in several common Java applications.
-      - Their code execution was shown only under controlled conditions, so it does not raise the call.
-      - No attacks or public exploit for an application reported.
-    tier: 3
+      - Probing since 18 Nov; no break-in confirmed.
+      - Public code only crashes the JVM.
+    tier: 2
     action: Update Java and restart sooner than your normal cycle; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
   - name: Java client that connects to untrusted TLS servers
     facts: { reachable: true, no_login: true, impact: critical }
@@ -137,6 +137,11 @@ evidence:
     as_of: 2026-11-19
     source_url: https://developers.cloudflare.com/waf/change-log/
     confidence: vendor-stated
+  - label: Exploitation outlook
+    text: "SecurityWeek (19 Nov) reports attackers probing for the flaw: GreyNoise saw over 150 attack-shaped requests from five IPs with no successful intrusion; watchTowr sees recon scans and blind attempts it calls not yet functional; Cloudflare and Previdian logged attempts on 18 and 19 Nov. VulnCheck offers a full exploit to its customers only. No compromise or KEV listing is reported. The primary posts were not opened."
+    as_of: 2026-11-20
+    source_url: https://www.securityweek.com/java4shell-exploitation-attempts-begin-as-vendors-rush-out-advisories/
+    confidence: reported
   - label: Independent analysis
     text: "Equixly and Upwind independently describe an AVX-512 VBMI Base64 tail bug writing 62 or 63 bytes out of bounds, reached through Basic auth in Spring Security, Tomcat and Jetty; ARM and Java 8 and 11 are not affected. Both called code execution unproven before Calif's write-up."
     as_of: 2026-11-17
@@ -146,9 +151,11 @@ timeline:
   - { event: "The researchers who found it say details leaked before the patch", date: 2026-11-17, source_url: "https://securityonline.info/java4shell-cve-2026-114938/", confidence: reported }
   - { event: "Oracle publishes its November patch update and fixed Java builds", date: 2026-11-17, source_url: "https://www.oracle.com/security-alerts/cspunov2026.html", confidence: vendor-stated }
   - { event: "The researchers publish their write-up and demonstration", date: 2026-11-17, source_url: "https://calif.io/java4shell/", confidence: reported }
+  - { event: "Attack-shaped requests first reported by Cloudflare and Previdian", date: 2026-11-18, source_url: "https://www.securityweek.com/java4shell-exploitation-attempts-begin-as-vendors-rush-out-advisories/", confidence: reported }
   - { event: "Cloudflare releases WAF detections for Java4Shell", date: 2026-11-18, source_url: "https://developers.cloudflare.com/waf/change-log/", confidence: vendor-stated }
 changes:
   - { date: 2026-11-19, reason: "Added Cloudflare's new WAF rules as a stopgap and noted CISA's alert; still no attacks reported, so no tier changes.", source_url: "https://developers.cloudflare.com/waf/change-log/" }
+  - { date: 2026-11-20, placement: "Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI", from_tier: 3, to_tier: 2, reason: "Attackers began probing for the flaw on 18 Nov, though no break-in is confirmed.", source_url: "https://www.securityweek.com/java4shell-exploitation-attempts-begin-as-vendors-rush-out-advisories/" }
 were_you_hit:
   assume_compromise_when: "An internet-facing affected JVM on AVX-512 x86 shows unexplained crashes or restarts, or a Java application the researchers named shows unexpected admin changes."
   check:
@@ -172,10 +179,11 @@ sources:
   - { title: "SecurityOnline: Java4Shell (CVE-2026-114938)", url: "https://securityonline.info/java4shell-cve-2026-114938/", accessed: 2026-11-17 }
   - { title: "Cloudflare WAF changelog", url: "https://developers.cloudflare.com/waf/change-log/", accessed: 2026-11-19 }
   - { title: "The Hacker News: CISA urges immediate patching of Java4Shell flaw", url: "https://thehackernews.com/2026/11/cisa-urges-immediate-patching-of.html", accessed: 2026-11-19 }
+  - { title: "SecurityWeek: Java4Shell exploitation attempts begin as vendors rush out advisories", url: "https://www.securityweek.com/java4shell-exploitation-attempts-begin-as-vendors-rush-out-advisories/", accessed: 2026-11-20 }
 ---
 
 Oracle's advisory confirms the flaw, its credit to the researchers who found it (at the security firm Calif) and the fixed builds, but not the mechanism: it names the Compiler component and gives no hardware condition. The Base64, AVX-512 and product details come from the researchers' write-up and two independent analyses, so they are marked reported.
 
-Why Prioritised and not Urgent: a working attack needs many things to line up. The JVM must be an affected build on x86 with AVX-512 VBMI; the application must pass attacker text to the basic or URL Base64 decoder; the decoder must already be JIT-compiled; the input must have a specific length ending in `=`; and turning the fixed-byte overwrite into code execution needs a heap layout tuned to each product, retries that can crash the JVM, partial request bodies that a buffering proxy such as nginx removes, and low, stable network latency (Calif rented a VM in the same region as its target). Calif's demonstrations were on its own targets under those controlled conditions and its product exploits are withheld, so under the published-claims rule they are recorded but do not raise the call. Blind exploitation against an unknown target is much harder, and widespread exploitation is unlikely while no product exploit is public. A crash of the JVM is the more realistic outcome of a failed attempt. CVSS (Oracle 8.1 under 3.1, with attack complexity high; 9.2 under 4.0 in early reports) is for reference only.
+Why Urgent and not Emergency: since 18 Nov attackers have been sending attack-shaped requests, which the rubric treats as exploitation about to start. But the only public code corrupts memory, which in practice crashes the JVM, so the probing is rated on that crash, and code execution still counts only as unproven. A working attack needs many things to line up. The JVM must be an affected build on x86 with AVX-512 VBMI; the application must pass attacker text to the basic or URL Base64 decoder; the decoder must already be JIT-compiled; the input must have a specific length ending in `=`; and turning the fixed-byte overwrite into code execution needs a heap layout tuned to each product, retries that can crash the JVM, partial request bodies that a buffering proxy such as nginx removes, and low, stable network latency (Calif rented a VM in the same region as its target). Calif's demonstrations were on its own targets under those controlled conditions and its product exploits are withheld, so under the published-claims rule they are recorded but do not raise the call. CVSS (Oracle 8.1 under 3.1, with attack complexity high; 9.2 under 4.0 in early reports) is for reference only.
 
-Upwind warns that a widely shared alternative, `-XX:DisableIntrinsic=_base64_decodeBlock`, does not work as written and can stop the JVM from starting if pushed through `JAVA_TOOL_OPTIONS`. Catching the decoder's exception does not help, because the write happens first. Cloudflare added six WAF detections on 18 Nov that log by default; set them to block. Calif notes that a proxy which buffers whole request bodies breaks some of its attack timings, but not all, so it is not a mitigation. Oracle's fixed builds are out; other OpenJDK distributions (Temurin, Corretto and others) had not published fixed builds when checked, so use the JVM flag until your vendor's build arrives.
+Upwind warns that a widely shared alternative, `-XX:DisableIntrinsic=_base64_decodeBlock`, does not work as written and can stop the JVM from starting if pushed through `JAVA_TOOL_OPTIONS`. Catching the decoder's exception does not help, because the write happens first. Cloudflare added six WAF detections on 18 Nov that log by default; set them to block. Calif notes that a proxy which buffers whole request bodies breaks some of its attack timings, but not all, so it is not a mitigation. Oracle's fixed builds are out; Amazon, Microsoft and Azul have since released fixed OpenJDK builds (reported); for other distributions, use the JVM flag until your vendor's build arrives.
