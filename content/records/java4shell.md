@@ -51,7 +51,7 @@ placements:
     facts: { reachable: true, no_login: true, impact: critical, exploitation_imminent: true, exploit_achieves: significant }
     why:
       - Reachable, and the researchers report no login needed in several common Java applications.
-      - Attackers began probing for it on 18 Nov; no break-in is confirmed.
+      - Probing since 18 Nov; no break-in confirmed.
       - Public code only corrupts memory, so a crash is the proven outcome.
     tier: 2
     action: Update Java and restart sooner than your normal cycle; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
