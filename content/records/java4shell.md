@@ -51,10 +51,10 @@ placements:
     facts: { reachable: true, no_login: true, impact: critical, exploitation_imminent: true, exploit_achieves: significant }
     why:
       - Reachable, and the researchers report no login needed in several common Java applications.
-      - Probing since 18 Nov looks like scanning, not attacks that would work.
+      - Probes since 18 Nov are scanning, not working attacks.
     tier: 3
     action: Update Java and restart sooner than your normal cycle; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
-    override_reason: "Editorial judgement: the rubric counts scanning as exploitation about to start (Urgent), but the probes are recon and blind requests watchTowr calls not functional, and public code only crashes the JVM."
+    override_reason: "Editorial judgement: the rubric reads scanning as Urgent, but these probes would not work and public code only crashes the JVM."
   - name: Java client that connects to untrusted TLS servers
     facts: { reachable: true, no_login: true, impact: critical }
     why:
