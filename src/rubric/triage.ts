@@ -45,6 +45,9 @@ export type TriageFacts = {
 
 export type Tier = 1 | 2 | 3 | 4;
 
+/** The highest tier a placement that is not reachable from the internet can get: only when it is exploited or part of a known exploit chain. Published on the rubric page. */
+export const UNREACHABLE_EXPLOITED_TIER: Tier = 3;
+
 type Evidence = 'exploited' | 'exploitation imminent' | 'public exploit' | 'credible researcher claim' | 'no evidence';
 
 /** The three columns the rubric page shows, in table order. */
@@ -93,9 +96,19 @@ export function triage(facts: TriageFacts): { tier: Tier; reason: string } {
     return { tier: 4, reason: 'A vendor-stated exposure condition is false, so this is not exposed. Routine patching.' };
   }
 
-  // Gate: not reachable from the internet. Routine patching; nothing special to do.
+  // Gate: not reachable from the internet. Routine patching, unless attackers are already using the flaw or it is a
+  // step in a known exploit chain: an attacker who gets in another way can still use it, so it is rated as if
+  // reachable and capped at Tier 3 (Prioritised).
   if (!reachable) {
-    return { tier: 4, reason: 'Not reachable from the internet. Routine patching.' };
+    const exploitedOrChained = facts.exploited === true || (facts.chained_with?.length ?? 0) > 0;
+    if (!exploitedOrChained) {
+      return { tier: 4, reason: 'Not reachable from the internet. Routine patching.' };
+    }
+    const asIfReachable = triage({ ...facts, reachable: true });
+    return {
+      tier: Math.max(UNREACHABLE_EXPLOITED_TIER, asIfReachable.tier) as Tier,
+      reason: `Not reachable from the internet, but it is exploited or part of a known exploit chain, so it is rated as if reachable and capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
+    };
   }
 
   const impact: TriageImpact = facts.impact ?? 'critical';

@@ -74,12 +74,26 @@ describe('triage: gates', () => {
     expect(triage({ vendor_stated_exposure_condition: false, exploited: true, no_login: true, impact: 'critical' }).tier).toBe(4);
   });
 
-  it('not reachable is Tier 4 (Routine), whatever the evidence or impact', () => {
+  it('not reachable is Tier 4 (Routine) when it is neither exploited nor in a known chain, whatever the other evidence or impact', () => {
     for (const facts of Object.values(evidence)) {
+      if (facts.exploited) continue;
       for (const impact of impacts) {
         expect(triage({ reachable: false, impact, ...facts }).tier).toBe(4);
       }
     }
+  });
+
+  it('not reachable but exploited is rated as if reachable, capped at Tier 3 (Prioritised)', () => {
+    expect(triage({ reachable: false, exploited: true, no_login: true, impact: 'critical' }).tier).toBe(3);
+    expect(triage({ reachable: false, exploited: true, no_login: true, impact: 'significant' }).tier).toBe(3);
+    expect(triage({ reachable: false, exploited: true, no_login: true, impact: 'limited' }).tier).toBe(3);
+    expect(triage({ reachable: false, exploited: true, requires_login: true, impact: 'limited' }).tier).toBe(4);
+    expect(triage({ reachable: false, exploited: true, impact: 'critical' }).reason).toMatch(/not reachable.*exploited/i);
+  });
+
+  it('not reachable but part of a known exploit chain is rated as if reachable, capped at Tier 3', () => {
+    expect(triage({ reachable: false, no_login: true, impact: 'critical', chained_with: ['CVE-2024-0001'] }).tier).toBe(3);
+    expect(triage({ reachable: false, no_login: true, impact: 'limited', chained_with: ['CVE-2024-0001'] }).tier).toBe(4);
   });
 
   it('explains an unreachable call as routine in its reason', () => {
@@ -106,6 +120,7 @@ describe('triage: golden cases', () => {
   it.each<[string, TriageFacts, Tier]>([
     ['PHP2Shell, internet-facing', { reachable: true, exploited: true, no_login: true, impact: 'critical' }, 1],
     ['PHP2Shell, internal-only', { reachable: false, no_login: true, impact: 'critical' }, 4],
+    ['PHP2Shell, internal-only, exploited', { reachable: false, exploited: true, no_login: true, impact: 'critical' }, 3],
     ['HTTP2Shell before KEV', { reachable: true, no_login: true, impact: 'critical', credible_researcher_claim: true }, 2],
     ['HTTP2Shell after KEV', { reachable: true, exploited: true, no_login: true, impact: 'critical', credible_researcher_claim: true }, 1],
     ['HTTP2Shell, never decodes untrusted Brotli', { vendor_stated_exposure_condition: false }, 4],
