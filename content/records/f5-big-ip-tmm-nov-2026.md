@@ -79,7 +79,7 @@ mitigations:
   - title: Take the affected iRule commands or APM agents out of use
     limitation: "F5 lists no workaround; breaks whatever the iRule or policy does"
     role: stopgap
-    official_guides: ["[link to add]"]
+    official_guides: [https://cveawg.mitre.org/api/cve/CVE-2026-120292]
     confidence: inference
 
 evidence:
