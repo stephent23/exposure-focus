@@ -155,8 +155,6 @@ timeline:
   - { event: "Cloudflare releases WAF detections for Java4Shell", date: 2026-11-18, source_url: "https://developers.cloudflare.com/waf/change-log/", confidence: vendor-stated }
 changes:
   - { date: 2026-11-19, reason: "Added Cloudflare's new WAF rules as a stopgap and noted CISA's alert; still no attacks reported, so no tier changes.", source_url: "https://developers.cloudflare.com/waf/change-log/" }
-  - { date: 2026-11-20, placement: "Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI", from_tier: 3, to_tier: 2, reason: "Attackers began probing for the flaw on 18 Nov, though no break-in is confirmed.", source_url: "https://www.securityweek.com/java4shell-exploitation-attempts-begin-as-vendors-rush-out-advisories/" }
-  - { date: 2026-11-20, placement: "Internet-facing Java app, affected JDK, x86 with AVX-512 VBMI", from_tier: 2, to_tier: 3, reason: "On review the probes look like scanning, not attempts that would work, so the call returns to Prioritised as an editorial judgement.", source_url: "https://www.securityweek.com/java4shell-exploitation-attempts-begin-as-vendors-rush-out-advisories/" }
 were_you_hit:
   assume_compromise_when: "An internet-facing affected JVM on AVX-512 x86 shows unexplained crashes or restarts, or a Java application the researchers named shows unexpected admin changes."
   check:
