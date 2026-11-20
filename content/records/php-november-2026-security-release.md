@@ -3,7 +3,6 @@ slug: php-november-2026-security-release
 name: PHP November 2026 security release
 aliases: []
 cves: [CVE-2026-115560, CVE-2026-129289, CVE-2026-129474, CVE-2026-129182, CVE-2026-129496, CVE-2026-129481, CVE-2026-126714]
-related_cves: [CVE-2026-129501, CVE-2026-129538, CVE-2026-129291, CVE-2026-129292, CVE-2026-128090, CVE-2026-15353, CVE-2026-129506, CVE-2026-128064, CVE-2026-127960, CVE-2026-129438, CVE-2026-48841]
 summary: "PHP fixed 18 flaws on 19 Nov 2026, several rated critical, but PHP says the critical ones need a non-default configuration or an uncommon setup, and no attacks are reported."
 attack: rce
 status: published
