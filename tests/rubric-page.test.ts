@@ -61,6 +61,7 @@ describe('rubric page', () => {
     for (const rule of [
       'If the vendor states a condition for exposure is false, it is not exposed: Tier 4, Routine.',
       'If it is not reachable from the internet, it is Tier 4, Routine.',
+      'It is then rated as if it were reachable, but never above Tier 3, Prioritised.',
       'If it is unclear whether something is exposed, it is treated as exposed.',
       'If it needs a login or an unusual configuration, the call drops one tier.',
       `If EPSS is at or above ${EPSS_ESCALATION_THRESHOLD * 100}%, a call that rests on exploitation or a public exploit rises one tier. EPSS never lowers a tier.`,

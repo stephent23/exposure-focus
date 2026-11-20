@@ -8,7 +8,7 @@ summary: Two flaws in the PHP runtime let an attacker run code from a web reques
 attack: rce
 status: published
 published: 2026-11-09
-evidence_as_of: 2026-11-09
+evidence_as_of: 2026-11-20
 review_until: 2026-11-23
 leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw has no fix yet, and PHP suggests turning off one feature until it does.
 tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
@@ -48,9 +48,10 @@ placements:
     action: "Out-of-cycle: patch PHP and restart every worker. If you cannot patch at once, apply PHP's configuration workarounds first."
   - name: Internal-only PHP
     facts: { reachable: false, exploited: true, no_login: true, impact: critical }
-    why: [Not reachable from the internet.]
-    tier: 4
-    action: Patch in your normal cycle. Move up if it becomes reachable from the internet.
+    why:
+      - Not reachable from the internet, but both flaws are exploited, so an attacker already inside can use them.
+    tier: 3
+    action: Patch sooner than your normal cycle. Move up if it becomes reachable from the internet.
 
 mitigations:
   - title: "Update PHP and restart every worker"
@@ -120,6 +121,8 @@ timeline:
   - { event: "Fixed releases published (8.2.35, 8.3.36, 8.4.27, 8.5.12)", date: 2026-10-21, source_url: "https://www.bleepingcomputer.com/news/security/cisa-confirms-php2shell-vulnerabilities-now-exploited-in-attacks/", confidence: reported }
   - { event: "PHP publishes an informational advisory on a third flaw, CVE-2026-115560, with no fix yet", date: 2026-10-23, source_url: "https://www.php.net/archive/2026.php", confidence: vendor-stated }
   - { event: "The first two flaws are added to CISA's Known Exploited Vulnerabilities catalogue", date: 2026-10-26, source_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", confidence: vendor-stated }
+changes:
+  - { date: 2026-11-20, placement: "Internal-only PHP", from_tier: 4, to_tier: 3, reason: "The rubric now rates an exploited flaw that is not reachable from the internet as Prioritised, not Routine.", source_url: "https://exposure.infosecuriosity.co.uk/rubric/" }
 
 sources:
   - { title: "PHP security advisory GHSA-w8hw-w9fx-j79w (CVE-2026-109618)", url: https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w, accessed: 2026-11-09 }
