@@ -9,8 +9,8 @@ status: published
 published: 2026-11-17
 evidence_as_of: 2026-11-20
 review_until: 2026-12-01
-leadership_quote: "A flaw in Java itself could let an outsider take over applications built on Java without logging in. Attackers began probing for it on 18 Nov; no break-in is confirmed and no application exploit is public. Oracle and other Java vendors have fixes. Update internet-facing Java on recent x86 servers sooner than usual."
-tier_reason: "Attackers are now probing for it, but the public code only corrupts memory and code execution was shown only under controlled conditions, so it is Urgent, not Emergency."
+leadership_quote: "A flaw in Java itself could let an outsider take over applications built on Java without logging in. Attackers began probing for it on 18 Nov; no break-in is confirmed. Fixes are out. Update internet-facing Java on recent x86 servers sooner than usual."
+tier_reason: "Attackers are probing for it, but public code only corrupts memory and code execution was shown only in controlled tests, so Urgent, not Emergency."
 would_change:
   - Moves to Emergency if a break-in is confirmed or a working exploit for an application is published
   - Moves back to Prioritised if the probing stops and no working exploit appears
@@ -52,7 +52,7 @@ placements:
     why:
       - Reachable, and the researchers report no login needed in several common Java applications.
       - Probing since 18 Nov; no break-in confirmed.
-      - Public code only corrupts memory, so a crash is the proven outcome.
+      - Public code only crashes the JVM.
     tier: 2
     action: Update Java and restart sooner than your normal cycle; until then, start the JVM with `-XX:-UseBASE64Intrinsics`.
   - name: Java client that connects to untrusted TLS servers
