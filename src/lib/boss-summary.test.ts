@@ -25,10 +25,7 @@ describe('bossSummary', () => {
     const lines = bossSummary(fake(), URL).split('\n').filter(Boolean);
     expect(lines).toEqual([
       'Example Bug (CVE-2026-0001, CVE-2026-0002): Tier 2, Urgent',
-      'A flaw in Example.',
-      'For leadership: Patch the edge first.',
-      'Tier 2: Internet-facing: Patch now.',
-      'Tier 3: Internal: Schedule it.',
+      'Patch the edge first.',
       'Evidence as of 2026-11-01 (UTC). Review by 2026-12-01.',
       URL
     ]);

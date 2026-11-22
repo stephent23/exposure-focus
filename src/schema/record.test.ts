@@ -14,7 +14,7 @@ function validRecord() {
     published: '2026-11-01',
     evidence_as_of: '2026-11-08',
     review_until: '2026-12-08',
-    leadership_quote: 'A sentence a boss can read.',
+    leadership_quote: 'Risk: an outsider can crash it. Attacks: none reported. Action: normal patching.',
     tier_reason: 'Exploited and reachable, so it is at the top of the rubric.',
     would_change: ['Moves down once patched'],
     affected: [{ product: 'Sample 1.x', vulnerable: 'below 1.2.3', fixed: '1.2.3' }],
@@ -109,7 +109,11 @@ describe('record schema', () => {
 
   it('rejects hour or day counts for a tier anywhere in the record', () => {
     reject((r) => (r.placements[0].action = 'Patch within 48 hours.'));
-    reject((r) => (r.leadership_quote = 'Do this in 7 days.'));
+    reject((r) => (r.leadership_quote = 'Risk: a crash. Attacks: none. Action: do this in 7 days.'));
+  });
+
+  it('requires the board summary as Risk, Attacks and Action', () => {
+    reject((r) => (r.leadership_quote = 'A sentence a boss can read, with no labelled parts.'));
   });
 
   it('accepts only the placeholder or a real https link in link fields', () => {
@@ -339,7 +343,7 @@ describe('length caps', () => {
   type Rec = Record<string, any>;
   const cases: [keyof typeof CAPS, (r: Rec, v: string) => void][] = [
     ['summary', (r, v) => (r.summary = v)],
-    ['leadershipQuote', (r, v) => (r.leadership_quote = v)],
+    ['leadershipQuote', (r, v) => (r.leadership_quote = ('Risk: x Attacks: y Action: ' + v).slice(0, v.length))],
     ['placementName', (r, v) => (r.placements[0].name = v)],
     ['placementAction', (r, v) => (r.placements[0].action = v)],
     ['question', (r, v) => (r.applies_check[0].question = v)],

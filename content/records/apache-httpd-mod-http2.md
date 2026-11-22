@@ -10,7 +10,7 @@ published: 2026-11-13
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
 
-leadership_quote: "A flaw in the Apache web server can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is on, and no attacks are reported. Schedule the update for internet-facing servers ahead of normal patching; switch HTTP/2 off where no update exists yet."
+leadership_quote: "Risk: an outsider can crash Apache web servers that have HTTP/2 on, and possibly take them over. Attacks: none reported. Action: Prioritised for internet-facing servers with HTTP/2 on; otherwise normal patching."
 tier_reason: "Rated critical by Apache and Red Hat, but the only public code crashes worker processes and no attacks are reported, so the crash is the outcome rated."
 would_change:
   - Tier 2 if the crash is exploited in the wild or a code-execution exploit is published

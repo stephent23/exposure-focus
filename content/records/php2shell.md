@@ -10,7 +10,7 @@ status: published
 published: 2026-11-09
 evidence_as_of: 2026-11-22
 review_until: 2026-11-23
-leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw was fixed in the 19 Nov 2026 releases.
+leadership_quote: "Risk: an outsider can take over PHP web servers without logging in. Attacks: yes, it is being exploited. Action: Emergency for internet-facing PHP; internal PHP follows normal patching."
 tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
 would_change:
   - "Internal-only PHP moves up if it becomes reachable or attackers are reported using the flaws inside networks"

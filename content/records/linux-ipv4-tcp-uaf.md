@@ -9,7 +9,7 @@ status: published
 published: 2026-11-09
 evidence_as_of: 2026-11-13
 review_until: 2026-11-27
-leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.
+leadership_quote: "Risk: an outsider could in theory take over internet-facing Linux servers. Attacks: none reported; one lab result, not published. Action: Prioritised for internet-facing Linux servers; internal servers follow normal patching."
 tier_reason: "Remote root is reported only from a lab, with no published exploit, kernel version or setup, and no attacks are reported. The rubric counts published demonstrations only."
 would_change:
   - Moves up if a working exploit is published

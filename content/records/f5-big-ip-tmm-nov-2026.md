@@ -10,7 +10,7 @@ published: 2026-11-19
 evidence_as_of: 2026-11-19
 review_until: 2026-12-03
 
-leadership_quote: "F5 has fixed six flaws in BIG-IP that could let an outsider knock traffic offline, and possibly take over the traffic engine. Each one needs a specific, uncommon configuration, and no attacks or exploit code are reported. Teams should check whether those features are used and patch where they are."
+leadership_quote: "Risk: an outsider could knock F5 BIG-IP traffic offline, and possibly take over its traffic engine. Attacks: none reported, and each flaw needs an uncommon setup. Action: normal patching; check whether the affected features are used."
 tier_reason: "Rated 9.8 by F5, but each flaw needs an uncommon iRule command or APM policy, and there is no exploit code or attack, so it is Routine; a confirmed affected setup deserves a quicker look."
 would_change:
   - Urgent if exploit code is published, Emergency if attacks are reported, for set-ups that use the affected features

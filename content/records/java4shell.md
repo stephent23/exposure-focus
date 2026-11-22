@@ -9,7 +9,7 @@ status: published
 published: 2026-11-17
 evidence_as_of: 2026-11-20
 review_until: 2026-12-01
-leadership_quote: "A flaw in Java itself could let an outsider take over applications built on Java without logging in. Scanners began probing for it on 18 Nov; no working attack is seen. Fixes are out. Update internet-facing Java on recent x86 servers sooner than usual."
+leadership_quote: "Risk: an outsider could take over Java applications on recent x86 servers without logging in. Attacks: scanning only, no working attacks seen. Action: Prioritised for internet-facing Java on those servers and Java clients of untrusted servers; otherwise normal patching."
 tier_reason: "The probes seen are scanning, not working attacks, and code execution was shown only in controlled tests, so Prioritised, not Urgent."
 would_change:
   - Moves to Emergency if a break-in is confirmed or a working exploit for an application is published

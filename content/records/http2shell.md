@@ -9,7 +9,7 @@ status: published
 published: 2026-11-09
 evidence_as_of: 2026-11-22
 review_until: 2026-12-07
-leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but sources reviewed report no takeovers. Update ahead of normal patching where untrusted data is unpacked.
+leadership_quote: "Risk: an outsider can crash apps that unpack untrusted Brotli-compressed data, and possibly run code in them. Attacks: CISA lists it as exploited; no takeovers reported. Action: Prioritised where apps unpack untrusted data; otherwise normal patching."
 tier_reason: "CISA lists it as exploited, which the rubric rates Tier 2. It is held at Tier 3 as an editorial call: no source reviewed reports code execution in the wild."
 would_change:
   - Moves up if a reliable public exploit for code execution appears

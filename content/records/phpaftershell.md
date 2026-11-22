@@ -9,7 +9,7 @@ status: published
 published: 2026-11-22
 evidence_as_of: 2026-11-22
 review_until: 2026-12-20
-leadership_quote: "phpAfterShell is a newly named PHP flaw that sounds like PHP2Shell but is far harder to use. It needs a session write to be cut off mid-way and a second weakness in the application. No attacks are reported. PHP fixed it in its 19 Nov 2026 releases; normal patching is enough."
+leadership_quote: "Risk: a PHP flaw that sounds like PHP2Shell but needs several unusual conditions to use. Attacks: none reported. Action: normal patching; PHP fixed it on 19 Nov 2026."
 tier_reason: "The worst case is code execution, but it needs an interrupted session write plus a usable chain in the application, and nothing shows it working, so it is Routine."
 would_change:
   - "Moves up if a public exploit shows code execution on a common setup"

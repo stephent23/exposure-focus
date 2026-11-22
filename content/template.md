@@ -17,7 +17,7 @@ published: 2026-11-08 # UTC date this verdict was first published; never changes
 evidence_as_of: 2026-11-08 # UTC date the evidence was last checked
 review_until: 2026-12-08 # UTC date to recheck by; after it the record shows a stale badge
 
-leadership_quote: Two or three sentences a boss can read. # at most 320 characters
+leadership_quote: "Risk: what an attacker can do, in plain words. Attacks: yes, or none reported. Action: the tier and where." # at most 320 characters; always these three labelled parts
 tier_reason: One sentence saying why this tier and not a higher or lower one. # max 220 characters; answer "it is a 9.8, why Tier 3?"
 would_change: # 1 to 3 items, max 140 characters each: what would move the call up or down
   - Moves up if a working exploit is published

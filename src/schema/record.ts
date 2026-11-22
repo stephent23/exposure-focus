@@ -254,6 +254,15 @@ export const recordSchema = baseRecordSchema.superRefine((record, ctx) => {
     });
   }
 
+  // The board summary is always three labelled parts, so a leader reads every verdict the same way.
+  if (!/^Risk: .+ Attacks: .+ Action: .+/.test(record.leadership_quote)) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['leadership_quote'],
+      message: 'Write the board summary as three parts: "Risk: … Attacks: … Action: …".'
+    });
+  }
+
   if (record.published > record.evidence_as_of) {
     ctx.addIssue({ code: 'custom', path: ['published'], message: 'published cannot be after evidence_as_of.' });
   }
