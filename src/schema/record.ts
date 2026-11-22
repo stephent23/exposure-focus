@@ -146,7 +146,9 @@ const epssSchema = z.object({
 const wereYouHitSchema = z.object({
   assume_compromise_when: text,
   check: z.array(text),
-  rotate: z.array(text)
+  rotate: z.array(text),
+  /** Optional: up to three pages with indicators of compromise or hunting guidance, best first. */
+  guides: z.array(z.object({ title: text, url: link }).strict()).min(1).max(3).optional()
 });
 
 const baseRecordSchema = z.object({

@@ -7,8 +7,8 @@ summary: A Brotli decoder flaw may let attackers crash or possibly run code in a
 attack: rce
 status: published
 published: 2026-11-09
-evidence_as_of: 2026-11-09
-review_until: 2026-11-23
+evidence_as_of: 2026-11-22
+review_until: 2026-12-07
 leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but sources reviewed report no takeovers. Update ahead of normal patching where untrusted data is unpacked.
 tier_reason: "CISA lists it as exploited, which the rubric rates Tier 2. It is held at Tier 3 as an editorial call: no source reviewed reports code execution in the wild."
 would_change:
@@ -16,16 +16,16 @@ would_change:
   - Moves up if code execution is reported in the wild
 affected:
   - product: Node.js 22.x
-    vulnerable: 22.x line (Node.js names the line, not a range)
+    vulnerable: "22.0.0 to 22.23.3 (per Zscaler and Wiz)"
     fixed: 22.23.4
   - product: Node.js 24.x
-    vulnerable: 24.x line (Node.js names the line, not a range)
+    vulnerable: "24.0.0 to 24.22.0 (per Zscaler and Wiz)"
     fixed: 24.22.1
   - product: Node.js 26.x
-    vulnerable: 26.x line (Node.js names the line, not a range)
+    vulnerable: "26.0.0 to 26.12.0 (per Zscaler and Wiz)"
     fixed: 26.12.1
   - product: Google Brotli library
-    vulnerable: Range not stated in Google's release notes
+    vulnerable: "1.0.3 to 1.2.0 (per Wiz; Google states no range)"
     fixed: v1.2.1
   - product: Other products that bundle the Brotli decoder
     vulnerable: Depends on the bundled Brotli version; ask the vendor
@@ -117,15 +117,36 @@ evidence:
     as_of: 2026-11-09
     source_url: https://nodejs.org/en/blog/vulnerability/october-2026-security-releases
     confidence: vendor-stated
+  - label: Affected versions
+    text: "Node.js names only the affected lines (22.x, 24.x, 26.x) and the fixed releases, and says end-of-life versions are always affected. Zscaler lists 22.0.0 to 22.23.3, 24.0.0 to 24.22.0 and 26.0.0 to 26.12.0; Wiz says the same and gives Brotli 1.0.3 to 1.2.0, on a page it says was AI-generated."
+    as_of: 2026-11-22
+    source_url: https://www.zscaler.com/blogs/security-research/cve-2026-111497-node2shell-http2shell-vulnerability-may-allow-rce
+    confidence: reported
   - label: Vendor report
     text: "Sophos describes a critical buffer overflow rated 9.2. The score's version and assigner are not confirmed; it is shown for reference only."
     as_of: 2026-11-09
     source_url: https://www.sophos.com/blog/node2shell-cve-2026-111497-in-active-exploitation
     confidence: reported
 
+were_you_hit:
+  assume_compromise_when: "An unfixed app that decodes untrusted Brotli crashed or misbehaved after compressed input, then spawned processes or made outbound connections."
+  check:
+    - "Unexpected crashes or segfaults in Node.js, Python, .NET, Envoy or service-mesh workloads after compressed requests (Zscaler)"
+    - "Requests with `Content-Encoding: br` to endpoints that do not normally take compressed bodies"
+    - "Unexpected child processes or outbound connections from those runtimes after a crash"
+  rotate:
+    - "Secrets and tokens the affected process could read, if code execution is suspected"
+  guides:
+    - { title: "Zscaler ThreatLabz: what to monitor, plus source IPs seen probing", url: "https://www.zscaler.com/blogs/security-research/cve-2026-111497-node2shell-http2shell-vulnerability-may-allow-rce" }
+
 timeline:
   - { event: "Node.js releases fixed versions (22.23.4, 24.22.1, 26.12.1)", date: 2026-10-21, source_url: "https://nodejs.org/en/blog/vulnerability/october-2026-security-releases", confidence: vendor-stated }
   - { event: "Added to CISA's Known Exploited Vulnerabilities catalogue", date: 2026-10-27, source_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", confidence: vendor-stated }
+
+changes:
+  - date: 2026-11-22
+    reason: "Added affected version ranges and monitoring guidance; tiers unchanged."
+    source_url: https://www.zscaler.com/blogs/security-research/cve-2026-111497-node2shell-http2shell-vulnerability-may-allow-rce
 
 sources:
   - title: Node.js October 2026 security releases
@@ -168,7 +189,7 @@ sources:
 
 The "HTTP2" in the name is misleading: the flaw is in the shared Brotli decoder and has nothing to do with the HTTP/2 protocol. That is why one patch is not enough.
 
-Affected Brotli library versions and the CVSS vector are not stated here. The Node.js advisory and the CISA catalogue entry are the main sources.
+Node.js and Google state no exact start versions; the ranges in the table come from Zscaler and Wiz and are marked as theirs. The Node.js advisory and the CISA catalogue entry are the main sources.
 
 ## Why this call is calmer than CISA's
 

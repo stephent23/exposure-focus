@@ -54,6 +54,7 @@ These are enforced by tests, not by convention:
 - CVSS never sets a tier. EPSS can raise a call by one tier, and only with its own date and source.
 - No hour or day counts in records or on built pages.
 - Links are real https sources or explicit placeholders. Every published record cites its sources.
+- A key fact says Yes (exploited, public exploit) only when a vendor or authority states it; when every source behind it is reported, the badge says "Reported, not confirmed".
 - Every fact has a source and an as-of date. Every mitigation is marked as the fix or a stopgap, states its limit (what it leaves open or costs), and carries a confidence label (`vendor-stated`, `reported` or `inference`).
 - Placeholders stay until the owner fills them in. Never invent a fact.
 - Built pages make no third-party requests, every internal link resolves, and there is no inline script or style. The strict Content-Security-Policy is in `public/_headers`.

@@ -42,3 +42,4 @@
   .fold-hint { margin-left: 24px; flex-basis: 100%; text-align: left; }
   .hit-list li { grid-template-columns: 1fr; gap: 2px; }
 }
+.hit-guides { margin-top: 12px; color: var(--ink-2); }

@@ -60,24 +60,45 @@ export const changeHeadline = (c: Change) => {
   return `${c.placement}: ${tier(c.from_tier)} to ${tier(c.to_tier)}`;
 };
 
-export type KeyFact = { label: string; value: string; tone: 'bad' | 'ok' | 'unknown'; source?: { url: string; as_of: string } };
+export type KeyFact = {
+  label: string;
+  value: string;
+  tone: 'bad' | 'ok' | 'unknown';
+  source?: { url: string; as_of: string };
+  /** True when the only evidence behind a definite answer is reported or inferred, not stated by a vendor or authority. */
+  unconfirmed?: boolean;
+};
 
-// Which evidence item backs each key fact, matched on its label. The first item with a real link wins.
+// Which evidence item backs each key fact, matched on its label. The first item with a real link wins,
+// but an item stated by a vendor or authority beats a reported one.
 const FACT_EVIDENCE = {
-  exploited: /KEV|exploitation|attacker activity|exploit evidence/i,
+  exploited: /KEV|exploited|exploitation|attacker activity|exploit evidence/i,
   publicExploit: /public exploit|proof of concept|exploit evidence/i,
   vendor: /vendor (advisory|bulletin)|distribution advisory/i
 };
 
+/** The value shown when a fact rests only on reported or inferred evidence. */
+export const REPORTED_VALUE = 'Reported, not confirmed';
+
 /** Four facts for the strip under the summary, always in this order. Derived, never typed by hand; each definite answer carries the evidence behind it. */
 export function keyFacts(record: RecordEntry): KeyFact[] {
   const any = (key: 'exploited' | 'public_exploit') => record.placements.some((p) => p.facts[key] === true);
+  const matches = (pattern: RegExp) => (record.evidence ?? []).filter((x) => pattern.test(x.label) && x.source_url.startsWith('http'));
+  const confirmed = (e: { confidence?: string }) => e.confidence === undefined || e.confidence === 'vendor-stated';
   const backing = (pattern: RegExp) => {
-    const e = (record.evidence ?? []).find((x) => pattern.test(x.label) && x.source_url.startsWith('http'));
+    const found = matches(pattern);
+    const e = found.find(confirmed) ?? found[0];
     return e && { url: e.source_url, as_of: e.as_of };
   };
-  const yesOrUnknown = (label: string, yes: boolean, pattern: RegExp): KeyFact =>
-    yes ? { label, value: 'Yes', tone: 'bad', source: backing(pattern) } : { label, value: 'Not known', tone: 'unknown' };
+  // A Yes only when a vendor or authority says so; otherwise the badge says the claim is reported, matching the evidence.
+  const yesOrUnknown = (label: string, yes: boolean, pattern: RegExp): KeyFact => {
+    if (!yes) return { label, value: 'Not known', tone: 'unknown' };
+    const found = matches(pattern);
+    const firm = found.length === 0 || found.some(confirmed);
+    return firm
+      ? { label, value: 'Yes', tone: 'bad', source: backing(pattern) }
+      : { label, value: REPORTED_VALUE, tone: 'bad', source: backing(pattern), unconfirmed: true };
+  };
   const vendor = backing(FACT_EVIDENCE.vendor);
 
   const headline = record.placements[0].facts;

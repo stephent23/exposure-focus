@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest';
 import type { RecordEntry } from '../schema/record';
 import { fixTitle, freshness, groupForHome, lastChanged, lastTierMove, recentActivity } from './home';
 
-function fake(slug: string, tier: number, status: 'draft' | 'published' | 'retired' = 'published'): RecordEntry {
-  return { slug, status, placements: [{ tier }] } as unknown as RecordEntry;
+function fake(slug: string, tier: number, status: 'draft' | 'published' | 'retired' = 'published', published = '2026-11-01'): RecordEntry {
+  return { slug, name: slug, status, published, placements: [{ tier }] } as unknown as RecordEntry;
 }
 
 describe('groupForHome', () => {
@@ -16,6 +16,15 @@ describe('groupForHome', () => {
   it('places each published record once under its headline tier', () => {
     const groups = groupForHome([fake('a', 1), fake('b', 2), fake('c', 3), fake('d', 3)]);
     expect(groups.map((g) => g.records.map((r) => r.slug))).toEqual([['a'], ['b'], ['c', 'd']]);
+  });
+
+  it('lists the newest verdict first within a tier, not alphabetically', () => {
+    const groups = groupForHome([
+      fake('alpha', 1, 'published', '2026-11-09'),
+      fake('zulu', 1, 'published', '2026-11-20'),
+      fake('mike', 1, 'published', '2026-11-13')
+    ]);
+    expect(groups[0].records.map((r) => r.slug)).toEqual(['zulu', 'mike', 'alpha']);
   });
 
   it('drops records headlined at Routine (tier 4)', () => {

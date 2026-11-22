@@ -27,6 +27,14 @@ const { record } = Astro.props;
           {record.were_you_hit.check.map((c) => <li><b>Check</b><span>{c}</span></li>)}
           {record.were_you_hit.rotate.map((c) => <li><b>Rotate</b><span>{c}</span></li>)}
         </ul>
+        {record.were_you_hit.guides && (
+          <p class="hit-guides">
+            <strong>Indicators and hunting guidance:</strong>{' '}
+            {record.were_you_hit.guides.map((g, i) => (
+              <>{i > 0 && ' · '}{g.url.startsWith('http') ? <a href={g.url}>{g.title}</a> : <><span>{g.title}</span> <span class="placeholder">{g.url}</span></>}</>
+            ))}
+          </p>
+        )}
       </details>
     </section>
   )}
