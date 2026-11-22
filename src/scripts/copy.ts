@@ -1,5 +1,5 @@
 // Browser script: the copy buttons on a verdict page (board summary and plain text).
-const buttons = [...document.querySelectorAll<HTMLButtonElement>('button[data-copy]')];
+const buttons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[data-copy]'));
 const statusEl = document.getElementById('boss-status');
 const fallback = document.getElementById('boss-fallback') as HTMLDetailsElement | null;
 
