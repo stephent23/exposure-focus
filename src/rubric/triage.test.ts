@@ -92,6 +92,14 @@ describe('triage: gates', () => {
     expect(triage({ ...inside, impact: 'critical' }).reason).toMatch(/not reachable.*inside a network/i);
   });
 
+  it('not reachable but an exploited flaw in a high-value target is rated as if reachable, capped at Tier 3', () => {
+    expect(triage({ reachable: false, exploited: true, high_value_target: true, no_login: true, impact: 'critical' }).tier).toBe(3);
+    expect(triage({ reachable: false, exploited: true, high_value_target: true, no_login: true, impact: 'critical' }).reason).toMatch(/high-value target/i);
+    // A high-value target alone, with no exploitation, stays Routine.
+    expect(triage({ reachable: false, high_value_target: true, no_login: true, impact: 'critical' }).tier).toBe(4);
+    expect(triage({ reachable: false, public_exploit: true, high_value_target: true, no_login: true, impact: 'critical' }).tier).toBe(4);
+  });
+
   it('not reachable and exploited only on internet-facing systems stays Tier 4 (Routine)', () => {
     expect(triage({ reachable: false, exploited: true, no_login: true, impact: 'critical' }).tier).toBe(4);
     expect(triage({ reachable: false, exploited: true, no_login: true, impact: 'critical' }).reason).toMatch(/only on systems reachable from the internet/i);
@@ -128,6 +136,7 @@ describe('triage: golden cases', () => {
     ['PHP2Shell, internet-facing', { reachable: true, exploited: true, no_login: true, impact: 'critical' }, 1],
     ['PHP2Shell, internal-only', { reachable: false, no_login: true, impact: 'critical' }, 4],
     ['PHP2Shell, internal-only, exploited only on internet-facing servers', { reachable: false, exploited: true, no_login: true, impact: 'critical' }, 4],
+    ['vCenter on a management network, exploited elsewhere (high-value target)', { reachable: false, exploited: true, high_value_target: true, no_login: true, impact: 'critical' }, 3],
     ['Expressway, internal cluster nodes reached from exposed ones', { reachable: false, exploited: true, used_internally: true, no_login: true, impact: 'critical' }, 3],
     ['HTTP2Shell before KEV', { reachable: true, no_login: true, impact: 'critical', credible_researcher_claim: true }, 2],
     ['HTTP2Shell after KEV', { reachable: true, exploited: true, no_login: true, impact: 'critical', credible_researcher_claim: true }, 1],

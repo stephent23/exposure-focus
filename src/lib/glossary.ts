@@ -26,8 +26,13 @@ const CORE: Entry[] = [
 const OPTIONAL: Entry[] = [
   {
     term: 'Capped at Tier 3',
-    pattern: /"used_internally":true|"chained_with"/,
-    definition: 'Software that outsiders cannot reach is rated as if they could when attackers are reported using the flaw from inside networks, or it is part of a known attack chain, but never above Tier 3 (Prioritised).'
+    pattern: /"used_internally":true|"high_value_target":true|"chained_with"/,
+    definition: 'Software that outsiders cannot reach is rated as if they could when attackers are reported using the flaw from inside networks, when it is an exploited flaw in a high-value target, or when it is part of a known attack chain, but never above Tier 3 (Prioritised).'
+  },
+  {
+    term: 'High-value target',
+    pattern: /"high_value_target":true/,
+    definition: 'A system attackers go after once inside a network: identity and access, virtualisation management, backup and recovery, or IT management and remote-access tools.'
   },
   {
     term: 'Editorial call',

@@ -69,6 +69,7 @@ const triageFactsSchema = z
     impact: z.enum(['critical', 'significant', 'limited']).optional(),
     chained_with: z.array(text).min(1).optional(),
     used_internally: z.boolean().optional(),
+    high_value_target: z.boolean().optional(),
     vendor_stated_exposure_condition: z.boolean().optional(),
     credible_researcher_claim: z.boolean().optional(),
     exploitation_imminent: z.boolean().optional(),
@@ -230,6 +231,16 @@ export const recordSchema = baseRecordSchema.superRefine((record, ctx) => {
       code: 'custom',
       path: ['evidence'],
       message: 'A placement relies on attackers using the flaw from inside a network, so the evidence must include an item labelled "Internal use" with its source.'
+    });
+  }
+
+  // A high-value target is a judgement about the system, so the record must say why it counts and cite it.
+  const usesTarget = record.placements.some((p) => p.facts.high_value_target === true);
+  if (usesTarget && !record.evidence.some((e) => /high-value target/i.test(e.label))) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['evidence'],
+      message: 'A placement relies on a high-value target, so the evidence must include an item labelled "High-value target" saying why, with its source.'
     });
   }
 

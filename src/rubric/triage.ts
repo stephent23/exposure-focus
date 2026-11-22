@@ -45,13 +45,20 @@ export type TriageFacts = {
    * not reachable from the internet; exploitation seen only on internet-facing systems does not.
    */
   used_internally?: boolean;
+  /**
+   * The system is a high-value target that attackers go after once inside a network: identity and access systems,
+   * virtualisation management, backup and recovery, or IT management and remote-access tools (the list on the rubric
+   * page). Needs an evidence item labelled "High-value target". With exploitation anywhere, it lifts a placement that
+   * is not reachable, even without a report of internal use.
+   */
+  high_value_target?: boolean;
   /** Used one way only: it can raise a call by one tier, never lower one. */
   epss?: number;
 };
 
 export type Tier = 1 | 2 | 3 | 4;
 
-/** The highest tier a placement that is not reachable from the internet can get: only when attackers are seen using the flaw from inside a network, or it is part of a known exploit chain. Published on the rubric page. */
+/** The highest tier a placement that is not reachable from the internet can get: only when attackers are seen using the flaw from inside a network, the system is a high-value target and the flaw is exploited, or it is part of a known exploit chain. Published on the rubric page. */
 export const UNREACHABLE_EXPLOITED_TIER: Tier = 3;
 
 type Evidence = 'exploited' | 'exploitation imminent' | 'public exploit' | 'credible researcher claim' | 'no evidence';
@@ -106,7 +113,8 @@ export function triage(facts: TriageFacts): { tier: Tier; reason: string } {
   // inside a network, or it is a step in a known exploit chain. Exploitation seen only on internet-facing systems
   // does not count here. When it applies, the placement is rated as if reachable and capped at Tier 3 (Prioritised).
   if (!reachable) {
-    const usedInside = (facts.exploited === true && facts.used_internally === true) || (facts.chained_with?.length ?? 0) > 0;
+    const usedInside =
+      (facts.exploited === true && (facts.used_internally === true || facts.high_value_target === true)) || (facts.chained_with?.length ?? 0) > 0;
     if (!usedInside) {
       const note = facts.exploited === true ? ' Exploitation is reported only on systems reachable from the internet.' : '';
       return { tier: 4, reason: `Not reachable from the internet. Routine patching.${note}` };
@@ -114,7 +122,7 @@ export function triage(facts: TriageFacts): { tier: Tier; reason: string } {
     const asIfReachable = triage({ ...facts, reachable: true });
     return {
       tier: Math.max(UNREACHABLE_EXPLOITED_TIER, asIfReachable.tier) as Tier,
-      reason: `Not reachable from the internet, but attackers are reported using it from inside a network or it is part of a known exploit chain, so it is rated as if reachable and capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
+      reason: `Not reachable from the internet, but attackers are reported using it from inside a network, it is an exploited flaw in a high-value target, or it is part of a known exploit chain, so it is rated as if reachable and capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
     };
   }
 
