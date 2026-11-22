@@ -30,8 +30,8 @@ describe('verdict view helpers', () => {
     expect(guideLabel('https://developers.cloudflare.com/waf/')).toBe('Cloudflare official guidance');
     expect(guideLabel('https://access.redhat.com/security/x')).toBe('Red Hat official guidance');
     expect(guideLabel('https://www.cisa.gov/x')).toBe('CISA official guidance');
-    expect(guideLabel('https://www.akamai.com/blog/x')).toBe('Akamai write-up (not official)');
-    expect(guideLabel('https://www.bleepingcomputer.com/news/x')).toBe('BleepingComputer report (not official)');
+    expect(guideLabel('https://www.akamai.com/blog/x')).toBe('Akamai write-up');
+    expect(guideLabel('https://www.bleepingcomputer.com/news/x')).toBe('BleepingComputer report');
     expect(guideLabel('https://example.org/x')).toBe('example.org (source not checked)');
   });
 });

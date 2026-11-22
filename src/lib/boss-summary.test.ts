@@ -34,13 +34,8 @@ describe('bossSummary', () => {
     ]);
   });
 
-  it('adds the unconfirmed line before the URL when something is only reported', () => {
-    const lines = bossSummary(fake(['vendor-stated', 'reported']), URL).split('\n').filter(Boolean);
-    expect(lines.at(-2)).toBe('Some facts are not yet confirmed.');
-    expect(lines.at(-1)).toBe(URL);
+  it('never adds an unconfirmed line: confidence is shown on the page, not repeated', () => {
+    expect(bossSummary(fake(['vendor-stated', 'reported']), URL)).not.toContain('not yet confirmed');
   });
 
-  it('omits the unconfirmed line otherwise', () => {
-    expect(bossSummary(fake(), URL)).not.toContain('not yet confirmed');
-  });
 });

@@ -117,9 +117,9 @@ describe('buildFeed', () => {
     expect(first).not.toContain('not yet confirmed');
   });
 
-  it('says so when any evidence is only reported', () => {
+  it('does not add an unconfirmed line when evidence is only reported', () => {
     const r = rec({ evidence: [{ label: 'L', text: 'T', as_of: '2026-11-09', source_url: '[link to add]', confidence: 'reported' }] });
-    for (const e of entries(buildFeed([r], SITE))) expect(e).toContain('Some facts are not yet confirmed.');
+    for (const e of entries(buildFeed([r], SITE))) expect(e).not.toContain('not yet confirmed');
   });
 
   it('adds one entry per change, linked to the change log on the verdict page', () => {

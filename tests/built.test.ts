@@ -52,13 +52,13 @@ const CARD_WORD_BUDGET = 120;
 
 const records = await getAllRecords();
 const published = records.filter((r) => r.status === 'published');
-const listed = published.filter((r) => headlineTier(r) !== 4);
+const listed = published;
 const pages = files().filter((f) => f.endsWith('.html'));
 const home = read('index.html');
 const recordPage = (slug: string) => read('verdicts', slug, 'index.html');
 
 describe('built site', () => {
-  it('lists every published non-Tier-4 record on the home page exactly once, and no others', () => {
+  it('lists every published record on the home page exactly once, and no others', () => {
     expect(listed.length).toBeGreaterThan(0);
     for (const r of records) expect(count(home, `data-record="${r.slug}"`), r.slug).toBe(listed.includes(r) ? 1 : 0);
     expect(count(home, 'data-record="')).toBe(listed.length);
@@ -553,7 +553,7 @@ describe('answer box, evidence badges and plain language', () => {
       for (const p of r.placements.filter((x) => x.tier <= 3 && x.override_reason)) {
         const rubric = placementResult(r, p).tier;
         if (rubric === p.tier) continue;
-        expect(shown, `${r.slug} ${p.name}`).toContain(`Editorial call: the rules give Tier ${rubric}; this page shows Tier ${p.tier}.`);
+        expect(shown, `${r.slug} ${p.name}`).toContain(`Editorial call: the rules give Tier ${rubric}.`);
       }
     }
   });
@@ -567,7 +567,7 @@ describe('answer box, evidence badges and plain language', () => {
   });
 
   it('lists home cards newest first within each tier', () => {
-    for (const tier of [1, 2, 3]) {
+    for (const tier of [1, 2, 3, 4]) {
       const expected = listed.filter((r) => headlineTier(r) === tier).sort(byNewest).map((r) => r.slug);
       const shown = [...home.matchAll(/data-record="([^"]+)"/g)].map((m) => m[1]).filter((s) => expected.includes(s));
       expect(shown, `tier ${tier}`).toEqual(expected);

@@ -12,7 +12,6 @@ export function bossSummary(record: RecordEntry, pageUrl: string): string {
     ...sortedPlacements(record).map((p) => `Tier ${p.tier}: ${p.name}: ${p.action}`),
     `Evidence as of ${record.evidence_as_of} (UTC). Review by ${record.review_until}.`
   ];
-  if (record.evidence.some((e) => e.confidence === 'reported')) lines.push('Some facts are not yet confirmed.');
   lines.push(pageUrl);
   return lines.join('\n');
 }

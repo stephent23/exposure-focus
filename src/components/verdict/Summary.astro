@@ -11,7 +11,6 @@ interface Props {
 }
 const { record, stale } = Astro.props;
 const top = headlineTier(record) as TierNumber;
-const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
 // The latest tier move, if any, so a returning reader sees at once that the call changed.
 const move = sortedChanges(record.changes).find((c) => c.to_tier !== undefined);
 ---
@@ -28,7 +27,6 @@ const move = sortedChanges(record.changes).find((c) => c.to_tier !== undefined);
   <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
   <p class="verdict-summary">{record.summary}</p>
   <p class="tags">
-    {unconfirmed && <span>Some facts unconfirmed</span>}
     <span class="tag-stale" data-review-until={record.review_until} hidden={!stale}>Overdue for review</span>
   </p>
 

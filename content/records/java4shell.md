@@ -14,7 +14,6 @@ tier_reason: "The probes seen are scanning, not working attacks, and code execut
 would_change:
   - Moves to Emergency if a break-in is confirmed or a working exploit for an application is published
   - Moves to Urgent if working attack attempts are seen
-  - Drops to Routine once the JVM runs a fixed build
 affected:
   - product: Oracle Java SE 17
     vulnerable: "17.0.6 to 17.0.21.0.3 (start of range per the researchers)"

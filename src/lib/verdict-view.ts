@@ -31,13 +31,13 @@ const SOURCES: Record<string, { name: string; official: boolean; kind?: string }
   'seclists.org': { name: 'SecLists', official: false, kind: 'mailing list post' }
 };
 
-/** "AWS official guidance" for a vendor page; other sources are named but never called official. */
+/** "AWS official guidance" for a vendor page; other sources are named by kind, never called official. */
 export const guideLabel = (url: string) => {
   const host = new URL(url).hostname.replace(/^www\./, '');
   const key = Object.keys(SOURCES).find((h) => host === h || host.endsWith(`.${h}`));
   const s = key && SOURCES[key];
   if (!s) return `${host} (source not checked)`;
-  return s.official ? `${s.name} official guidance` : `${s.name} ${s.kind} (not official)`;
+  return s.official ? `${s.name} official guidance` : `${s.name} ${s.kind}`;
 };
 
 const MONTHS =['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -78,7 +78,7 @@ const FACT_EVIDENCE = {
 };
 
 /** The value shown when a fact rests only on reported or inferred evidence. */
-export const REPORTED_VALUE = 'Reported, not confirmed';
+export const REPORTED_VALUE = 'Reported';
 
 /** Four facts for the strip under the summary, always in this order. Derived, never typed by hand; each definite answer carries the evidence behind it. */
 export function keyFacts(record: RecordEntry): KeyFact[] {

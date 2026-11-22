@@ -11,10 +11,10 @@ export const byNewest = (a: RecordEntry, b: RecordEntry) =>
   latestChange(b).localeCompare(latestChange(a)) ||
   a.name.localeCompare(b.name);
 
-/** Published records grouped by headline tier 1-3, newest first within each tier. Routine (tier 4) headlines are not listed. */
+/** Published records grouped by headline tier 1-4, newest first within each tier. */
 export function groupForHome(records: RecordEntry[]) {
   const published = records.filter((record) => record.status === 'published');
-  return ([1, 2, 3] as const).map((tier) => ({
+  return ([1, 2, 3, 4] as const).map((tier) => ({
     tier,
     records: published.filter((record) => headlineTier(record) === tier).sort(byNewest)
   }));
