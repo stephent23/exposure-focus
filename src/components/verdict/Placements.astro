@@ -1,7 +1,9 @@
 ---
-// Where it matters: the tier for each placement, most urgent first. This is the decision, so it comes straight after the header.
+// The answer box: the tier for each place the software can run, most urgent first, with the first thing to do.
+// This is the decision, so it comes straight after the header. Reasons and terms are folded.
 import '../../styles/verdict/placements.css';
 import Text from '../Text.astro';
+import Glossary from './Glossary.astro';
 import { TIERS, type TierNumber } from '../../lib/tiers';
 import { placementResult, sortedPlacements, type RecordEntry } from '../../schema/record';
 
@@ -14,13 +16,14 @@ const notable = all.filter((p) => p.tier <= 3);
 const routine = all.filter((p) => p.tier === 4);
 ---
 
-<section class="sec where" aria-labelledby="placement-heading">
-  <h2 id="placement-heading">Where it matters</h2>
-  <p class="sec-lede">The same flaw needs a different response depending on where the software runs.</p>
+<section class="sec where answer" aria-labelledby="placement-heading">
+  <h2 id="placement-heading">Your answer: tier by where it runs</h2>
+  <p class="sec-lede">Find the line that matches your setup. Its tier and first step are beside it.</p>
   {notable.length > 0 && <ul class="places" role="list">
     {notable.map((placement) => {
       const result = placementResult(record, placement);
       const tier = placement.tier as TierNumber;
+      const editorial = placement.override_reason !== undefined && result.tier !== tier;
       return (
         <li class={`place t${tier}`}>
           <div class="place-main">
@@ -28,6 +31,9 @@ const routine = all.filter((p) => p.tier === 4);
             <div class="place-body">
               <h3>{placement.name}</h3>
               <p class="place-action"><Text text={placement.action} /></p>
+              {editorial && (
+                <p class="place-override">Editorial call: the rules give Tier {result.tier}; this page shows Tier {tier}. Reason under “Why Tier {tier}”.</p>
+              )}
             </div>
           </div>
           <details class="reasoning">
@@ -35,8 +41,8 @@ const routine = all.filter((p) => p.tier === 4);
             <ul class="list">
               {placement.why.map((w) => <li><Text text={w} /></li>)}
             </ul>
-            <p class="meta-line">Rubric: {result.reason}</p>
-            {placement.override_reason && <p class="meta-line">Override: {placement.override_reason}</p>}
+            <p class="meta-line">How the rules rate it: {result.reason}</p>
+            {placement.override_reason && <p class="meta-line">Editorial call: {placement.override_reason}</p>}
           </details>
         </li>
       );
@@ -45,4 +51,5 @@ const routine = all.filter((p) => p.tier === 4);
   {routine.length > 0 && (
     <p class="routine-rest"><span class="badge t4">Tier 4 · {TIERS[4].name}</span> <span>{routine.map((p) => p.name).join('; ')}</span></p>
   )}
+  <Glossary record={record} />
 </section>

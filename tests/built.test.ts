@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 
-import { recentActivity } from '../src/lib/home';
+import { byNewest, recentActivity } from '../src/lib/home';
 import { getWatching } from '../src/lib/watching';
 import { getAllRecords } from '../src/lib/records';
 import { CONFIDENCE_LABELS } from '../src/lib/tiers';
-import { keyFacts } from '../src/lib/verdict-view';
-import { headlineTier, TIMEFRAME } from '../src/schema/record';
+import { keyFacts, REPORTED_VALUE } from '../src/lib/verdict-view';
+import { headlineTier, placementResult, TIMEFRAME } from '../src/schema/record';
 
 const dist = join(process.cwd(), 'dist-test');
 const read = (...p: string[]) => readFileSync(join(dist, ...p), 'utf-8');
@@ -534,6 +534,58 @@ describe('built site', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
       for (const d of [r.published, r.evidence_as_of, r.review_until]) expect(html, `${r.slug} ${d}`).toContain(`<time datetime="${d}">`);
+    }
+  });
+});
+
+describe('answer box, evidence badges and plain language', () => {
+  it('says Yes for exploitation or a public exploit only when a vendor or authority states it', () => {
+    for (const r of published) {
+      for (const f of keyFacts(r).filter((x) => x.label === 'Exploited in the wild' || x.label === 'Public exploit code')) {
+        if (f.value !== 'Yes' || !f.source) continue;
+        const backing = r.evidence.find((e) => e.source_url === f.source!.url && e.as_of === f.source!.as_of);
+        expect(backing?.confidence, `${r.slug} ${f.label}`).toBe('vendor-stated');
+      }
+      for (const f of keyFacts(r).filter((x) => x.unconfirmed)) expect(plain(recordPage(r.slug)), `${r.slug} ${f.label}`).toContain(REPORTED_VALUE);
+    }
+  });
+
+  it('puts the tier for each placement in one answer box straight after the header, with terms defined', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      const start = html.indexOf('class="sec where answer"');
+      expect(start, `${r.slug} answer box`).toBeGreaterThan(html.indexOf('</header>'));
+      const box = html.slice(start, html.indexOf('</section>', start));
+      expect(box, `${r.slug} terms`).toContain('Terms on this page');
+      expect(box, `${r.slug} rules link`).toContain('href="/rubric/"');
+      for (const p of r.placements.filter((x) => x.tier <= 3)) expect(plain(box), `${r.slug} ${p.name}`).toContain(p.name);
+    }
+  });
+
+  it('explains every editorial call in one visible sentence on its row', () => {
+    for (const r of published) {
+      const shown = plain(withoutDetails(recordBody(recordPage(r.slug))));
+      for (const p of r.placements.filter((x) => x.tier <= 3 && x.override_reason)) {
+        const rubric = placementResult(r, p).tier;
+        if (rubric === p.tier) continue;
+        expect(shown, `${r.slug} ${p.name}`).toContain(`Editorial call: the rules give Tier ${rubric}; this page shows Tier ${p.tier}.`);
+      }
+    }
+  });
+
+  it('offers the board summary and the plain text as copy buttons', () => {
+    for (const r of published) {
+      const html = recordPage(r.slug);
+      expect(html, `${r.slug} board button`).toContain('data-copy="boss-quote"');
+      expect(html, `${r.slug} text button`).toContain('data-copy="boss-text"');
+    }
+  });
+
+  it('lists home cards newest first within each tier', () => {
+    for (const tier of [1, 2, 3]) {
+      const expected = listed.filter((r) => headlineTier(r) === tier).sort(byNewest).map((r) => r.slug);
+      const shown = [...home.matchAll(/data-record="([^"]+)"/g)].map((m) => m[1]).filter((s) => expected.includes(s));
+      expect(shown, `tier ${tier}`).toEqual(expected);
     }
   });
 });

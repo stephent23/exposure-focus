@@ -4,13 +4,13 @@ name: PHP2Shell
 aliases: []
 cves: [CVE-2026-109618, CVE-2026-109619]
 related_cves: [CVE-2026-115560]
-summary: Two flaws in the PHP runtime let an attacker run code from a web request with no login, and both are exploited. Internet-facing PHP needs an out-of-cycle response; internal-only PHP does not.
+summary: "Two exploited flaws in the PHP runtime let an attacker run code from a web request with no login, so internet-facing PHP needs an out-of-cycle response."
 attack: rce
 status: published
 published: 2026-11-09
-evidence_as_of: 2026-11-20
+evidence_as_of: 2026-11-22
 review_until: 2026-11-23
-leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw has no fix yet, and PHP suggests turning off one feature until it does.
+leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw was fixed in the 19 Nov 2026 releases.
 tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
 would_change:
   - Internal-only PHP moves up if it becomes reachable from the internet
@@ -31,9 +31,12 @@ affected:
   - product: PHP 8.1 and older
     vulnerable: "Not listed in PHP's advisories; end of life, no fix from PHP"
   - product: "CVE-2026-115560 (third flaw)"
-    vulnerable: Fully patched releases, including 8.5.12 (Cloudflare)
+    vulnerable: "Releases before 8.2.36, 8.3.37, 8.4.28 and 8.5.13"
+    fixed: "8.4.28 (php.net); 8.2.36, 8.3.37 and 8.5.13 per press"
 exposed_when:
   - PHP serves requests from the internet, as Apache mod_php or PHP-FPM
+  - "CVE-2026-109618: the attacker can make request parsing hit a memory allocation failure (the memory_limit)"
+  - "CVE-2026-109619: a fatal error interrupts serialize or unserialize, or session upload progress is on"
   - "CVE-2026-115560 only: session upload progress on and session.serialize_handler switched to php with ini_set()"
 
 applies_check:
@@ -55,7 +58,7 @@ placements:
 
 mitigations:
   - title: "Update PHP and restart every worker"
-    limitation: "Leaves CVE-2026-115560 unfixed; PHP 8.1 and older get no fix"
+    limitation: "Take the 19 Nov releases to fix CVE-2026-115560 too; 8.1 and older get no fix"
     role: fix
     official_guides:
       - https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w
@@ -100,6 +103,16 @@ evidence:
     as_of: 2026-11-09
     source_url: https://www.bleepingcomputer.com/news/security/cisa-confirms-php2shell-vulnerabilities-now-exploited-in-attacks/
     confidence: reported
+  - label: Exploit obstacles
+    text: "CrowdStrike (23 Oct, updated 28 Oct) says CVE-2026-109618 is triggered by a memory allocation failure while PHP parses request variables, and CVE-2026-109619 by a fatal error that interrupts serialize or unserialize, or by the session upload-progress lifecycle. Attackers must adapt the exploit to each PHP version and application; reliable use is feasible against fixed setups such as a known Docker image. At the time it had seen only probing and failed attempts, which CISA's KEV listing of 26 Oct later contradicted."
+    as_of: 2026-11-22
+    source_url: https://www.crowdstrike.com/en-us/blog/obstacles-to-weaponizing-php2shell-likely-constrain-exploitation/
+    confidence: reported
+  - label: Related flaw, fix
+    text: "PHP's 8.4.28 changelog (19 Nov 2026) lists GHSA-658j-r8rw-q6mx, session serializer mismatch can lead to remote code execution, CVE-2026-115560, as fixed. The 8.2, 8.3 and 8.5 sections were not read."
+    as_of: 2026-11-22
+    source_url: https://www.php.net/ChangeLog-8.php
+    confidence: vendor-stated
   - label: Related flaw, vendor notice
     text: "On 2026-10-23 PHP published an informational advisory for a third, related flaw, CVE-2026-115560, in session upload progress. It says it will publish a full advisory with the next release, and suggests setting session.upload_progress.enabled=0 until the next regular bugfix release. Cloudflare says the flaw affects fully patched releases, including 8.5.12. The php.net notice names no fixed version."
     as_of: 2026-11-09
@@ -121,8 +134,10 @@ timeline:
   - { event: "Fixed releases published (8.2.35, 8.3.36, 8.4.27, 8.5.12)", date: 2026-10-21, source_url: "https://www.bleepingcomputer.com/news/security/cisa-confirms-php2shell-vulnerabilities-now-exploited-in-attacks/", confidence: reported }
   - { event: "PHP publishes an informational advisory on a third flaw, CVE-2026-115560, with no fix yet", date: 2026-10-23, source_url: "https://www.php.net/archive/2026.php", confidence: vendor-stated }
   - { event: "The first two flaws are added to CISA's Known Exploited Vulnerabilities catalogue", date: 2026-10-26, source_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", confidence: vendor-stated }
+  - { event: "PHP fixes the third flaw, CVE-2026-115560 (8.4.28 and other lines)", date: 2026-11-19, source_url: "https://www.php.net/ChangeLog-8.php", confidence: vendor-stated }
 changes:
   - { date: 2026-11-20, placement: "Internal-only PHP", from_tier: 4, to_tier: 3, reason: "The rubric now rates an exploited flaw that is not reachable from the internet as Prioritised, not Routine.", source_url: "https://exposure.infosecuriosity.co.uk/rubric/" }
+  - { date: 2026-11-22, reason: "Added the conditions each flaw needs (CrowdStrike) and the 19 Nov fix for CVE-2026-115560; tiers unchanged.", source_url: "https://www.crowdstrike.com/en-us/blog/obstacles-to-weaponizing-php2shell-likely-constrain-exploitation/" }
 
 sources:
   - { title: "PHP security advisory GHSA-w8hw-w9fx-j79w (CVE-2026-109618)", url: https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w, accessed: 2026-11-09 }
@@ -136,20 +151,16 @@ sources:
   - { title: "Cloudflare changelog: emergency WAF release, 22 October 2026", url: https://developers.cloudflare.com/changelog/post/2026-10-22-emergency-waf-release-cfmr/, accessed: 2026-11-09 }
   - { title: "Fastly: virtual patch for CVE-2026-109618 and CVE-2026-109619", url: https://www.fastly.com/documentation/reference/changes/2026/10/added-virtual-patch-for-CVE-2026-109618-and-CVE-2026-109619/, accessed: 2026-11-09 }
   - { title: "Broadcom: WAF rules for the PHP vulnerabilities (VMware Avi)", url: https://knowledge.broadcom.com/external/article/460068, accessed: 2026-11-09 }
+  - { title: "CrowdStrike: Obstacles to weaponizing PHP2Shell likely constrain immediate widespread exploitation", url: https://www.crowdstrike.com/en-us/blog/obstacles-to-weaponizing-php2shell-likely-constrain-exploitation/, accessed: 2026-11-22 }
+  - { title: "PHP 8 ChangeLog (8.4.28, 19 Nov 2026)", url: https://www.php.net/ChangeLog-8.php, accessed: 2026-11-22 }
 ---
 
-Both flaws sit in the PHP runtime, not in any application built on it, which is why the exposure is so wide. PHP's advisories rate attack complexity as high; the conditions they describe include session upload progress, which the CVE-2026-109619 stopgap above turns off.
+Both flaws sit in the PHP runtime, not in any application built on it, which is why the exposure is so wide. They are not easy to use everywhere: CrowdStrike says each exploit has to be adapted to the PHP version and the application, and works most reliably against a known, fixed setup such as a standard container image. The tier still rests on CISA's listing of attacks.
 
-A third, related flaw, CVE-2026-115560, is handled differently on purpose. It is not in the CISA catalogue, no source reports it being exploited, and it needs an unusual configuration, so it does not set the tier above. It matters because there is no fix yet: the fixed releases listed on this page do not cover it, and the mitigation PHP suggests is turning off session upload progress.
+A third flaw, CVE-2026-115560, needs an unusual setup and is not reported exploited, so it does not set the tier. PHP fixed it in the 19 Nov 2026 releases. The October releases that fix the first two flaws do not.
 
-PHP's advisories are more cautious than some write-ups about which ways of serving PHP are affected: FrankenPHP and LiteSpeed are described as likely but not demonstrated.
+Restart Apache or PHP-FPM after updating so no old worker keeps running, and rebuild container images that bundle PHP. PHP 8.1 and older get no fix.
 
-Restart Apache or PHP-FPM after updating so no old worker keeps running, and rebuild container images that bundle PHP. The fixed releases do not fix CVE-2026-115560, which PHP says it will fix in its next regular release.
+Stopgaps, from PHP's advisories: for CVE-2026-109618, set memory_limit=-1 administratively and keep post_max_size, input variables, multipart parts and uploads bounded, or block multipart requests at the frontend if unused; do not use RLIMIT_AS or RLIMIT_DATA. PHP calls this its primary, not complete, mitigation. For CVE-2026-109619 there is no complete configuration fix; session.upload_progress.enabled=0 removes the upload-progress paths and stops session-based progress bars.
 
-For the CVE-2026-109618 stopgap, PHP's advisory says to set memory_limit=-1 administratively, keep post_max_size conservative, bound input variables, multipart parts and uploads, and block multipart form requests at the frontend if the application does not use them. It says not to use RLIMIT_AS or RLIMIT_DATA.
-
-For the upload progress stopgap, PHP says there is no complete configuration mitigation for CVE-2026-109619. It recommends session.upload_progress.enabled=0 even after patching if you do not use the feature, and on PHP 8.5 fatal_error_backtraces=0 removes another confirmed path. For CVE-2026-115560 this setting is the mitigation PHP suggests until its next regular release.
-
-WAF coverage: AWS WAF has a PHP managed rule group, Cloudflare has managed rules set to block by default on its emergency release, Fastly has a Next-Gen WAF virtual patch, and Broadcom publishes rule text for VMware Avi. All describe this as an interim measure. AWS says no WAF rule is a complete mitigation and Cloudflare says to patch PHP regardless. Only Cloudflare says its rules also cover CVE-2026-115560, and its rule for the session upload path only works while session.upload_progress.name is left at its default. Update any pinned rule-group version to pick up the new rules.
-
-PHP 8.1 and older get no fix and need a supported release or a backport. PHP calls the memory-limit stopgap its primary configuration mitigation, not a complete one, and it removes the memory cap. Turning off session upload progress stops upload progress bars that use PHP sessions. WAF rules miss traffic that bypasses the WAF.
+WAF coverage: AWS, Cloudflare, Fastly and Broadcom (VMware Avi) publish rules, all as interim measures that miss traffic bypassing the WAF. AWS says no rule is a complete mitigation.

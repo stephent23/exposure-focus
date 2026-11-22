@@ -3,12 +3,20 @@ import { headlineTier, type RecordEntry } from '../schema/record';
 import { freshLabel } from './fresh-dates';
 import { TIERS } from './tiers';
 
-/** Published records grouped by headline tier 1-3. Routine (tier 4) headlines are not listed. */
+const latestChange = (r: RecordEntry) => (r.changes ?? []).map((c) => c.date).sort().at(-1) ?? '';
+
+/** Newest first: by first publication date, then by latest logged change, then by name. */
+export const byNewest = (a: RecordEntry, b: RecordEntry) =>
+  b.published.localeCompare(a.published) ||
+  latestChange(b).localeCompare(latestChange(a)) ||
+  a.name.localeCompare(b.name);
+
+/** Published records grouped by headline tier 1-3, newest first within each tier. Routine (tier 4) headlines are not listed. */
 export function groupForHome(records: RecordEntry[]) {
   const published = records.filter((record) => record.status === 'published');
   return ([1, 2, 3] as const).map((tier) => ({
     tier,
-    records: published.filter((record) => headlineTier(record) === tier)
+    records: published.filter((record) => headlineTier(record) === tier).sort(byNewest)
   }));
 }
 
@@ -33,7 +41,9 @@ export function recentActivity(records: RecordEntry[], limit = 6): Activity[] {
         { ...base, date: r.published, kind: 'new', detail: `New verdict: Tier ${top} (${TIERS[top].name})` }
       ];
     });
-  return all.sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
+  // Same-day items sort by verdict name, so the list does not depend on the order the records come in.
+  // Within one verdict the file order of its changes is kept (Array.prototype.sort is stable).
+  return all.sort((a, b) => b.date.localeCompare(a.date) || a.name.localeCompare(b.name)).slice(0, limit);
 }
 
 /** The date of the latest logged change, if the verdict has ever changed. */

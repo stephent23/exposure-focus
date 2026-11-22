@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import type { RecordEntry } from '../schema/record';
-import { changeHeadline, keyFacts, guideLabel, isPlaceholder, niceDate, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
+import { changeHeadline, keyFacts, guideLabel, isPlaceholder, niceDate, REPORTED_VALUE, shortDate, sortedChanges, sortedTimeline } from './verdict-view';
 
 describe('verdict view helpers', () => {
   it('spots owner placeholders', () => {
@@ -98,3 +98,29 @@ describe('keyFacts', () => {
   });
 });
 
+
+describe('keyFacts and the strength of the evidence', () => {
+  const withEvidence = (evidence: { label: string; confidence: string; source_url?: string }[]) =>
+    ({
+      ...rec([{ exploited: true, public_exploit: true }], [{ fixed: '1.2' }]),
+      evidence: evidence.map((e) => ({ source_url: 'https://news.test/x', as_of: '2026-11-20', ...e }))
+    }) as unknown as RecordEntry;
+
+  it('says Yes only when a vendor or authority states exploitation', () => {
+    const r = withEvidence([
+      { label: 'Exploited in the wild', confidence: 'reported', source_url: 'https://news.test/a' },
+      { label: 'CISA KEV', confidence: 'vendor-stated', source_url: 'https://cisa.test/kev' }
+    ]);
+    expect(fact(r, 'Exploited in the wild')).toMatchObject({ value: 'Yes', tone: 'bad', source: { url: 'https://cisa.test/kev' } });
+  });
+
+  it('says the claim is reported when every source behind it is reported or inferred', () => {
+    const r = withEvidence([
+      { label: 'Exploited in the wild', confidence: 'reported', source_url: 'https://news.test/a' },
+      { label: 'CISA KEV', confidence: 'inference', source_url: 'https://news.test/b' },
+      { label: 'Public exploit code', confidence: 'reported', source_url: 'https://news.test/c' }
+    ]);
+    expect(fact(r, 'Exploited in the wild')).toMatchObject({ value: REPORTED_VALUE, unconfirmed: true, source: { url: 'https://news.test/a' } });
+    expect(fact(r, 'Public exploit code')).toMatchObject({ value: REPORTED_VALUE, unconfirmed: true });
+  });
+});

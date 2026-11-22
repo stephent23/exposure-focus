@@ -1,6 +1,6 @@
 ---
-// Why this tier: the reason and what would change it, then the summary for the board behind one click,
-// with a copy button (src/scripts/copy.ts). The plain-text fallback for when copying fails is folded too.
+// Why this tier: the reason and what would change it. The board summary and the plain-text version are copy
+// buttons (src/scripts/copy.ts), so the page does not repeat them; their text is folded for when copying fails.
 import '../../styles/verdict/leadership.css';
 import { headlineTier, type RecordEntry } from '../../schema/record';
 
@@ -21,20 +21,17 @@ const { record, bossText } = Astro.props;
     </div>
   </dl>
   <div class="board">
-    <details class="board-text">
-      <summary>Summary for the board</summary>
-      <blockquote>{record.leadership_quote}</blockquote>
-    </details>
-    <div class="boss">
-      <button type="button" id="boss-copy" class="copy-btn" hidden>Copy summary for the board</button>
+    <div class="copy-row">
+      <button type="button" id="boss-copy-quote" class="copy-btn" data-copy="boss-quote" hidden>Copy summary for the board</button>
+      <button type="button" id="boss-copy" class="copy-btn" data-copy="boss-text" hidden>Copy as plain text</button>
       <p id="boss-status" class="boss-status" role="status" aria-live="polite"></p>
-      <div id="boss-fallback" class="boss-fallback">
-        <details class="boss-more">
-          <summary>Summary as plain text</summary>
-          <label for="boss-text">Summary you can copy and paste</label>
-          <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
-        </details>
-      </div>
     </div>
+    <details id="boss-fallback" class="boss-more">
+      <summary>Show the text to copy</summary>
+      <p class="boss-label">Summary for the board</p>
+      <blockquote id="boss-quote">{record.leadership_quote}</blockquote>
+      <label for="boss-text">Plain text for an email or chat</label>
+      <textarea id="boss-text" readonly rows="6">{bossText}</textarea>
+    </details>
   </div>
 </section>
