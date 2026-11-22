@@ -3,7 +3,6 @@ slug: phpaftershell
 name: phpAfterShell
 aliases: [GHSA-fm2m-fjf5-v3cp]
 cves: [CVE-2026-126714]
-related_cves: [CVE-2026-109618, CVE-2026-109619, CVE-2026-115560]
 summary: "A PHP session flaw can, under narrow conditions, let an attacker plant objects in a session file; turning that into code execution needs more steps, and no attacks are reported."
 attack: rce
 status: published
