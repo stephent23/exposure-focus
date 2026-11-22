@@ -41,7 +41,9 @@ export function recentActivity(records: RecordEntry[], limit = 6): Activity[] {
         { ...base, date: r.published, kind: 'new', detail: `New verdict: Tier ${top} (${TIERS[top].name})` }
       ];
     });
-  return all.sort((a, b) => b.date.localeCompare(a.date)).slice(0, limit);
+  // Same-day items sort by verdict name, so the list does not depend on the order the records come in.
+  // Within one verdict the file order of its changes is kept (Array.prototype.sort is stable).
+  return all.sort((a, b) => b.date.localeCompare(a.date) || a.name.localeCompare(b.name)).slice(0, limit);
 }
 
 /** The date of the latest logged change, if the verdict has ever changed. */

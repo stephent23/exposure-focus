@@ -81,6 +81,15 @@ describe('lastChanged and freshness', () => {
   });
 });
 
+describe('recentActivity order', () => {
+  it('orders same-day items by verdict name, whatever order the records come in', () => {
+    const z = rec({ slug: 'z', name: 'Zulu', published: '2026-11-05' });
+    const a = rec({ slug: 'a', name: 'Alpha', published: '2026-11-05' });
+    expect(recentActivity([z, a]).map((x) => x.slug)).toEqual(['a', 'z']);
+    expect(recentActivity([a, z]).map((x) => x.slug)).toEqual(['a', 'z']);
+  });
+});
+
 describe('recentActivity reasons', () => {
   it('carries the reason for a change and folds a publication-day change into the new verdict', () => {
     const a = rec({
