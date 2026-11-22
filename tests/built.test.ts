@@ -236,10 +236,11 @@ describe('built site', () => {
     }
   });
 
-  it('has no sidebar and no "On this page" list', () => {
+  it('has no sidebar, no section nav and no "On this page" list', () => {
     for (const f of pages) {
       const html = readFileSync(f, 'utf-8');
       expect(html, f).not.toContain('class="sidebar"');
+      expect(html, f).not.toContain('class="section-nav"');
       expect(text(html), f).not.toContain('On this page');
     }
   });
@@ -305,21 +306,6 @@ describe('built site', () => {
       const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(html)?.[0] ?? '';
       expect(header, `${r.slug} summary header`).not.toBe('');
       expect(plain(header), `${r.slug} header repeats the reason`).not.toContain(r.tier_reason);
-    }
-  });
-
-  it('has one section nav on each verdict page, linking five sections that exist', () => {
-    const expected = ['placement', 'protect', 'applies', 'leadership', 'evidence'].map((id) => `#${id}-heading`);
-    for (const r of published) {
-      const html = recordPage(r.slug);
-      expect(count(html, 'class="section-nav"'), `${r.slug} nav count`).toBe(1);
-      const nav = /<nav\b[^>]*class="section-nav"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
-      // The nav is named by its visible "Jump to" label.
-      expect(nav).toContain('aria-labelledby="section-nav-label"');
-      expect(plain(nav)).toContain('Jump to');
-      const hrefs = [...nav.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)].map((m) => m[1]);
-      expect(hrefs, `${r.slug} nav links`).toEqual(expected);
-      for (const h of hrefs) expect(count(html, `id="${h.slice(1)}"`), `${r.slug} ${h}`).toBe(1);
     }
   });
 
@@ -550,14 +536,13 @@ describe('answer box, evidence badges and plain language', () => {
     }
   });
 
-  it('puts the tier for each placement in one answer box straight after the header, with terms defined', () => {
+  it('puts the tier for each placement in one answer box straight after the header', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
       const start = html.indexOf('class="sec where answer"');
       expect(start, `${r.slug} answer box`).toBeGreaterThan(html.indexOf('</header>'));
       const box = html.slice(start, html.indexOf('</section>', start));
-      expect(box, `${r.slug} terms`).toContain('Terms on this page');
-      expect(box, `${r.slug} rules link`).toContain('href="/rubric/"');
+      expect(box, `${r.slug} no glossary`).not.toContain('Terms on this page');
       for (const p of r.placements.filter((x) => x.tier <= 3)) expect(plain(box), `${r.slug} ${p.name}`).toContain(p.name);
     }
   });

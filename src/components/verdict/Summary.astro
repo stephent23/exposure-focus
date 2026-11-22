@@ -1,7 +1,6 @@
 ---
 // The top of a verdict: tier, what the flaw is, four facts at a glance, and when it was last checked.
 import '../../styles/verdict/summary.css';
-import { ATTACKS } from '../../lib/attacks';
 import type { TierNumber } from '../../lib/tiers';
 import { keyFacts, niceDate, shortDate, sortedChanges } from '../../lib/verdict-view';
 import { headlineTier, type RecordEntry } from '../../schema/record';
@@ -29,7 +28,6 @@ const move = sortedChanges(record.changes).find((c) => c.to_tier !== undefined);
   <h1>{record.name}{record.aliases.length > 0 && <small> also {record.aliases.join(', ')}</small>}</h1>
   <p class="verdict-summary">{record.summary}</p>
   <p class="tags">
-    <span>{ATTACKS[record.attack].name}</span>
     {unconfirmed && <span>Some facts unconfirmed</span>}
     <span class="tag-stale" data-review-until={record.review_until} hidden={!stale}>Overdue for review</span>
   </p>
