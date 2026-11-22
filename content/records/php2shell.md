@@ -137,8 +137,6 @@ timeline:
   - { event: "The first two flaws are added to CISA's Known Exploited Vulnerabilities catalogue", date: 2026-10-26, source_url: "https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json", confidence: vendor-stated }
   - { event: "PHP fixes the third flaw, CVE-2026-115560 (8.4.28 and other lines)", date: 2026-11-19, source_url: "https://www.php.net/ChangeLog-8.php", confidence: vendor-stated }
 changes:
-  - { date: 2026-11-20, placement: "Internal-only PHP", from_tier: 4, to_tier: 3, reason: "The rubric now rates an exploited flaw that is not reachable from the internet as Prioritised, not Routine.", source_url: "https://exposure.infosecuriosity.co.uk/rubric/" }
-  - { date: 2026-11-22, placement: "Internal-only PHP", from_tier: 3, to_tier: 4, reason: "The rubric now lifts an internal placement only when attackers are reported using the flaw from inside a network, and none is reported for PHP2Shell.", source_url: "https://exposure.infosecuriosity.co.uk/rubric/" }
   - { date: 2026-11-22, reason: "Added the conditions each flaw needs (CrowdStrike) and the 19 Nov fix for CVE-2026-115560; tiers unchanged.", source_url: "https://www.crowdstrike.com/en-us/blog/obstacles-to-weaponizing-php2shell-likely-constrain-exploitation/" }
 
 sources:

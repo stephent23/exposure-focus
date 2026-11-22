@@ -52,13 +52,13 @@ const CARD_WORD_BUDGET = 120;
 
 const records = await getAllRecords();
 const published = records.filter((r) => r.status === 'published');
-const listed = published.filter((r) => headlineTier(r) !== 4);
+const listed = published;
 const pages = files().filter((f) => f.endsWith('.html'));
 const home = read('index.html');
 const recordPage = (slug: string) => read('verdicts', slug, 'index.html');
 
 describe('built site', () => {
-  it('lists every published non-Tier-4 record on the home page exactly once, and no others', () => {
+  it('lists every published record on the home page exactly once, and no others', () => {
     expect(listed.length).toBeGreaterThan(0);
     for (const r of records) expect(count(home, `data-record="${r.slug}"`), r.slug).toBe(listed.includes(r) ? 1 : 0);
     expect(count(home, 'data-record="')).toBe(listed.length);
@@ -236,10 +236,11 @@ describe('built site', () => {
     }
   });
 
-  it('has no sidebar and no "On this page" list', () => {
+  it('has no sidebar, no section nav and no "On this page" list', () => {
     for (const f of pages) {
       const html = readFileSync(f, 'utf-8');
       expect(html, f).not.toContain('class="sidebar"');
+      expect(html, f).not.toContain('class="section-nav"');
       expect(text(html), f).not.toContain('On this page');
     }
   });
@@ -305,21 +306,6 @@ describe('built site', () => {
       const header = /<header\b[^>]*class="[^"]*\bsummary\b[^"]*"[\s\S]*?<\/header>/.exec(html)?.[0] ?? '';
       expect(header, `${r.slug} summary header`).not.toBe('');
       expect(plain(header), `${r.slug} header repeats the reason`).not.toContain(r.tier_reason);
-    }
-  });
-
-  it('has one section nav on each verdict page, linking five sections that exist', () => {
-    const expected = ['placement', 'protect', 'applies', 'leadership', 'evidence'].map((id) => `#${id}-heading`);
-    for (const r of published) {
-      const html = recordPage(r.slug);
-      expect(count(html, 'class="section-nav"'), `${r.slug} nav count`).toBe(1);
-      const nav = /<nav\b[^>]*class="section-nav"[\s\S]*?<\/nav>/.exec(html)?.[0] ?? '';
-      // The nav is named by its visible "Jump to" label.
-      expect(nav).toContain('aria-labelledby="section-nav-label"');
-      expect(plain(nav)).toContain('Jump to');
-      const hrefs = [...nav.matchAll(/<a\b[^>]*\shref="([^"]+)"/g)].map((m) => m[1]);
-      expect(hrefs, `${r.slug} nav links`).toEqual(expected);
-      for (const h of hrefs) expect(count(html, `id="${h.slice(1)}"`), `${r.slug} ${h}`).toBe(1);
     }
   });
 
@@ -550,14 +536,13 @@ describe('answer box, evidence badges and plain language', () => {
     }
   });
 
-  it('puts the tier for each placement in one answer box straight after the header, with terms defined', () => {
+  it('puts the tier for each placement in one answer box straight after the header', () => {
     for (const r of published) {
       const html = recordPage(r.slug);
       const start = html.indexOf('class="sec where answer"');
       expect(start, `${r.slug} answer box`).toBeGreaterThan(html.indexOf('</header>'));
       const box = html.slice(start, html.indexOf('</section>', start));
-      expect(box, `${r.slug} terms`).toContain('Terms on this page');
-      expect(box, `${r.slug} rules link`).toContain('href="/rubric/"');
+      expect(box, `${r.slug} no glossary`).not.toContain('Terms on this page');
       for (const p of r.placements.filter((x) => x.tier <= 3)) expect(plain(box), `${r.slug} ${p.name}`).toContain(p.name);
     }
   });
@@ -568,7 +553,7 @@ describe('answer box, evidence badges and plain language', () => {
       for (const p of r.placements.filter((x) => x.tier <= 3 && x.override_reason)) {
         const rubric = placementResult(r, p).tier;
         if (rubric === p.tier) continue;
-        expect(shown, `${r.slug} ${p.name}`).toContain(`Editorial call: the rules give Tier ${rubric}; this page shows Tier ${p.tier}.`);
+        expect(shown, `${r.slug} ${p.name}`).toContain(`Editorial call: the rules give Tier ${rubric}.`);
       }
     }
   });
@@ -582,7 +567,7 @@ describe('answer box, evidence badges and plain language', () => {
   });
 
   it('lists home cards newest first within each tier', () => {
-    for (const tier of [1, 2, 3]) {
+    for (const tier of [1, 2, 3, 4]) {
       const expected = listed.filter((r) => headlineTier(r) === tier).sort(byNewest).map((r) => r.slug);
       const shown = [...home.matchAll(/data-record="([^"]+)"/g)].map((m) => m[1]).filter((s) => expected.includes(s));
       expect(shown, `tier ${tier}`).toEqual(expected);

@@ -58,13 +58,7 @@ const { record } = Astro.props;
           </div>
         ))}
       </dl>
-      {record.epss && (
-        <p class="note">
-          EPSS (Exploit Prediction Scoring System, an estimate of how likely a flaw is to be exploited) is {Math.round(record.epss.score * 100)}% as of {record.epss.as_of}.
-          At 50% or above it raises a call that rests on exploitation or a public exploit by one tier. It never lowers one.
-        </p>
-      )}
-      <p class="note">Any CVSS (Common Vulnerability Scoring System, a general severity score) figure quoted is for reference. It did not set a tier.</p>
+      {record.epss && <p class="note">EPSS {Math.round(record.epss.score * 100)}% as of {record.epss.as_of}.</p>}
     </details>
   </section>
 

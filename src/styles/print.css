@@ -2,7 +2,7 @@
 @media print {
   :root { --paper: #fff; --panel: #fff; --muted: #333; --link: #000; }
   body { background: #fff; color: #000; font-size: var(--fs-m); }
-  .skip, .site-header nav, .section-nav, .filters, form, button, .button, .brief, .foot-links { display: none !important; }
+  .skip, .site-header nav, .filters, form, button, .button, .brief, .foot-links { display: none !important; }
   .site-header, .site-footer { border: 0; background: #fff; margin-top: 16pt; }
   .site-header .wrap { padding: 0; }
   .wrap { max-width: none; padding: 0; }

@@ -7,15 +7,15 @@ function fake(slug: string, tier: number, status: 'draft' | 'published' | 'retir
 }
 
 describe('groupForHome', () => {
-  it('always returns tiers 1, 2 and 3 in order, even when empty', () => {
+  it('always returns tiers 1 to 4 in order, even when empty', () => {
     const groups = groupForHome([]);
-    expect(groups.map((g) => g.tier)).toEqual([1, 2, 3]);
+    expect(groups.map((g) => g.tier)).toEqual([1, 2, 3, 4]);
     expect(groups.every((g) => g.records.length === 0)).toBe(true);
   });
 
   it('places each published record once under its headline tier', () => {
     const groups = groupForHome([fake('a', 1), fake('b', 2), fake('c', 3), fake('d', 3)]);
-    expect(groups.map((g) => g.records.map((r) => r.slug))).toEqual([['a'], ['b'], ['c', 'd']]);
+    expect(groups.map((g) => g.records.map((r) => r.slug))).toEqual([['a'], ['b'], ['c', 'd'], []]);
   });
 
   it('lists the newest verdict first within a tier, not alphabetically', () => {
@@ -27,9 +27,9 @@ describe('groupForHome', () => {
     expect(groups[0].records.map((r) => r.slug)).toEqual(['zulu', 'mike', 'alpha']);
   });
 
-  it('drops records headlined at Routine (tier 4)', () => {
+  it('lists records headlined at Routine (tier 4) last', () => {
     const slugs = groupForHome([fake('routine', 4), fake('a', 2)]).flatMap((g) => g.records.map((r) => r.slug));
-    expect(slugs).toEqual(['a']);
+    expect(slugs).toEqual(['a', 'routine']);
   });
 
   it('never includes draft or retired records', () => {

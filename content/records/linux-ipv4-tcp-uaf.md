@@ -111,8 +111,6 @@ timeline:
   - { event: "Anthropic reports a root exploit, not released", date: 2026-10-27, source_url: "https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack", confidence: reported }
   - { event: "Red Hat publishes its security bulletin RHSB-2026-016", date: 2026-10-30, source_url: "https://access.redhat.com/security/vulnerabilities/RHSB-2026-016", confidence: vendor-stated }
 
-changes:
-  - { date: 2026-11-13, placement: "Internet-facing server with an MPTCP listener", from_tier: 2, to_tier: 3, reason: "The rubric now counts a researcher's claim only when the demonstration is published, and Anthropic's root exploit, kernel version and setup remain unpublished.", source_url: "https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack" }
 
 sources:
   - title: Red Hat bulletin RHSB-2026-016

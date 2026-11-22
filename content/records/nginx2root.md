@@ -16,7 +16,6 @@ tier_reason: "Public code reaches code execution only against a freshly started 
 would_change:
   - Emergency if attacks are reported, or exploit code is shown to work against ordinary internet servers
   - Urgent if code execution is published against an unprepared remote server
-  - Routine once NGINX runs 1.30.7, 1.31.9 or a fixed distribution package
 
 affected:
   - product: NGINX Open Source

@@ -36,10 +36,8 @@ function entriesFor(records: RecordEntry[], base: URL): FeedEntry[] {
   for (const record of records) {
     if (record.status !== 'published') continue;
     const tierName = TIERS[headlineTier(record)].name;
-    const unconfirmed = record.evidence.some((e) => e.confidence === 'reported');
     const href = new URL(`verdicts/${record.slug}/`, base).href;
     const lines = [record.summary, `Current headline tier: ${tierName}.`, `Evidence as of ${record.evidence_as_of}`];
-    if (unconfirmed) lines.push('Some facts are not yet confirmed.');
     out.push({
       id: `tag:${TAG_AUTHORITY},2026:${tagPart(record.slug)}`,
       title: record.name,

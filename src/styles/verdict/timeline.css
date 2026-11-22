@@ -1,4 +1,4 @@
-/* Key dates: a plain list, oldest first. In the right column on wide screens, straight after the section nav on narrow ones. */
+/* Key dates: a plain list, oldest first. In the right column on wide screens, after the decision on narrow ones. */
 .timeline { margin-top: 28px; }
 .dates { list-style: none; margin: 8px 0 0; padding: 0; }
 .date-row { display: grid; gap: 1px 12px; padding: 8px 0; }

@@ -12,7 +12,7 @@ const plain = (html: string) =>
   text(html).replace(/&#x27;|&#39;/g, "'").replace(/&quot;/g, '"').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/\s+/g, ' ');
 const count = (s: string, needle: string) => s.split(needle).length - 1;
 
-const records = (await getAllRecords()).filter((r) => r.status === 'published' && headlineTier(r) !== 4);
+const records = (await getAllRecords()).filter((r) => r.status === 'published');
 const card = (slug: string) => {
   const start = home.lastIndexOf('<article', home.indexOf(`data-record="${slug}"`));
   return home.slice(start, home.indexOf('</article>', start));

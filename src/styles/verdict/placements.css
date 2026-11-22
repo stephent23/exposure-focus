@@ -48,14 +48,4 @@
 .answer { padding: 16px 20px 12px; border: 2px solid var(--ink); border-radius: 10px; background: #fff; }
 .answer > h2 { margin-top: 0; }
 .place-override { margin-top: 4px; font-size: var(--fs-s); color: var(--ink-2); }
-/* Terms on this page: folded definitions under the answer. */
-.terms { margin-top: 10px; }
-.terms > summary { cursor: pointer; display: inline-flex; align-items: center; gap: 7px; min-height: 32px; font-size: var(--fs-s); font-weight: 600; color: var(--link); list-style: none; }
-.terms > summary::-webkit-details-marker { display: none; }
-.terms > summary::before { content: '+'; font-family: var(--font-mono); font-weight: 400; }
-.terms[open] > summary::before { content: '−'; }
-.terms > summary:hover { color: var(--link-hover); text-decoration: underline; }
-.terms-list { margin: 4px 0 8px; display: grid; gap: 8px; font-size: var(--fs-s); line-height: 1.55; max-width: 72ch; }
-.terms-list dt { font-weight: 600; }
-.terms-list dd { margin: 0; color: var(--ink-2); }
 @media (max-width: 640px) { .answer { padding: 12px 12px 8px; } }

@@ -115,8 +115,6 @@ timeline:
   - { event: "Ubuntu publishes fixes (USN-9090-1)", date: 2026-11-12, source_url: "https://ubuntu.com/security/CVE-2026-119618", confidence: vendor-stated }
   - { event: "Red Hat publishes bulletin RHSB-2026-017", date: 2026-11-12, time: "18:03", source_url: "https://access.redhat.com/security/vulnerabilities/RHSB-2026-017", confidence: vendor-stated }
 
-changes:
-  - { date: 2026-11-13, placement: "Internet-facing Apache 2.4.55 to 2.4.70 with HTTP/2 enabled", from_tier: 2, to_tier: 3, reason: "The only public proof of concept crashes worker processes, and Red Hat's code-execution claim names no published research, which under the rubric no longer raises the tier.", source_url: "https://github.com/googlesky/CVE-2026-119618" }
 
 sources:
   - title: Apache HTTP Server 2.4 vulnerabilities

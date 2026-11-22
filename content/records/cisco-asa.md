@@ -47,13 +47,6 @@ placements:
       - Same as above, but losing the VPN for a while is tolerable, so the impact is limited.
     tier: 3
     action: Schedule the upgrade sooner than your normal cycle.
-  - name: Any condition false
-    facts: { vendor_stated_exposure_condition: false }
-    why:
-      - Cisco lists every condition as required, so the device is not vulnerable if any one is false.
-    tier: 4
-    action: No special action. Routine patching.
-
 mitigations:
   - title: "Upgrade ASA and FTD to a fixed release"
     limitation: "Restart interrupts the VPN unless you have a failover pair"
