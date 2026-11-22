@@ -9,7 +9,7 @@ status: published
 published: 2026-11-20
 evidence_as_of: 2026-11-20
 review_until: 2026-12-04
-leadership_quote: "PHP released fixes on 19 Nov 2026 for 18 flaws, some of which could let an attacker run code. PHP says the serious ones only apply to unusual setups, and no attacks are reported. Include the update in the normal patch cycle."
+leadership_quote: "Risk: 18 PHP flaws, some allowing code execution, but only in unusual setups. Attacks: none reported. Action: normal patching with the 19 Nov 2026 releases."
 tier_reason: "The critical flaws need a non-default configuration or an uncommon setup, and there are no attacks or published exploits, so this is Routine, not Prioritised."
 would_change:
   - Moves up if attacks or a working public exploit are reported for any of the critical flaws

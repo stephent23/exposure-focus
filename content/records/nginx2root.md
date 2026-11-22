@@ -11,7 +11,7 @@ published: 2026-11-19
 evidence_as_of: 2026-11-19
 review_until: 2026-12-03
 
-leadership_quote: "A flaw in NGINX, one of the most widely used web servers, can let an outsider crash it, and in tests take it over, without logging in. Public attack code only works in a lab set-up and no attacks are reported. Update internet-facing NGINX that uses HTTP/2 sooner than usual."
+leadership_quote: "Risk: an outsider can crash NGINX web servers that have HTTP/2 on, and in tests take them over. Attacks: none reported. Action: Prioritised for internet-facing NGINX with HTTP/2 on; otherwise normal patching."
 tier_reason: "Public code reaches code execution only against a freshly started local test container, other exploits are withheld and no attacks are reported, so the outcome rated is a worker crash."
 would_change:
   - Emergency if attacks are reported, or exploit code is shown to work against ordinary internet servers

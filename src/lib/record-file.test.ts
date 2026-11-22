@@ -12,7 +12,7 @@ status: draft
 published: 2026-11-01
 evidence_as_of: 2026-11-08
 review_until: 2026-12-08
-leadership_quote: A sentence a boss can read.
+leadership_quote: "Risk: an outsider can crash it. Attacks: none reported. Action: normal patching."
 tier_reason: Exploited and reachable.
 would_change: [Moves down once patched]
 affected:
