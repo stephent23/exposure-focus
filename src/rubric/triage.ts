@@ -120,9 +120,15 @@ export function triage(facts: TriageFacts): { tier: Tier; reason: string } {
       return { tier: 4, reason: `Not reachable from the internet. Routine patching.${note}` };
     }
     const asIfReachable = triage({ ...facts, reachable: true });
+    const because =
+      facts.exploited === true && facts.used_internally === true
+        ? 'attackers are reported using it from inside a network'
+        : facts.exploited === true && facts.high_value_target === true
+          ? 'it is an exploited flaw in a high-value target'
+          : 'it is part of a known exploit chain';
     return {
       tier: Math.max(UNREACHABLE_EXPLOITED_TIER, asIfReachable.tier) as Tier,
-      reason: `Not reachable from the internet, but attackers are reported using it from inside a network, it is an exploited flaw in a high-value target, or it is part of a known exploit chain, so it is rated as if reachable and capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
+      reason: `Not reachable from the internet, but ${because}, so it is rated as if reachable, capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
     };
   }
 

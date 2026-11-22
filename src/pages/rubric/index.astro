@@ -59,8 +59,7 @@ const rows = IMPACT_LEVELS.map((impact) => ({ impact, ...descriptions[impact], c
     <ul class="gates">
       <li class="gate t4">If the vendor states a condition for exposure is false, it is not exposed: Tier 4, Routine.</li>
       <li class="gate t4">If it is not reachable from the internet, it is Tier 4, Routine. Normal patching is enough.</li>
-      <li class="gate t3">The exception: a source shows attackers using the flaw from inside a network after getting in another way, or it is a step in a known exploit chain. It is then rated as if it were reachable, but never above Tier 3, Prioritised. Attacks seen only on internet-facing systems do not lift an internal one.</li>
-      <li class="gate t3">High-value targets are the other exception: identity and access systems (directories, single sign-on, privileged access), virtualisation management, backup and recovery, and IT management or remote-access tools. Attackers go after these once they are inside, so an exploited flaw in one is rated the same way, never above Tier 3, even with no report of internal use. Every record that uses this says why the system counts and cites a source.</li>
+      <li class="gate t3">The exception, when one of these is true: attackers are reported using the flaw inside networks; the flaw is exploited and the system is a high-value target (identity, virtualisation, backup, or IT management and remote access); or it is a step in a known exploit chain. It is then rated as if it were reachable, but never above Tier 3, Prioritised.</li>
     </ul>
     <p class="note">If it is unclear whether something is exposed, it is treated as exposed.</p>
   </section>
