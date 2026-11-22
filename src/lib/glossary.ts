@@ -26,8 +26,8 @@ const CORE: Entry[] = [
 const OPTIONAL: Entry[] = [
   {
     term: 'Capped at Tier 3',
-    pattern: /reachable:\s*false|"reachable":false/,
-    definition: 'Software that outsiders cannot reach is rated as if they could when the flaw is exploited or part of a known attack chain, but never above Tier 3 (Prioritised).'
+    pattern: /"used_internally":true|"chained_with"/,
+    definition: 'Software that outsiders cannot reach is rated as if they could when attackers are reported using the flaw from inside networks, or it is part of a known attack chain, but never above Tier 3 (Prioritised).'
   },
   {
     term: 'Editorial call',

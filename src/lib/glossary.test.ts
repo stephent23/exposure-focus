@@ -23,7 +23,7 @@ describe('termsFor', () => {
   });
 
   it('explains the Tier 3 cap and editorial calls when a placement uses them', () => {
-    const r = record({ placements: [{ facts: { reachable: false, exploited: true }, override_reason: 'Editorial judgement.' }] });
+    const r = record({ placements: [{ facts: { reachable: false, exploited: true, used_internally: true }, override_reason: 'Editorial judgement.' }] });
     expect(terms(r)).toContain('Capped at Tier 3');
     expect(terms(r)).toContain('Editorial call');
   });

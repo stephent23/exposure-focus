@@ -13,7 +13,7 @@ review_until: 2026-11-23
 leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw was fixed in the 19 Nov 2026 releases.
 tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
 would_change:
-  - Internal-only PHP moves up if it becomes reachable from the internet
+  - "Internal-only PHP moves up if it becomes reachable or attackers are reported using the flaws inside networks"
   - "The third flaw, CVE-2026-115560, starts to count if exploitation or a public exploit is reported"
 affected:
   - product: PHP 8.2
@@ -52,9 +52,10 @@ placements:
   - name: Internal-only PHP
     facts: { reachable: false, exploited: true, no_login: true, impact: critical }
     why:
-      - Not reachable from the internet, but both flaws are exploited, so an attacker already inside can use them.
-    tier: 3
-    action: Patch sooner than your normal cycle. Move up if it becomes reachable from the internet.
+      - Not reachable from the internet.
+      - Attacks are reported only on internet-facing PHP; no source shows the flaws used from inside a network.
+    tier: 4
+    action: Patch in your normal cycle. Move up if it becomes reachable from the internet.
 
 mitigations:
   - title: "Update PHP and restart every worker"
@@ -137,6 +138,7 @@ timeline:
   - { event: "PHP fixes the third flaw, CVE-2026-115560 (8.4.28 and other lines)", date: 2026-11-19, source_url: "https://www.php.net/ChangeLog-8.php", confidence: vendor-stated }
 changes:
   - { date: 2026-11-20, placement: "Internal-only PHP", from_tier: 4, to_tier: 3, reason: "The rubric now rates an exploited flaw that is not reachable from the internet as Prioritised, not Routine.", source_url: "https://exposure.infosecuriosity.co.uk/rubric/" }
+  - { date: 2026-11-22, placement: "Internal-only PHP", from_tier: 3, to_tier: 4, reason: "The rubric now lifts an internal placement only when attackers are reported using the flaw from inside a network, and none is reported for PHP2Shell.", source_url: "https://exposure.infosecuriosity.co.uk/rubric/" }
   - { date: 2026-11-22, reason: "Added the conditions each flaw needs (CrowdStrike) and the 19 Nov fix for CVE-2026-115560; tiers unchanged.", source_url: "https://www.crowdstrike.com/en-us/blog/obstacles-to-weaponizing-php2shell-likely-constrain-exploitation/" }
 
 sources:
