@@ -55,7 +55,6 @@ placements:
       - An outsider cannot supply the compressed data.
     tier: 4
     action: Update in your normal cycle. Move up if an outsider could influence that data.
-    override_reason: "Editorial judgement: here no attacker can supply the compressed data, even from inside, so the rule that lifts exploited internal flaws to Prioritised does not fit."
   - name: Never decodes untrusted Brotli
     facts: { vendor_stated_exposure_condition: false }
     why:

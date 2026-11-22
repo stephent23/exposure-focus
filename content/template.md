@@ -44,7 +44,10 @@ applies_check:
 # common_configuration, rare_configuration, vendor_stated_exposure_condition, credible_researcher_claim (only for a
 # published demonstration: a write-up, talk or code; not a lab-only result, unreleased exploit or unnamed claim),
 # exploitation_imminent (needs an "Exploitation outlook" evidence item), exploit_achieves (use when the
-# attacks do less than the impact), chained_with (needs an "Exploit chain" evidence item), and
+# attacks do less than the impact), chained_with (needs an "Exploit chain" evidence item), used_internally (attackers seen using it from inside a network;
+# needs an "Internal use" evidence item; with exploitation, this, high_value_target or a chain lifts a placement that is not reachable),
+# high_value_target (identity, virtualisation management, backup, IT management or remote access; needs a
+# "High-value target" evidence item), and
 # impact: the BUSINESS impact on this placement.
 # requires_login or rare_configuration lowers the tier by one.
 # impact: critical = control of the system, sensitive or regulated data, credentials, a production

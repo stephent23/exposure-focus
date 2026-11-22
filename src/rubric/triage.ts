@@ -39,13 +39,26 @@ export type TriageFacts = {
   vendor_stated_exposure_condition?: boolean;
   /** Other flaws in a known chain this rating relies on. The impact, evidence and login facts already describe the chain. */
   chained_with?: string[];
+  /**
+   * A source shows attackers using this flaw from inside a network, after getting in another way (for example moving
+   * from an exposed system to internal ones). Needs an evidence item labelled "Internal use". Lifts a placement that is
+   * not reachable from the internet; exploitation seen only on internet-facing systems does not.
+   */
+  used_internally?: boolean;
+  /**
+   * The system is a high-value target that attackers go after once inside a network: identity and access systems,
+   * virtualisation management, backup and recovery, or IT management and remote-access tools (the list on the rubric
+   * page). Needs an evidence item labelled "High-value target". With exploitation anywhere, it lifts a placement that
+   * is not reachable, even without a report of internal use.
+   */
+  high_value_target?: boolean;
   /** Used one way only: it can raise a call by one tier, never lower one. */
   epss?: number;
 };
 
 export type Tier = 1 | 2 | 3 | 4;
 
-/** The highest tier a placement that is not reachable from the internet can get: only when it is exploited or part of a known exploit chain. Published on the rubric page. */
+/** The highest tier a placement that is not reachable from the internet can get: only when attackers are seen using the flaw from inside a network, the system is a high-value target and the flaw is exploited, or it is part of a known exploit chain. Published on the rubric page. */
 export const UNREACHABLE_EXPLOITED_TIER: Tier = 3;
 
 type Evidence = 'exploited' | 'exploitation imminent' | 'public exploit' | 'credible researcher claim' | 'no evidence';
@@ -96,18 +109,26 @@ export function triage(facts: TriageFacts): { tier: Tier; reason: string } {
     return { tier: 4, reason: 'A vendor-stated exposure condition is false, so this is not exposed. Routine patching.' };
   }
 
-  // Gate: not reachable from the internet. Routine patching, unless attackers are already using the flaw or it is a
-  // step in a known exploit chain: an attacker who gets in another way can still use it, so it is rated as if
-  // reachable and capped at Tier 3 (Prioritised).
+  // Gate: not reachable from the internet. Routine patching, unless a source shows attackers using the flaw from
+  // inside a network, or it is a step in a known exploit chain. Exploitation seen only on internet-facing systems
+  // does not count here. When it applies, the placement is rated as if reachable and capped at Tier 3 (Prioritised).
   if (!reachable) {
-    const exploitedOrChained = facts.exploited === true || (facts.chained_with?.length ?? 0) > 0;
-    if (!exploitedOrChained) {
-      return { tier: 4, reason: 'Not reachable from the internet. Routine patching.' };
+    const usedInside =
+      (facts.exploited === true && (facts.used_internally === true || facts.high_value_target === true)) || (facts.chained_with?.length ?? 0) > 0;
+    if (!usedInside) {
+      const note = facts.exploited === true ? ' Exploitation is reported only on systems reachable from the internet.' : '';
+      return { tier: 4, reason: `Not reachable from the internet. Routine patching.${note}` };
     }
     const asIfReachable = triage({ ...facts, reachable: true });
+    const because =
+      facts.exploited === true && facts.used_internally === true
+        ? 'attackers are reported using it from inside a network'
+        : facts.exploited === true && facts.high_value_target === true
+          ? 'it is an exploited flaw in a high-value target'
+          : 'it is part of a known exploit chain';
     return {
       tier: Math.max(UNREACHABLE_EXPLOITED_TIER, asIfReachable.tier) as Tier,
-      reason: `Not reachable from the internet, but it is exploited or part of a known exploit chain, so it is rated as if reachable and capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
+      reason: `Not reachable from the internet, but ${because}, so it is rated as if reachable, capped at Tier ${UNREACHABLE_EXPLOITED_TIER}. ${asIfReachable.reason}`
     };
   }
 
