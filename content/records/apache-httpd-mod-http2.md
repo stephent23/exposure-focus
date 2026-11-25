@@ -7,8 +7,8 @@ summary: "A flaw in Apache HTTP Server's HTTP/2 module lets an outsider with no 
 attack: rce
 status: published
 published: 2026-11-13
-evidence_as_of: 2026-11-13
-review_until: 2026-11-27
+evidence_as_of: 2026-11-25
+review_until: 2026-12-09
 
 leadership_quote: "A flaw in the Apache web server can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is on, and no attacks are reported. Schedule the update for internet-facing servers ahead of normal patching; switch HTTP/2 off where no update exists yet."
 tier_reason: "Rated critical by Apache and Red Hat, but the only public code crashes worker processes and no attacks are reported, so the crash is the outcome rated."
@@ -92,6 +92,11 @@ evidence:
     as_of: 2026-11-13
     source_url: https://www.tenable.com/cve/CVE-2026-119618
     confidence: reported
+  - label: Observed attacker activity
+    text: "F5 Labs (16 Nov) says it has observed no major exploit activity, and gives detection signs: requests with a Content-Type header but no Content-Length, worker crashes and HTTP/2 connection resets."
+    as_of: 2026-11-25
+    source_url: https://www.f5.com/labs/articles/cve-2026-119618
+    confidence: reported
   - label: Exposure estimate
     text: "Wiz says 64% of cloud environments it sees have vulnerable resources and 51% have publicly exposed instances, without taking configuration (whether HTTP/2 is on) into account."
     as_of: 2026-11-13
@@ -108,6 +113,9 @@ timeline:
 
 
 sources:
+  - title: "F5 Labs: CVE-2026-119618"
+    url: https://www.f5.com/labs/articles/cve-2026-119618
+    accessed: 2026-11-25
   - title: Apache HTTP Server 2.4 vulnerabilities
     url: https://httpd.apache.org/security/vulnerabilities_24.html
     accessed: 2026-11-13

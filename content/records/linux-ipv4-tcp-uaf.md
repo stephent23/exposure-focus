@@ -7,8 +7,8 @@ summary: Red Hat says a race in the Linux kernel's IPv4 TCP code lets a remote a
 attack: rce
 status: published
 published: 2026-11-09
-evidence_as_of: 2026-11-13
-review_until: 2026-11-27
+evidence_as_of: 2026-11-25
+review_until: 2026-12-09
 leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.
 tier_reason: "Remote root is reported only from a lab, with no published exploit, kernel version or setup, and no attacks are reported. The rubric counts published demonstrations only."
 would_change:
