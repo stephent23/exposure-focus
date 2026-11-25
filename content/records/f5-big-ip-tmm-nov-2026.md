@@ -13,19 +13,11 @@ review_until: 2026-12-03
 leadership_quote: "F5 has fixed six flaws in BIG-IP that could let an outsider knock traffic offline, and possibly take over the traffic engine. Each one needs a specific, uncommon configuration, and no attacks or exploit code are reported. Teams should check whether those features are used and patch where they are."
 tier_reason: "Rated 9.8 by F5, but each flaw needs an uncommon iRule command or APM policy, and there is no exploit code or attack, so it is Routine; a confirmed affected setup deserves a quicker look."
 would_change:
-  - Urgent if exploit code is published, Emergency if attacks are reported, for set-ups that use the affected features
-  - Higher if F5 widens the list of affected configurations
-
+  - Moves up if exploit code or attacks are reported for the affected set-ups, or if F5 widens the list
 affected:
-  - product: BIG-IP 21.1.x (all modules)
-    vulnerable: 21.1.0 and later before the engineering hotfix
-    fixed: Engineering hotfix BIGIP-21.1.0.4.0.19.3-ENG
-  - product: BIG-IP 17.5.x (all modules)
-    vulnerable: 17.5.0 and later before the engineering hotfixes
-    fixed: "Engineering hotfix BIGIP-17.5.1.10.0.80.35-ENG or 17.5.1.11.0.61.12-ENG"
-  - product: BIG-IP 17.1.x (all modules)
-    vulnerable: 17.1.0 and later before the engineering hotfixes
-    fixed: "Engineering hotfix BIGIP-17.1.3.6.0.14.20-ENG or 17.1.3.7.0.21.4-ENG"
+  - product: BIG-IP 21.1.x, 17.5.x and 17.1.x (all modules)
+    vulnerable: All releases before the engineering hotfixes
+    fixed: "Engineering hotfixes for each release (builds in the analysis)"
   - product: BIG-IP Next for Kubernetes
     vulnerable: "2.2, 2.3 and 2.4 before the EHF1 builds (five of the six flaws)"
     fixed: "BNK-2.2.5-EHF1, BNK-2.3.4-EHF1, BNK-2.4.2-EHF1"
@@ -55,18 +47,12 @@ placements:
       - No exploit code or attacks reported; CISA's assessment says no exploitation.
     tier: 4
     action: "Install F5's engineering hotfix after testing it, or take the affected iRule command out of use until you can."
-  - name: BIG-IP without these iRule commands or APM policies
-    facts: { vendor_stated_exposure_condition: false }
-    why:
-      - F5 lists each configuration as a condition; without it the flaw is not reachable.
-    tier: 4
-    action: Routine patching. Pick up the fixes in the next scheduled release.
   - name: Affected configuration reachable only from internal networks
     facts: { reachable: false, no_login: true, rare_configuration: true, impact: critical }
     why:
       - An outsider cannot reach the virtual server directly.
     tier: 4
-    action: Routine patching. Move up if the virtual server becomes reachable from untrusted networks.
+    action: Patch in your normal cycle.
 
 mitigations:
   - title: Install F5's engineering hotfix for your release
@@ -118,10 +104,4 @@ sources:
   - { title: "The Hacker News: F5 warns 6 critical BIG-IP flaws can crash traffic in specific setups", url: "https://thehackernews.com/2026/11/f5-warns-6-critical-big-ip-flaws-can.html", accessed: 2026-11-19 }
 ---
 
-## Why Routine, despite a 9.8
-
-Each flaw is reachable only through one configuration: an iRule using PEM::subscriber, MR::message route, PSC::ip_address, GENERICMESSAGE::route or DNS::scrape on client traffic, or an APM per-request policy combining the Client Information and Endpoint Security agents. Most BIG-IP deployments use none of these, so the rubric drops the call one tier, from Prioritised to Routine. There is no exploit code, no published demonstration and no reported attack. If your check finds one of these configurations on an internet-facing virtual server, treat it as more pressing than Routine: a crash of TMM stops all traffic through that BIG-IP until it restarts.
-
-The fixes are engineering hotfixes, which F5 says get less testing than scheduled releases, so test them first. F5 lists no workaround. Taking the affected iRule command or APM agent out of use removes the trigger, but that is an inference, not F5's advice, and it stops whatever that iRule or policy does. No WAF or CDN rule was found; these requests reach the BIG-IP itself, which is often the WAF.
-
-F5's K-articles could not be read here, so the configuration list and fixed builds come from F5's own CVE records, with the CNF fixes from The Hacker News. One record (CVE-2026-121805) lists BIG-IP Next CNF under a DNS::scrape module name, which looks like a copying error by F5. The same release also fixed lower-rated iControl REST, iControl SOAP and APM SAML flaws, which are not rated here.
+Each flaw needs one uncommon iRule command or APM policy, so the rubric drops the call to Routine; if you find one on an internet-facing virtual server, treat it as more pressing, because a TMM crash stops all traffic through that BIG-IP. The engineering hotfixes are BIGIP-21.1.0.4.0.19.3-ENG, BIGIP-17.5.1.10.0.80.35-ENG or 17.5.1.11.0.61.12-ENG, and BIGIP-17.1.3.6.0.14.20-ENG or 17.1.3.7.0.21.4-ENG; F5's K-articles could not be read, so these come from F5's CVE records. No WAF or CDN rule was found.

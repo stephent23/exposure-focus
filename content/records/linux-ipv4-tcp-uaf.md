@@ -12,8 +12,7 @@ review_until: 2026-11-27
 leadership_quote: A serious Linux kernel flaw could in theory let an outsider take over an internet-facing server. One research team reports doing it in a lab but has not published how, and no attacks are reported. Schedule the kernel update for internet-facing Linux servers ahead of normal patching and watch for a public exploit.
 tier_reason: "Remote root is reported only from a lab, with no published exploit, kernel version or setup, and no attacks are reported. The rubric counts published demonstrations only."
 would_change:
-  - Moves up if a working exploit is published
-  - Moves up if attacks are reported
+  - Moves up if a working exploit is published or attacks are reported
 affected:
   - product: "Linux kernel 5.10, 5.15, 6.1, 6.6"
     vulnerable: "5.10 to 5.10.271, 5.15 to 5.15.222, 6.1 to 6.1.189, 6.6 to 6.6.158 (Akamai)"
@@ -35,23 +34,14 @@ applies_check:
     how_to_check: "Run `uname -r` and compare with your distribution's security tracker for CVE-2026-98432; vendor kernels carry their own version numbers. For MPTCP listeners, check `sysctl net.mptcp.enabled` and the listening services."
 
 placements:
-  - name: Internet-facing server with an MPTCP listener
+  - name: Internet-facing Linux server
     facts: { reachable: true, no_login: true, impact: critical }
     why:
-      - Reachable from the internet.
-      - No login needed.
-      - Anthropic reports remote root in its lab against an MPTCP listener, but has not published the exploit, kernel version or setup, so under the rubric it does not raise the tier.
-      - No public exploit and no exploitation reported.
+      - No login needed; Red Hat says it can lead to code execution, with or without MPTCP.
+      - Anthropic's lab root exploit against an MPTCP listener is unpublished, so it does not raise the call.
+      - No public exploit and no attacks reported.
     tier: 3
-    action: Schedule the kernel update and reboot ahead of your normal cycle. Move up if a working exploit is published or attacks are reported.
-  - name: Internet-facing server without an MPTCP listener
-    facts: { reachable: true, no_login: true, impact: critical }
-    why:
-      - Reachable from the internet.
-      - Red Hat says the flaw can lead to code execution, and the bug is not specific to MPTCP.
-      - No exploit has been shown or released for servers without an MPTCP listener.
-    tier: 3
-    action: Schedule the kernel update sooner than your normal cycle. Move up if an exploit that does not need MPTCP appears.
+    action: Schedule the kernel update and reboot sooner than your normal cycle.
   - name: Internal-only server
     facts: { reachable: false, no_login: true, impact: critical }
     why:
@@ -72,12 +62,6 @@ mitigations:
     role: stopgap
     official_guides: [https://access.redhat.com/security/vulnerabilities/RHSB-2026-016]
     confidence: vendor-stated
-  - title: "Turn off MPTCP and request-socket migration"
-    limitation: "Akamai and Red Hat say it does not stop exploitation"
-    role: stopgap
-    official_guides: [https://www.akamai.com/blog/security-research/cve-2026-98432-remote-uaf-linux-kernels-tcp-stack]
-    confidence: reported
-
 evidence:
   - label: Vendor bulletin
     text: "Red Hat rates it Critical. An unauthenticated remote attacker can exploit a race with no privileges or user interaction, and exploitation needs precise timing. MPTCP is not a precondition, and default RHEL systems, where MPTCP is off, are still affected. RHEL 8, 9 and 10 and OpenShift Container Platform 4 are listed."
@@ -133,12 +117,4 @@ sources:
     accessed: 2026-11-09
 ---
 
-Some write-ups describe this as an MPTCP-only problem. Red Hat and Akamai both say the bug itself is not specific to MPTCP, while the researchers' exploit uses an MPTCP listener. The record therefore has separate rows for servers with and without one.
-
-As of 2026-11-13 no source reviewed reports the flaw in the CISA KEV catalogue; the catalogue itself was not checked.
-
-Both internet-facing rows are Tier 3. The researchers' exploit is described in Anthropic's own write-up, but without the code, kernel version or configuration, so it counts as a lab result rather than a published demonstration.
-
-Red Hat's temporary nftables rule is `ip protocol tcp ip hdrlength > 5 counter drop`, in a table named cve_2026_98432. It takes effect at once for new and existing connections and needs no service restart. Red Hat says it is not a substitute for patching.
-
-Red Hat calls a fixed kernel the only complete solution; a new kernel can change drivers, so test first. The nftables rule can break CIPSO labelling, is lost on reboot and misses OpenShift pod traffic. The MPTCP option sets `net.mptcp.enabled=0` and `net.ipv4.tcp_migrate_req=0` to block the researchers' exploit route; services that rely on MPTCP stop using it.
+The bug is not specific to MPTCP (Red Hat, Akamai), even though the researchers' unpublished exploit uses an MPTCP listener, so all internet-facing servers are rated the same. Red Hat's temporary nftables rule is `ip protocol tcp ip hdrlength > 5 counter drop`; it is lost on reboot, can break CIPSO labelling and misses OpenShift pod traffic. Turning off MPTCP (`net.mptcp.enabled=0`) blocks only the researchers' route, and Akamai and Red Hat say it does not stop exploitation.

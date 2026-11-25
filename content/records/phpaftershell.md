@@ -12,21 +12,11 @@ review_until: 2026-12-20
 leadership_quote: "phpAfterShell is a newly named PHP flaw that sounds like PHP2Shell but is far harder to use. It needs a session write to be cut off mid-way and a second weakness in the application. No attacks are reported. PHP fixed it in its 19 Nov 2026 releases; normal patching is enough."
 tier_reason: "The worst case is code execution, but it needs an interrupted session write plus a usable chain in the application, and nothing shows it working, so it is Routine."
 would_change:
-  - "Moves up if a public exploit shows code execution on a common setup"
-  - "Moves up if attacks are reported"
+  - "Moves up if attacks are reported, or a public exploit shows code execution on a common setup"
 affected:
-  - product: PHP 8.4
-    vulnerable: Releases before 8.4.28
-    fixed: 8.4.28
-  - product: PHP 8.5
-    vulnerable: "Releases before 8.5.13 (per The Hacker News)"
-    fixed: "8.5.13 (per The Hacker News)"
-  - product: PHP 8.3
-    vulnerable: "Releases before 8.3.37 (per The Hacker News)"
-    fixed: "8.3.37 (per The Hacker News)"
-  - product: PHP 8.2
-    vulnerable: "Releases before 8.2.36 (per The Hacker News)"
-    fixed: "8.2.36 (per The Hacker News)"
+  - product: PHP 8.2, 8.3, 8.4 and 8.5
+    vulnerable: "Before 8.2.36, 8.3.37, 8.4.28, 8.5.13 (8.4 per php.net; others per press)"
+    fixed: "8.2.36, 8.3.37, 8.4.28, 8.5.13"
   - product: PHP 8.1 and older
     vulnerable: "Affected per the researchers; end of life, no fix from PHP"
 exposed_when:
@@ -46,12 +36,6 @@ placements:
       - No public code-execution exploit and no attacks reported.
     tier: 4
     action: Update PHP in your normal cycle and restart workers.
-  - name: Sessions in Redis or a database, or upload progress off
-    facts: { vendor_stated_exposure_condition: false }
-    why:
-      - Per PHP's maintainers, other session stores are outside this flaw.
-    tier: 4
-    action: No special action for this flaw.
 mitigations:
   - title: Update PHP to the 19 Nov 2026 releases and restart
     limitation: "Upload progress is now off by default; apps that use it must re-enable it"
@@ -87,8 +71,4 @@ sources:
   - { title: "The Hacker News: phpAfterShell explained", url: "https://thehackernews.com/2026/11/phpaftershell-explained-how-hackers.html", accessed: 2026-11-22 }
 ---
 
-phpAfterShell shares a name pattern with PHP2Shell, which is exploited and rated Emergency for internet-facing PHP, but the two are different flaws. This one needs several things to line up and has no known attacks. That is why it is Routine for every setup. It is also one of the 18 flaws in the PHP November 2026 security release verdict, which reaches the same call.
-
-The Routine call treats the interrupted session write as an uncommon condition: the one route PHP's maintainers name needs a threaded PHP build, which most PHP-FPM and Apache setups do not use. If a simpler route to cut off the write is published, the call moves up.
-
-No WAF or CDN rule for this flaw was found.
+phpAfterShell is a different flaw from the exploited PHP2Shell: it needs an interrupted session write, which the one route PHP's maintainers name gets only in a threaded PHP build, plus an object chain in the application. It is one of the 18 flaws in the PHP November 2026 security release verdict, which reaches the same Routine call. No WAF or CDN rule for this flaw was found.

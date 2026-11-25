@@ -12,18 +12,11 @@ review_until: 2026-12-07
 leadership_quote: A flaw in a widely used compression library can let an outsider crash applications that unpack untrusted compressed data, and in a research demonstration run code in them. CISA lists it as exploited, but sources reviewed report no takeovers. Update ahead of normal patching where untrusted data is unpacked.
 tier_reason: "CISA lists it as exploited, which the rubric rates Tier 2. It is held at Tier 3 as an editorial call: no source reviewed reports code execution in the wild."
 would_change:
-  - Moves up if a reliable public exploit for code execution appears
-  - Moves up if code execution is reported in the wild
+  - Moves up if a reliable public exploit for code execution appears, or code execution is reported in the wild
 affected:
-  - product: Node.js 22.x
-    vulnerable: "22.0.0 to 22.23.3 (per Zscaler and Wiz)"
-    fixed: 22.23.4
-  - product: Node.js 24.x
-    vulnerable: "24.0.0 to 24.22.0 (per Zscaler and Wiz)"
-    fixed: 24.22.1
-  - product: Node.js 26.x
-    vulnerable: "26.0.0 to 26.12.0 (per Zscaler and Wiz)"
-    fixed: 26.12.1
+  - product: Node.js 22.x, 24.x and 26.x
+    vulnerable: "22.0.0-22.23.3, 24.0.0-24.22.0, 26.0.0-26.12.0 (per Zscaler and Wiz)"
+    fixed: "22.23.4, 24.22.1, 26.12.1"
   - product: Google Brotli library
     vulnerable: "1.0.3 to 1.2.0 (per Wiz; Google states no range)"
     fixed: v1.2.1
@@ -41,27 +34,18 @@ placements:
   - name: Application that decodes untrusted Brotli data
     facts: { reachable: true, exploited: true, exploit_achieves: significant, credible_researcher_claim: true, no_login: true, impact: critical }
     why:
-      - Reachable by an outsider who can supply Brotli data.
-      - Listed in CISA KEV on 2026-10-27 (vendor-stated exploitation; the kind of exploitation is not described).
-      - No login needed.
-      - Memory corruption that can lead to code execution; a researcher demonstrated it on stock Node.js but needed multiple attempts.
-      - Reported attacks are attempts or reconnaissance; what they achieve is treated as at most a crash, an inference.
+      - In CISA KEV since 2026-10-27; no login needed.
+      - Code execution was demonstrated on stock Node.js, but needed multiple attempts.
+      - Reported attacks are attempts or reconnaissance, treated as at most a crash (inference).
     tier: 3
-    override_reason: "Editorial judgment, not a sourced fact. The rubric gives Tier 2: CISA lists exploitation, but no source reviewed shows attacks achieving code execution, and Imperva's code execution counts as demonstrated only. It is rated Tier 3 because the one demonstrated code execution needed multiple attempts and no source reports code execution in the wild. Zscaler reports reconnaissance and exploitation attempts. Wiz says no self-contained remote exploit for code execution has been publicly confirmed. The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild."
+    override_reason: "Editorial judgment: the rubric gives Tier 2 because CISA lists exploitation, but no source shows attacks achieving code execution, and the one demonstration needed multiple attempts."
     action: "Update sooner than your normal cycle: every runtime and library, rebuild images, restart. If you cannot soon, block Brotli input first."
   - name: Only decodes Brotli from sources you control
     facts: { reachable: false, exploited: true, no_login: true, impact: critical }
     why:
       - An outsider cannot supply the compressed data.
     tier: 4
-    action: Update in your normal cycle. Move up if an outsider could influence that data.
-  - name: Never decodes untrusted Brotli
-    facts: { vendor_stated_exposure_condition: false }
-    why:
-      - Node.js states the condition for exposure is an attacker supplying Brotli data that the application decompresses.
-    tier: 4
-    action: No special action. Routine patching.
-
+    action: Update in your normal cycle.
 mitigations:
   - title: "Update Node.js and Brotli, rebuild images, restart"
     limitation: "Each bundled product needs its own update; old runtimes get no fix"
@@ -186,22 +170,4 @@ sources:
     accessed: 2026-11-09
 ---
 
-The "HTTP2" in the name is misleading: the flaw is in the shared Brotli decoder and has nothing to do with the HTTP/2 protocol. That is why one patch is not enough.
-
-Node.js and Google state no exact start versions; the ranges in the table come from Zscaler and Wiz and are marked as theirs. The Node.js advisory and the CISA catalogue entry are the main sources.
-
-## Why this call is calmer than CISA's
-
-This section is an editorial judgment. It is not a sourced fact, and it overrides the rubric's Tier 2.
-
-- CISA lists the flaw as exploited without saying what attackers achieved.
-- Zscaler reports reconnaissance and exploitation attempts, not confirmed code execution.
-- Imperva demonstrated code execution on stock Node.js 24.22.0 (Linux arm64), but only after multiple attempts.
-- Wiz says the one public code-execution proof of concept is local and needs a deterministic memory layout, and that no self-contained remote exploit has been publicly confirmed.
-- No source reviewed reports code execution in the wild. That is not proof there has been none.
-
-The call moves up if a reliable public exploit for code execution appears or code execution is reported in the wild.
-
-For the WAF option, Microsoft's Azure WAF guidance is a custom rule that blocks requests whose `Content-Encoding` header contains `br`; Imperva has added WAF rules for this CVE and Fastly has a virtual patch, so check whether your own WAF vendor has one. Azure suggests starting in log-only mode and checking the logs for legitimate Brotli-compressed uploads before blocking. It is a stopgap until you update.
-
-Updating means the fixed Node.js and Brotli v1.2.1, rebuilt images and a restart of every process. Each bundled product needs its own update, and out-of-support runtimes get no fix and need upgrading. The WAF rule blocks requests whose `Content-Encoding` header contains `br`, so it does not cover compressed replies your application downloads from other servers, and it rejects clients that legitimately upload Brotli.
+The "HTTP2" in the name is misleading: the flaw is in the shared Brotli decoder, not the HTTP/2 protocol, so every runtime, library and bundled copy needs its own update. The call is calmer than CISA's listing suggests because Zscaler reports only attempts and reconnaissance, and Wiz says no self-contained remote code-execution exploit has been publicly confirmed. For the WAF stopgap, Azure suggests starting the `Content-Encoding: br` block in log-only mode to spot legitimate Brotli uploads.
