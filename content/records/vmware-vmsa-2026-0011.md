@@ -3,78 +3,59 @@ slug: vmware-vmsa-2026-0011
 name: VMware vCenter and ESX critical flaws (VMSA-2026-0011)
 aliases: [VMSA-2026-0011]
 cves: [CVE-2026-123903, CVE-2026-123910, CVE-2026-123911]
-related_cves: [CVE-2026-123890, CVE-2026-123904, CVE-2026-123912]
-summary: "A new vCenter flaw lets anyone who can reach it bypass login, and two ESX flaws allow host takeover over the network; fixes are out and no attacks are reported."
+related_cves: [CVE-2026-123890]
+summary: "A new vCenter flaw lets anyone who can reach it skip the login, and two ESX flaws allow host takeover over the network. Fixes are out; no attacks are reported."
 attack: auth-bypass
 status: draft
 published: 2026-11-25
 evidence_as_of: 2026-11-25
 review_until: 2026-12-09
-leadership_quote: "Broadcom fixed a second critical vCenter login bypass and two critical ESX host flaws on 24 Nov 2026, shortly after an earlier vCenter flaw was exploited. No attacks or public exploit are reported. Update vCenter and every ESX host, starting with any reachable outside the management network."
-tier_reason: "Full control with no login, but no attacks, exploit or published demonstration, so reachable systems are Prioritised, not Emergency; isolated ones are Routine."
+leadership_quote: "Broadcom fixed a critical vCenter login bypass and two critical ESX host flaws on 24 Nov 2026. No attacks are reported. Update vCenter and every ESX host, and keep both off the internet and user networks."
+tier_reason: "Full control with no login, but no attacks or exploit are reported, so reachable systems are Prioritised, not Emergency."
 would_change:
-  - "Moves to Emergency for reachable systems if attacks or a working public exploit are reported"
-  - "Management-network-only systems move to Prioritised if exploitation is reported"
+  - "Moves up if attacks or a working public exploit are reported"
 affected:
-  - product: vCenter Server 9.1 (VCF and vSphere Foundation 9.1)
-    vulnerable: "Releases before 9.1.2 (reported; advisory not opened)"
-    fixed: "9.1.2 (reported)"
-  - product: vCenter Server 9.0
-    vulnerable: "Releases before 9.0.2.0300 (reported)"
-    fixed: "9.0.2.0300 (reported)"
-  - product: vCenter Server 8.0 (also VCF 5.x and Telco Cloud)
-    vulnerable: "Releases before 8.0 U3m; VCF 5.x before 5.2.5 (reported)"
-    fixed: "8.0 U3m; VCF 5.2.5 (reported)"
+  - product: vCenter Server 9.1 and 9.0
+    vulnerable: "Before 9.1.2 and 9.0.2.0300 (reported)"
+    fixed: "9.1.2, 9.0.2.0300"
+  - product: vCenter Server 8.0 and VCF 5.x
+    vulnerable: "Before 8.0 U3m and VCF 5.2.5 (reported)"
+    fixed: "8.0 U3m, VCF 5.2.5"
   - product: vCenter Server 7.0
     vulnerable: "Fix only via Broadcom Support with extended support (reported)"
   - product: ESX 9.1, 9.0 and 8.0
-    vulnerable: "Before ESXi-9.1.2.0, ESXi-9.0.2.0200, ESXi80U3m (reported)"
-    fixed: "ESXi-9.1.2.0-25946735, ESXi-9.0.2.0200-25953133, ESXi80U3m-25926933 (reported)"
-exposed_when:
-  - "An attacker can reach vCenter over the network; no login is needed"
-  - "For ESX, an attacker can reach the host's I/O filter service; no VM access needed (reported)"
+    vulnerable: "Before 9.1.2, 9.0.2.0200 and 8.0 U3m (reported)"
+    fixed: "9.1.2, 9.0.2.0200, 8.0 U3m"
 applies_check:
   - question: Do you run VMware vCenter Server, ESX or VMware Cloud Foundation?
-    how_to_check: "In the vSphere Client check each vCenter's Summary tab and each host's build number, and compare them with the affected table."
-  - question: Who can reach your vCenter and ESX hosts?
-    how_to_check: "Check firewall rules for vCenter (`443`, `5480`) and ESX management interfaces. Note whether user networks, VPN users or remote-access tools can reach them, not only the management network."
+    how_to_check: "In the vSphere Client check each vCenter's Summary tab and each host's build number against the affected table."
+  - question: Can anything outside the management network reach vCenter or ESX?
+    how_to_check: "Check firewall rules for vCenter (`443`, `5480`) and ESX management interfaces, including access from user networks, VPN users and remote-access tools."
 placements:
-  - name: vCenter reachable from the internet or user networks
+  - name: vCenter or ESX reachable from the internet or user networks
     facts: { reachable: true, no_login: true, impact: critical }
     why:
-      - No login needed; the attacker gets past vCenter authentication.
-      - No attacks, public exploit or published demonstration reported.
-    tier: 3
-    action: "Exposure is an architectural flaw: move vCenter onto a management network, then update to a fixed build sooner than your normal cycle."
-  - name: ESX hosts reachable beyond vCenter
-    facts: { reachable: true, no_login: true, impact: critical }
-    why:
-      - Two network flaws in the I/O filter service can give code execution on the host (reported).
+      - No login needed; the result is control of vCenter or the host.
       - No attacks or public exploit reported.
     tier: 3
-    action: Update every ESX host sooner than your normal cycle; until then allow only vCenter to reach it.
+    action: "Exposure is an architectural flaw: move vCenter and ESX onto a management network, then patch sooner than your normal cycle."
   - name: vCenter and ESX on a restricted management network only
     facts: { reachable: false, high_value_target: true, no_login: true, impact: critical }
     why:
       - Not reachable from outside, and not reported exploited.
     tier: 4
-    action: Update vCenter and ESX in your normal cycle and keep management access restricted.
+    action: Patch vCenter and ESX in your normal cycle.
 mitigations:
   - title: Update vCenter and every ESX host to fixed builds
-    limitation: "Some ESX 9.0 medium flaws have no fix yet; vCenter 7.0 needs Broadcom Support"
+    limitation: "vCenter 7.0 needs Broadcom Support; some lesser ESX 9.0 flaws are unfixed"
     role: fix
     official_guides: ["https://www.rescana.com/post/vmware-vcenter-cve-2026-123903-auth-bypass-and-esx-code-execution-patch-now"]
     confidence: reported
-  - title: Allow only vCenter to reach ESX hosts (KB 463535)
-    limitation: "Broadcom says it only partly addresses the ESX flaws; no vCenter workaround"
+  - title: Restrict vCenter and ESX to a management network
+    limitation: "Attackers already inside can still reach them; ESX rule KB 463535 is partial"
     role: stopgap
     official_guides: ["https://www.rescana.com/post/vmware-vcenter-cve-2026-123903-auth-bypass-and-esx-code-execution-patch-now"]
     confidence: reported
-  - title: Limit vCenter access to a management network
-    limitation: "Attackers already inside the network can still reach it"
-    role: stopgap
-    official_guides: ["https://thehackernews.com/2026/11/vmware-vcenter-hit-by-another-critical.html"]
-    confidence: inference
 evidence:
   - label: Vendor advisory
     text: "Per The Hacker News (24 Nov), Broadcom's VMSA-2026-0011 fixes 23 flaws across ESX, vCenter, Workstation, Fusion and Avi. CVE-2026-123903 (CVSS 9.8) is an authentication bypass in the vCenter Directory Service exploitable by anyone with network access to vCenter; Broadcom says it is distinct from CVE-2026-123890. No workaround is listed for vCenter. Broadcom's advisory could not be opened, so this is reported."
@@ -104,6 +85,4 @@ sources:
   - { title: "Cohash: VMSA-2026-0011, vCenter and every ESX host need patching", url: "https://cohash.com/blog/vmware-vmsa-2026-0011-vcenter-esx-cve-2026-123903", accessed: 2026-11-25 }
 ---
 
-Broadcom's advisory, the CVE record, NVD and CISA's catalog could not be opened, so every fact here comes from press and research blogs and is marked reported. Cohash agrees on the vCenter fixes but gives no ESX 9.0 build number.
-
-The 9.8 score does not set the tier: with no attacks or exploit reported, reachable systems are Prioritised. The earlier vCenter flaw was exploited, so this call may move quickly. No WAF or CDN rule applies, and none was found.
+Broadcom's advisory, the CVE record and CISA's catalog could not be opened, so the facts and versions come from press and research blogs and are marked reported. ESX build numbers: 9.1.2.0-25946735, 9.0.2.0200-25953133 and 80U3m-25926933 (Rescana).
