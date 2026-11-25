@@ -7,8 +7,8 @@ summary: A crafted request can make a Cisco ASA or FTD firewall reload without a
 attack: dos
 status: published
 published: 2026-11-09
-evidence_as_of: 2026-11-09
-review_until: 2026-11-23
+evidence_as_of: 2026-11-25
+review_until: 2026-12-09
 leadership_quote: This is an outage risk, not a breach. Attackers are exploiting a flaw that can restart Cisco VPN firewalls without a login. Where the VPN is how the business works, handle it ahead of the normal cycle; where it is a backup, schedule it sooner than usual.
 tier_reason: "It is exploited and needs no login, but the effect is a reload: an outage, not a breach. That is Urgent, not Emergency, where the VPN is business-critical."
 would_change:

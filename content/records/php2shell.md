@@ -8,8 +8,8 @@ summary: "Two exploited flaws in the PHP runtime let an attacker run code from a
 attack: rce
 status: published
 published: 2026-11-09
-evidence_as_of: 2026-11-22
-review_until: 2026-11-23
+evidence_as_of: 2026-11-25
+review_until: 2026-12-09
 leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw was fixed in the 19 Nov 2026 releases.
 tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
 would_change:
