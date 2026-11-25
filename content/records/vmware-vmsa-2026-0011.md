@@ -45,7 +45,7 @@ placements:
       - No login needed; the attacker gets past vCenter authentication.
       - No attacks, public exploit or published demonstration reported.
     tier: 3
-    action: Update vCenter to a fixed build sooner than your normal cycle and limit access to a management network.
+    action: "Exposure is an architectural flaw: move vCenter onto a management network, then update to a fixed build sooner than your normal cycle."
   - name: ESX hosts reachable beyond vCenter
     facts: { reachable: true, no_login: true, impact: critical }
     why:
