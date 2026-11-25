@@ -1,7 +1,7 @@
 ---
 slug: vmware-vmsa-2026-0011
 name: VMware vCenter and ESX critical flaws (VMSA-2026-0011)
-aliases: [VMSA-2026-0011]
+aliases: []
 cves: [CVE-2026-123903, CVE-2026-123910, CVE-2026-123911]
 related_cves: [CVE-2026-123890]
 summary: "A new vCenter flaw lets anyone who can reach it skip the login, and two ESX flaws allow host takeover over the network. Fixes are out; no attacks are reported."
