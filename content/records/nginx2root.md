@@ -1,7 +1,7 @@
 ---
 slug: nginx2root
 name: NGINX2Root (NGINX HTTP/2 flow control flaw)
-aliases: ["NGINX2Root"]
+aliases: []
 cves: [CVE-2026-123007]
 related_cves: [CVE-2026-123633, CVE-2026-123634, CVE-2026-121810, CVE-2026-113425]
 summary: "A flaw in NGINX's HTTP/2 code lets an outsider with no login corrupt memory; public code takes over a test server in a lab. Fixed in 1.30.7 and 1.31.9."
@@ -14,9 +14,7 @@ review_until: 2026-12-03
 leadership_quote: "A flaw in NGINX, one of the most widely used web servers, can let an outsider crash it, and in tests take it over, without logging in. Public attack code only works in a lab set-up and no attacks are reported. Update internet-facing NGINX that uses HTTP/2 sooner than usual."
 tier_reason: "Public code reaches code execution only against a freshly started local test container, other exploits are withheld and no attacks are reported, so the outcome rated is a worker crash."
 would_change:
-  - Emergency if attacks are reported, or exploit code is shown to work against ordinary internet servers
-  - Urgent if code execution is published against an unprepared remote server
-
+  - Moves up if attacks are reported, or exploit code is shown to work against ordinary internet servers
 affected:
   - product: NGINX Open Source
     vulnerable: 1.9.5 to 1.31.8
@@ -42,26 +40,17 @@ placements:
   - name: Internet-facing NGINX 1.9.5 to 1.31.8 with HTTP/2 on
     facts: { reachable: true, no_login: true, public_exploit: true, exploit_achieves: significant, impact: critical }
     why:
-      - Reachable, and no login is needed.
-      - Code execution would give control of the NGINX worker and the traffic and keys it holds.
-      - Public code reaches code execution only against a freshly started local test container; its author says it will likely fail elsewhere.
-      - Other researchers' exploits are withheld, so they do not raise the call.
+      - No login needed; code execution would expose the traffic and keys NGINX holds.
+      - Public code works only against a fresh local test container; other exploits are withheld.
       - No attacks reported; not in CISA KEV as of 18 Nov.
     tier: 3
     action: "Update to 1.30.7, 1.31.9 or a fixed package and restart, sooner than your normal cycle. Until then, turn HTTP/2 off."
-  - name: NGINX with HTTP/2 off
-    facts: { vendor_stated_exposure_condition: false }
-    why:
-      - This flaw is in the HTTP/2 module and needs HTTP/2 enabled on the listener.
-      - The related HTTP/3, resolver and mail flaws are not covered by this.
-    tier: 4
-    action: Routine patching. Check every server block before relying on this.
   - name: NGINX reachable only from internal networks
     facts: { reachable: false, no_login: true, public_exploit: true, exploit_achieves: significant, impact: critical }
     why:
       - An outsider cannot reach it directly.
     tier: 4
-    action: Routine patching. Move up if it is reachable from the internet or untrusted networks.
+    action: Patch in your normal cycle.
 
 mitigations:
   - title: Update NGINX to 1.30.7 or 1.31.9 and restart it
@@ -134,12 +123,4 @@ sources:
   - { title: "Cyber Security News: NGINX HTTP/2 vulnerabilities", url: "https://cybersecuritynews.com/nginx-http-2-vulnerabilities/", accessed: 2026-11-19 }
 ---
 
-## Why Prioritised and not higher
-
-The public exploit is real code that reaches code execution, but its author says it only suits a freshly started local test container and will likely fail against a busy server, over limited bandwidth or behind a proxy. It also needs about 128 GB of HTTP/2 traffic per attempt. Xint and Wiz say they have working exploits but have not published them. Under the published-claims rule, a demonstration only against the researcher's own nearby target does not raise the call, so the realistic outcome rated is a crash of a worker process, which NGINX restarts. No attacks are reported. This is a judgement on a close case: if anyone shows the code working against an ordinary internet server, the call moves to Emergency.
-
-## Related flaws in the same release
-
-F5 fixed four other memory-safety flaws that Xint grouped under the NGINX2Root name. Each needs a less common set-up: CVE-2026-123633 (HTTP/2 use-after-free when `worker_connections` runs out), CVE-2026-121810 (HTTP/3 turned on), CVE-2026-123634 (resolver with names built from variables plus subrequests) and CVE-2026-113425 (NGINX as a mail proxy). Turning HTTP/2 off does not cover the last three. Versions 1.30.7 and 1.31.9 fix all of them. Restart NGINX after updating, because a reload keeps the old binary running.
-
-No WAF or CDN vendor rule for this flaw was found: Cloudflare's WAF changelog lists none from 17 to 19 Nov. A CDN or load balancer that ends HTTP/2 and talks HTTP/1.1 to NGINX shields the origin, but only if the origin cannot be reached directly. Xint also reported an unpatched Linux kernel flaw (no CVE yet) that would turn worker access into root; it is not rated here.
+The public exploit needs a freshly started local container and about 128 GB of HTTP/2 traffic per attempt, so the outcome rated is a worker crash, which NGINX restarts. Versions 1.30.7 and 1.31.9 also fix four related flaws (CVE-2026-123633, -121810, -123634, -113425) that turning HTTP/2 off does not all cover; restart rather than reload after updating. No WAF or CDN rule was found, though a CDN that speaks HTTP/1.1 to NGINX shields an origin that cannot be reached directly.

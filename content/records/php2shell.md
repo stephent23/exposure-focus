@@ -13,21 +13,11 @@ review_until: 2026-11-23
 leadership_quote: Attackers are exploiting two flaws in PHP that let them take over a web server without logging in. Internet-facing PHP sites need an out-of-cycle response; internal PHP can follow the normal patch cycle. A related third flaw was fixed in the 19 Nov 2026 releases.
 tier_reason: "Both flaws are in CISA's exploited list, need no login and give code execution on internet-facing PHP, which is the top of the rubric."
 would_change:
-  - "Internal-only PHP moves up if it becomes reachable or attackers are reported using the flaws inside networks"
-  - "The third flaw, CVE-2026-115560, starts to count if exploitation or a public exploit is reported"
+  - "Moves up for internal PHP if attacks inside networks are reported; CVE-2026-115560 counts if it is exploited"
 affected:
-  - product: PHP 8.2
-    vulnerable: below 8.2.35
-    fixed: 8.2.35
-  - product: PHP 8.3
-    vulnerable: below 8.3.36
-    fixed: 8.3.36
-  - product: PHP 8.4
-    vulnerable: below 8.4.27
-    fixed: 8.4.27
-  - product: PHP 8.5
-    vulnerable: below 8.5.12
-    fixed: 8.5.12
+  - product: PHP 8.2, 8.3, 8.4 and 8.5
+    vulnerable: "Below 8.2.35, 8.3.36, 8.4.27 and 8.5.12"
+    fixed: "8.2.35, 8.3.36, 8.4.27, 8.5.12"
   - product: PHP 8.1 and older
     vulnerable: "Not listed in PHP's advisories; end of life, no fix from PHP"
   - product: "CVE-2026-115560 (third flaw)"
@@ -37,8 +27,6 @@ exposed_when:
   - PHP serves requests from the internet, as Apache mod_php or PHP-FPM
   - "CVE-2026-109618: the attacker can make request parsing hit a memory allocation failure (the memory_limit)"
   - "CVE-2026-109619: a fatal error interrupts serialize or unserialize, or session upload progress is on"
-  - "CVE-2026-115560 only: session upload progress on and session.serialize_handler switched to php with ini_set()"
-
 applies_check:
   - question: Do you run PHP that serves requests from the internet?
     how_to_check: "Run `php -v` on each web server and check how PHP is served with `php -i | grep 'Server API'`. Distribution packages can carry the fix without changing the version number, so check your distribution's tracker."
@@ -55,7 +43,7 @@ placements:
       - Not reachable from the internet.
       - Attacks are reported only on internet-facing PHP; no source shows the flaws used from inside a network.
     tier: 4
-    action: Patch in your normal cycle. Move up if it becomes reachable from the internet.
+    action: Patch in your normal cycle.
 
 mitigations:
   - title: "Update PHP and restart every worker"
@@ -65,17 +53,12 @@ mitigations:
       - https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
     confidence: vendor-stated
-  - title: "Set PHP memory_limit to -1 and cap request sizes"
-    limitation: "Partial only; unlimited memory needs size limits at the frontend"
-    role: stopgap
-    official_guides: [https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w]
-    confidence: vendor-stated
-  - title: "Disable PHP session upload progress"
-    limitation: "Partial for CVE-2026-109619; upload progress bars stop working"
+  - title: "Apply PHP's memory and upload-progress workarounds"
+    limitation: "Partial only; needs request size limits and stops upload progress bars"
     role: stopgap
     official_guides:
+      - https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w
       - https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp
-      - https://www.php.net/archive/2026.php
     confidence: vendor-stated
   - title: "Turn on your WAF vendor's PHP rules"
     limitation: "Known exploit patterns only; can block legitimate requests"
@@ -155,12 +138,4 @@ sources:
   - { title: "PHP 8 ChangeLog (8.4.28, 19 Nov 2026)", url: https://www.php.net/ChangeLog-8.php, accessed: 2026-11-22 }
 ---
 
-Both flaws sit in the PHP runtime, not in any application built on it, which is why the exposure is so wide. They are not easy to use everywhere: CrowdStrike says each exploit has to be adapted to the PHP version and the application, and works most reliably against a known, fixed setup such as a standard container image. The tier still rests on CISA's listing of attacks.
-
-A third flaw, CVE-2026-115560, needs an unusual setup and is not reported exploited, so it does not set the tier. PHP fixed it in the 19 Nov 2026 releases. The October releases that fix the first two flaws do not.
-
-Restart Apache or PHP-FPM after updating so no old worker keeps running, and rebuild container images that bundle PHP. PHP 8.1 and older get no fix.
-
-Stopgaps, from PHP's advisories: for CVE-2026-109618, set memory_limit=-1 administratively and keep post_max_size, input variables, multipart parts and uploads bounded, or block multipart requests at the frontend if unused; do not use RLIMIT_AS or RLIMIT_DATA. PHP calls this its primary, not complete, mitigation. For CVE-2026-109619 there is no complete configuration fix; session.upload_progress.enabled=0 removes the upload-progress paths and stops session-based progress bars.
-
-WAF coverage: AWS, Cloudflare, Fastly and Broadcom (VMware Avi) publish rules, all as interim measures that miss traffic bypassing the WAF. AWS says no rule is a complete mitigation.
+Both flaws sit in the PHP runtime, so the exposure is wide, though CrowdStrike says each exploit has to be adapted to the PHP version and application; the tier rests on CISA's listing of attacks. PHP's workarounds are `memory_limit=-1` set administratively with bounded request sizes for CVE-2026-109618, and `session.upload_progress.enabled=0` for CVE-2026-109619; PHP calls neither complete. The third flaw, CVE-2026-115560, is fixed only in the 19 Nov releases and is not reported exploited.

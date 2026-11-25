@@ -12,21 +12,11 @@ review_until: 2026-12-04
 leadership_quote: "PHP released fixes on 19 Nov 2026 for 18 flaws, some of which could let an attacker run code. PHP says the serious ones only apply to unusual setups, and no attacks are reported. Include the update in the normal patch cycle."
 tier_reason: "The critical flaws need a non-default configuration or an uncommon setup, and there are no attacks or published exploits, so this is Routine, not Prioritised."
 would_change:
-  - Moves up if attacks or a working public exploit are reported for any of the critical flaws
-  - "Moves up if a flaw turns out to work in a default setup"
+  - Moves up if attacks or a working public exploit are reported, or a critical flaw works in a default setup
 affected:
-  - product: PHP 8.2
-    vulnerable: before 8.2.36
-    fixed: 8.2.36
-  - product: PHP 8.3
-    vulnerable: before 8.3.37
-    fixed: 8.3.37
-  - product: PHP 8.4
-    vulnerable: before 8.4.28
-    fixed: 8.4.28
-  - product: PHP 8.5
-    vulnerable: before 8.5.13
-    fixed: 8.5.13
+  - product: PHP 8.2, 8.3, 8.4 and 8.5
+    vulnerable: "Before 8.2.36, 8.3.37, 8.4.28 and 8.5.13"
+    fixed: "8.2.36, 8.3.37, 8.4.28, 8.5.13"
   - product: PHP 8.1 and older
     vulnerable: "End of life; no fix from PHP"
 exposed_when:
@@ -39,40 +29,23 @@ applies_check:
   - question: Does a proxy reuse connections to PHP-FPM?
     how_to_check: "Look for `fastcgi_keep_conn on` in nginx, `enablereuse=on` in Apache `mod_proxy_fcgi`, or FastCGI in HAProxy."
 placements:
-  - name: PHP web apps, default configuration
+  - name: PHP 8.2 to 8.5 before the 19 Nov 2026 releases
     facts: { reachable: true, no_login: true, rare_configuration: true, impact: critical }
     why:
       - PHP says the critical flaws need a non-default configuration or an uncommon setup.
       - No attacks or published exploits reported.
     tier: 4
     action: Update PHP in your normal cycle and restart workers.
-  - name: PHP-FPM behind a proxy reusing backend connections
-    facts: { reachable: true, no_login: true, rare_configuration: true, impact: critical }
-    why:
-      - Request smuggling can run code with no login (reported); needs connection reuse.
-    tier: 4
-    action: Update PHP in your normal cycle; turn off connection reuse if updating has to wait.
-  - name: App switches session.serialize_handler at runtime
-    facts: { reachable: true, rare_configuration: true, impact: critical }
-    why:
-      - Code execution needs an unusual code pattern, plus upload progress on.
-    tier: 4
-    action: Update PHP in your normal cycle; set `session.upload_progress.enabled=0` until then.
 mitigations:
   - title: Update PHP and restart every worker
     limitation: "PHP 8.1 and older get no fix; rebuild images that bundle PHP"
     role: fix
     official_guides: [https://www.php.net/archive/2026.php]
     confidence: vendor-stated
-  - title: Turn off session upload progress
-    limitation: "Covers CVE-2026-115560 only; breaks upload progress bars"
+  - title: Turn off upload progress or FastCGI connection reuse
+    limitation: "Each covers one flaw; breaks progress bars or costs some performance"
     role: stopgap
-    official_guides: [https://www.php.net/archive/2026.php]
-    confidence: vendor-stated
-  - title: Turn off FastCGI connection reuse in the proxy
-    limitation: "Covers CVE-2026-129289 only; may cost some performance"
-    role: stopgap
-    official_guides: [https://www.aikido.dev/blog/php-security-release-19-november-2026-cve-2026-115560]
+    official_guides: [https://www.php.net/archive/2026.php, https://www.aikido.dev/blog/php-security-release-19-november-2026-cve-2026-115560]
     confidence: reported
 evidence:
   - label: Vendor advisory
@@ -113,6 +86,4 @@ sources:
   - { title: "LWN: PHP security releases", url: "https://lwn.net/Articles/1102014/", accessed: 2026-11-20 }
 ---
 
-Routine because PHP itself says the critical flaws only apply to non-default configurations or uncommon setups, and no attacks or working public exploits are reported. CVSS 9.2 on several flaws is for reference only. The per-flaw details come from Aikido and SecurityOnline, not from PHP's own advisories, so they are marked reported.
-
-This release also fixes CVE-2026-115560, the third flaw linked to PHP2Shell, which had no fix when the PHP2Shell verdict was written. PHP 8.1 and older get no fix from PHP. No WAF or CDN rule for these flaws was found.
+PHP itself says the critical flaws only apply to non-default configurations or uncommon setups, and no attacks or working public exploits are reported; the per-flaw details come from Aikido and SecurityOnline, so they are marked reported. This release also fixes CVE-2026-115560, the third flaw linked to PHP2Shell. No WAF or CDN rule for these flaws was found.

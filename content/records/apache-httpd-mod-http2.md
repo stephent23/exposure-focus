@@ -13,8 +13,7 @@ review_until: 2026-11-27
 leadership_quote: "A flaw in the Apache web server can let an outsider crash a server without logging in, and possibly take it over. It only matters where HTTP/2 is on, and no attacks are reported. Schedule the update for internet-facing servers ahead of normal patching; switch HTTP/2 off where no update exists yet."
 tier_reason: "Rated critical by Apache and Red Hat, but the only public code crashes worker processes and no attacks are reported, so the crash is the outcome rated."
 would_change:
-  - Tier 2 if the crash is exploited in the wild or a code-execution exploit is published
-  - Tier 1 if code execution is exploited in the wild
+  - Moves up if the crash is exploited, or if code execution is published or exploited
 affected:
   - product: Apache HTTP Server 2.4
     vulnerable: 2.4.55 to 2.4.70
@@ -36,26 +35,18 @@ placements:
   - name: Internet-facing Apache 2.4.55 to 2.4.70 with HTTP/2 enabled
     facts: { reachable: true, no_login: true, public_exploit: true, exploit_achieves: significant, impact: critical }
     why:
-      - An outsider can reach the server.
-      - No login needed (Apache and Red Hat).
-      - Code execution would mean control of the server process and the data it serves.
-      - Public proof-of-concept code reproduces heap corruption and crashes of Apache worker processes, which Apache restarts; it does not show code execution.
-      - Red Hat says public research has demonstrated a reliable exploit against a default-configured server, but names no research and no code-execution demonstration is published, so under the rubric it does not count.
-      - No exploitation in the wild has been reported, for either the crash or code execution.
+      - No login needed; code execution would mean control of the server.
+      - Public proof-of-concept code only crashes worker processes, which Apache restarts.
+      - Red Hat's claim of a reliable exploit names no published research, so it does not count.
+      - No attacks reported.
     tier: 3
     action: "Schedule the update to 2.4.71 or your distribution's fixed package ahead of normal patching. Where no fix exists yet, switch HTTP/2 off."
-  - name: Apache with HTTP/2 not enabled
-    facts: { vendor_stated_exposure_condition: false }
-    why:
-      - Apache and Red Hat say only servers with HTTP/2 (h2 or h2c) enabled through the Protocols directive are affected; servers serving only HTTP/1.1 are not.
-    tier: 4
-    action: Routine patching. Check every virtual host before relying on this.
   - name: Apache with HTTP/2 reachable only from internal networks
     facts: { reachable: false, no_login: true, public_exploit: true, exploit_achieves: significant, impact: critical }
     why:
       - An outsider cannot reach the server directly.
     tier: 4
-    action: Routine patching. Move up if reachable from the internet or untrusted networks.
+    action: Patch in your normal cycle.
 
 mitigations:
   - title: "Update Apache and restart it"
@@ -155,29 +146,4 @@ sources:
     accessed: 2026-11-13
 ---
 
-## Why Tier 3
-
-- The only public proof of concept reproduces heap corruption and crashes of Apache worker processes, which Apache restarts. It does not show code execution, so the crash is the outcome rated.
-- Red Hat says a reliable exploit has been demonstrated, but names no research, and Wiz said on 2026-11-11 that no exploit was available. The rubric counts a claim only when the demonstration is published, so this does not raise the tier.
-- No attacks have been reported, for the crash or for code execution.
-- EPSS, which estimates the chance of exploitation, is very low: 0.00398 on Tenable's page, which gives no date. The rubric uses EPSS only to raise a call.
-
-The call moves to Tier 2 if the crash is exploited in the wild or a code-execution exploit is published, and to Tier 1 if code execution is exploited in the wild.
-
-No WAF or CDN vendor rule for this CVE was found. HTTP/2 is often terminated at a CDN or load balancer, which may shield Apache behind it, but no vendor has said so for this flaw.
-
-## Checking in more detail
-
-Upstream, httpd 2.4.55 to 2.4.70 and the standalone mod_h2 module 2.0.8 to 2.0.42 are affected. Run `httpd -v`, `apache2 -v` or `apachectl -v`, then check the distribution package, because distributions fix it without moving to 2.4.71: Ubuntu's fixed packages carry numbers such as `2.4.58-1ubuntu8.19`, so a scanner that only compares with 2.4.71 will report fixed Ubuntu servers as vulnerable. On RHEL check `rpm -q mod_http2`; Red Hat says mod_http2 before 2.0.8 lacks the affected code and RHEL 8 and earlier are not affected. Tenable lists detection plugins, including 115821 (Web App Scanning) and per-distribution Nessus plugins. Also look inside container images and appliances that bundle Apache.
-
-Search the configuration for the `Protocols` directive, server-wide and in every virtual host: Red Hat suggests `grep -r 'Protocols' /etc/httpd/conf/ /etc/httpd/conf.d/` (on Debian and Ubuntu, search `/etc/apache2`). HTTP/2 is on where the list includes `h2` (over TLS) or `h2c` (cleartext). Check that mod_http2 is loaded with `httpd -M | grep http2`, or on RHEL `grep http2 /etc/httpd/conf.modules.d/*.conf`.
-
-Red Hat's client check is `curl -kI --http2 https://localhost`: a reply of `HTTP/2 200` means HTTP/2 is on, `HTTP/1.1 200 OK` means it is off. If a load balancer, CDN or reverse proxy sits in front, also find out whether it passes HTTP/2 through to Apache or speaks HTTP/1.1 to it; a test from outside only shows the front door.
-
-Where no fixed package exists yet, for example the archived standalone mod_h2 module or a vendor still preparing one, HTTP/2 stays off until it does.
-
-Distribution fixes seen on 2026-11-13: Debian has fixed packages for bookworm (2.4.71-1~deb12u1, DLA-4902-1) and trixie (2.4.71-1~deb13u1, DSA-6620-1), with forky still listed as vulnerable. Ubuntu has fixed packages for 26.10, 26.04 LTS, 24.04 LTS, 22.04 LTS and, through Ubuntu Pro, 20.04 LTS (USN-9090-1). Red Hat says fixes are available for most affected products and the rest are being expedited, and Tenable lists RHEL 9 and RHEL 10 mod_http2 updates under several RHSA numbers. Apache lists the standalone mod_h2 module 2.0.8 to 2.0.42 as affected, and it is reported to have no fix because the project is archived. Rebuild any container images that bundle Apache, and test the update like any server update, as 2.4.71 carries other fixes.
-
-To switch HTTP/2 off, which is Red Hat's mitigation and which Wiz also recommends, edit `/etc/httpd/conf/httpd.conf` or files in `/etc/httpd/conf.d/` and run `systemctl restart httpd`. The same directive applies on other distributions.
-
-Installing the fix means Apache 2.4.71 or your distribution's package, then a restart of Apache. Red Hat warns that switching HTTP/2 off costs some performance and stops anything that needs HTTP/2 end to end, such as gRPC; to do it, remove `h2` and `h2c` from every `Protocols` directive so it reads `Protocols http/1.1`.
+The public proof of concept only crashes Apache workers, and Red Hat's claim of a reliable exploit names no published research, so the crash is what is rated. Distributions fix it with backports below 2.4.71 (Ubuntu's fixed package is `2.4.58-1ubuntu8.19`, for example), so check the package, not only the version number. No WAF or CDN rule for this flaw was found.

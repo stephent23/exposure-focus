@@ -13,7 +13,6 @@ leadership_quote: This is an outage risk, not a breach. Attackers are exploiting
 tier_reason: "It is exploited and needs no login, but the effect is a reload: an outage, not a breach. That is Urgent, not Emergency, where the VPN is business-critical."
 would_change:
   - Moves to Emergency if the flaw is shown to do more than reload the device
-  - Drops to Routine as soon as any one of the exposure conditions is false
 affected:
   - product: Cisco ASA
     vulnerable: "Releases before the first fixed release of each train; Cisco lists no ranges"
@@ -31,20 +30,17 @@ applies_check:
     how_to_check: "Look for `webvpn` with SSL VPN on an interface, and `secondary-authentication-server-group` on any tunnel group, including DefaultWEBVPNGroup. On FTD, review the deployed remote access VPN policy in FMC or FDM."
 
 placements:
-  - name: All conditions true, VPN is business-critical
+  - name: Exposed SSL VPN with secondary authentication, VPN business-critical
     facts: { reachable: true, exploited: true, no_login: true, impact: significant }
     why:
-      - Reachable from the internet.
-      - Cisco and CISA say it is being exploited.
-      - No login needed.
-      - The effect is a device reload (denial of service only). Nobody gets in.
-      - Losing the VPN hurts the business, but the device restarts on its own, so the impact is significant rather than critical.
+      - Exploited (Cisco and CISA); no login needed.
+      - "The effect is a reload: an outage, not a breach, and the device restarts on its own."
     tier: 2
     action: "Out-of-cycle: upgrade, or apply Cisco's mitigation first if you cannot upgrade yet."
-  - name: All conditions true, VPN is a backup
+  - name: Exposed SSL VPN with secondary authentication, VPN only a backup
     facts: { reachable: true, exploited: true, no_login: true, impact: limited }
     why:
-      - Same as above, but losing the VPN for a while is tolerable, so the impact is limited.
+      - Same flaw, but losing the VPN for a while is tolerable.
     tier: 3
     action: Schedule the upgrade sooner than your normal cycle.
 mitigations:
@@ -53,13 +49,8 @@ mitigations:
     role: fix
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
-  - title: "Stop listing VPN login groups to users"
-    limitation: "Users must type their profile name; Cisco calls it temporary"
-    role: stopgap
-    official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
-    confidence: vendor-stated
-  - title: "Turn off secondary authentication on the default group"
-    limitation: "Lowers VPN security: removes the second factor"
+  - title: "Apply Cisco's temporary tunnel-group mitigation"
+    limitation: "Users must type their profile name, or lose the second factor"
     role: stopgap
     official_guides: [https://www.cisco.com/c/en/us/support/docs/csa/cisco-sa-asaftd-tunnel-dos-s6mgkb75.html]
     confidence: vendor-stated
@@ -94,12 +85,4 @@ sources:
     accessed: 2026-11-09
 ---
 
-All of Cisco's conditions must be true for a device to be vulnerable: a vulnerable release, a reachable SSL remote access VPN login service, `webvpn` with SSL VPN enabled on at least one interface, and a tunnel group with `secondary-authentication-server-group`. If `tunnel-group-list enable` is set, check every tunnel group including DefaultWEBVPNGroup, not just the ones shown on the login page. If it is not set, check DefaultWEBVPNGroup. A successful VPN login is not needed to reach the affected code.
-
-Cisco lists two mitigations that avoid an upgrade. Cisco says there are no workarounds, and calls both mitigations temporary. It recommends upgrading.
-
-The call would move up if the impact were shown to go beyond a reload, or if exploitation became widespread enough to stop access across many organisations.
-
-Use Cisco's Software Checker to find the first fixed release for your exact release. Cisco says the tunnel group list mitigation was tested in a lab. Removing the group list does not help if DefaultWEBVPNGroup uses secondary authentication; in that case Cisco's mitigation is to remove the secondary authentication server group from it.
-
-Upgrade each ASA or FTD to the first fixed release for its train, which Cisco strongly recommends. The restart interrupts the VPN unless you have a failover pair, so test on a lab or standby unit first. The group list mitigation is `no tunnel-group-list enable` in WebVPN mode and applies where DefaultWEBVPNGroup lacks secondary authentication; users then cannot pick a profile at login and must know its name. The second mitigation is `no secondary-authentication-server-group` on DefaultWEBVPNGroup where it uses secondary authentication.
+Every one of Cisco's conditions must hold: check every tunnel group, including DefaultWEBVPNGroup, for `secondary-authentication-server-group`. Cisco's temporary mitigation is `no tunnel-group-list enable` in WebVPN mode, or `no secondary-authentication-server-group` on DefaultWEBVPNGroup where that group uses it; Cisco still recommends upgrading. Use Cisco's Software Checker to find the first fixed release for your train.
